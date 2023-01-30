@@ -1,3 +1,5 @@
+server:
+  port: 8080
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/
@@ -19,7 +21,7 @@ spring:
 springdoc:
   show-actuator: true
   paths-to-match: /**
-  packages-to-scan: design.boilerplate.springboot
+  packages-to-scan: zw.co.afrosoft
 
 management:
   endpoint:
@@ -39,15 +41,15 @@ logging:
 
 jwt:
   secretKey: secret
-  issuer: www.farukgenc.com
+  issuer: afrosoft.co.zw
   expirationMinute: 10
 
 swagger:
-  contact-name: Faruk Genc
-  contact-mail: omer@farukgenc.com
-  contact-url: https://farukgenc.com
+  contact-name: Perfect Makuwerere
+  contact-mail: perfect.makuwerere@afrosoft.co.zw
+  contact-url:
   app-name: Spring Boot Boilerplate Project
-  app-description: "Spring Boot Boilerplate is a starter kit. This project includes : Spring Boot(2.7.4), Spring Data JPA, Spring Validation, Spring Security + JWT Token, PostgreSQL, Mapstruct, Lombok, Swagger"
+  app-description: "Spring Boot"
   app-version: 2.0.0
   app-license-url: https://www.apache.org/licenses/LICENSE-2.0.html
   app-license: Apache 2.0
