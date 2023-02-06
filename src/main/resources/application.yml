@@ -2,14 +2,14 @@ server:
   port: 8080
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/
-    username: postgres
-    password: example
+    url: jdbc:mysql://localhost:3306/employee
+    username: root
+    password: Perfect2001
 
   jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+#    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
       show-sql: true
       format-sql: true
       type: info
@@ -48,7 +48,7 @@ swagger:
   contact-name: Perfect Makuwerere
   contact-mail: perfect.makuwerere@afrosoft.co.zw
   contact-url:
-  app-name: Spring Boot Boilerplate Project
+  app-name: Hr Leave System
   app-description: "Spring Boot"
   app-version: 2.0.0
   app-license-url: https://www.apache.org/licenses/LICENSE-2.0.html

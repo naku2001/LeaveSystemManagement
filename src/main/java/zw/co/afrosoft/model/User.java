@@ -18,7 +18,10 @@ public class User {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	private String companyName;
+
 	private String name;
+	private String lastName;
 
 	@Column(unique = true)
 	private String username;

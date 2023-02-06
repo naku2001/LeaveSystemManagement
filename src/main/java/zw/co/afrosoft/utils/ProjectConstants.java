@@ -10,7 +10,7 @@ public final class ProjectConstants {
 
 	public static final String PROJECT_BASE_PACKAGE = "design.boilerplate.springboot";
 
-	public static final Locale TURKISH_LOCALE = new Locale.Builder().setLanguage("tr").setRegion("TR").build();
+	public static final Locale TURKISH = new Locale.Builder().setLanguage("tr").setRegion("TR").build();
 
 	private ProjectConstants() {
 

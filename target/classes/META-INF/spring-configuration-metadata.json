@@ -1,0 +1,73 @@
+{
+  "groups": [
+    {
+      "name": "jwt",
+      "type": "zw.co.afrosoft.security.jwt.JwtProperties",
+      "sourceType": "zw.co.afrosoft.security.jwt.JwtProperties"
+    },
+    {
+      "name": "swagger",
+      "type": "zw.co.afrosoft.configuration.SwaggerConfiguration",
+      "sourceType": "zw.co.afrosoft.configuration.SwaggerConfiguration"
+    }
+  ],
+  "properties": [
+    {
+      "name": "jwt.expiration-minute",
+      "type": "java.lang.Long",
+      "sourceType": "zw.co.afrosoft.security.jwt.JwtProperties",
+      "defaultValue": 0
+    },
+    {
+      "name": "jwt.issuer",
+      "type": "java.lang.String",
+      "sourceType": "zw.co.afrosoft.security.jwt.JwtProperties"
+    },
+    {
+      "name": "jwt.secret-key",
+      "type": "java.lang.String",
+      "sourceType": "zw.co.afrosoft.security.jwt.JwtProperties"
+    },
+    {
+      "name": "swagger.app-description",
+      "type": "java.lang.String",
+      "sourceType": "zw.co.afrosoft.configuration.SwaggerConfiguration"
+    },
+    {
+      "name": "swagger.app-license",
+      "type": "java.lang.String",
+      "sourceType": "zw.co.afrosoft.configuration.SwaggerConfiguration"
+    },
+    {
+      "name": "swagger.app-license-url",
+      "type": "java.lang.String",
+      "sourceType": "zw.co.afrosoft.configuration.SwaggerConfiguration"
+    },
+    {
+      "name": "swagger.app-name",
+      "type": "java.lang.String",
+      "sourceType": "zw.co.afrosoft.configuration.SwaggerConfiguration"
+    },
+    {
+      "name": "swagger.app-version",
+      "type": "java.lang.String",
+      "sourceType": "zw.co.afrosoft.configuration.SwaggerConfiguration"
+    },
+    {
+      "name": "swagger.contact-mail",
+      "type": "java.lang.String",
+      "sourceType": "zw.co.afrosoft.configuration.SwaggerConfiguration"
+    },
+    {
+      "name": "swagger.contact-name",
+      "type": "java.lang.String",
+      "sourceType": "zw.co.afrosoft.configuration.SwaggerConfiguration"
+    },
+    {
+      "name": "swagger.contact-url",
+      "type": "java.lang.String",
+      "sourceType": "zw.co.afrosoft.configuration.SwaggerConfiguration"
+    }
+  ],
+  "hints": []
+}
