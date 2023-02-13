@@ -6,11 +6,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.List;
+import java.util.Set;
 
 @Data
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor
+
 @Entity
 @Table(name = "employee")
 public class Employee {
@@ -23,13 +25,16 @@ public class Employee {
     private Gender gender;
     private String dateOfBirth;
     private String email;
-    @ManyToOne
-    Leaves leaves;
+    private int availableSickLeave;
+    private int availableVacationLeave;
+
+    public Employee() {
+        this.availableSickLeave = 10;
+        this.availableVacationLeave = 22;
+        this.availableUnpaidLeave = 365;
+    }
+
+    private int availableUnpaidLeave;
 
 
-
-//    public LeaveType setLeaves(LeaveType leaveType) {
-//
-//        return leaveType;
-//    }
 }

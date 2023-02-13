@@ -18,29 +18,24 @@ public class EmployeeRestController {
 
     private final EmployeeService employeeService;
 
+   @PostMapping("create")
+  public ResponseEntity createEmployee(@RequestBody EmployeeRequest   request){
 
-    @PostMapping("create")
-    public ResponseEntity createEmployee(@RequestBody EmployeeRequest   request){
-
-        return employeeService.createEmployee(request);
+       return employeeService.createEmployee(request);
     }
-    @PutMapping("/update/{id}")
-    public ResponseEntity updateUser(@PathVariable Long id, EmployeeRequest request){
-        return employeeService.updateEmployee(id,request);
-    }
-    @GetMapping("/getById/{id}")
-    public ResponseEntity getUser(@PathVariable Long id){
+  @PutMapping("/update/{id}")
+  Employee updateUser(@PathVariable Long id,@RequestBody EmployeeRequest request){
+      return employeeService.updateEmployee(id, request);
+   }
+  @GetMapping("/getById/{id}")
+   public ResponseEntity getUser(@PathVariable Long id){
         return employeeService.getEmployee(id);
-    }
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity deleteUser(@PathVariable Long id){
-        return employeeService.deleteEmployee(id);
-    }
-//
-//    @GetMapping("getAll")
-//    public Page<Employee> getAll( @PageableDefault  Pageable pageable) {
-//        return employeeService.getAll(pageable);
-//    }
+   }
+  @DeleteMapping("/delete/{id}")
+   public ResponseEntity deleteUser(@PathVariable Long id){
+       return employeeService.deleteEmployee(id);
+   }
+
     @GetMapping("getAllEmployees")
     public Page getAll(int offset,int size) {
         return employeeService.getAll(PageRequest.of(offset, size));

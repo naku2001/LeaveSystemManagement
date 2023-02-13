@@ -6,34 +6,23 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 import zw.co.afrosoft.model.Employee;
-import zw.co.afrosoft.model.EmployeeLeave;
-import zw.co.afrosoft.model.Leaves;
-import zw.co.afrosoft.repository.EmployeeLeaveRepository;
 import zw.co.afrosoft.repository.EmployeeRepository;
-import zw.co.afrosoft.repository.LeavesRepository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
 public class EmployeeServiceImplementation implements EmployeeService {
     private final EmployeeRepository employeeRepository;
-    private final LeavesRepository leavesRepository;
-    private final EmployeeLeaveRepository employeeLeaveRepository;
 
-    public EmployeeServiceImplementation(EmployeeRepository employeeRepository, LeavesRepository leavesRepository,
-                                         EmployeeLeaveRepository employeeLeaveRepository) {
+    public EmployeeServiceImplementation(EmployeeRepository employeeRepository) {
         this.employeeRepository = employeeRepository;
-        this.leavesRepository = leavesRepository;
-        this.employeeLeaveRepository = employeeLeaveRepository;
     }
 
 
     @Override
-    public ResponseEntity createEmployee(EmployeeRequest request) {
-
-      List<Leaves> leave =leavesRepository.findAll();
+    public ResponseEntity createEmployee( EmployeeRequest request) {
 
         Employee employees =  new Employee();
         employees .setGender(request.getGender());
@@ -41,6 +30,7 @@ public class EmployeeServiceImplementation implements EmployeeService {
         employees.setDateOfBirth(request.getDateOfBirth());
         employees.setLastName(request.getLastName());
         employees.setFirstName(request.getFirstName());
+
         return ResponseEntity.ok().body(employeeRepository.save(employees));
 
     }
@@ -56,7 +46,7 @@ public class EmployeeServiceImplementation implements EmployeeService {
     }
 
     @Override
-    public ResponseEntity updateEmployee(Long id, EmployeeRequest employeeRequest) {
+    public Employee updateEmployee(Long id, @RequestBody EmployeeRequest employeeRequest) {
         Optional<Employee> user = employeeRepository.findById(id);
         if(user.isPresent()){
             Employee updatedEmployee = user.get();
@@ -67,10 +57,12 @@ public class EmployeeServiceImplementation implements EmployeeService {
             updatedEmployee.setLastName(employeeRequest.getLastName());
             updatedEmployee.setFirstName(employeeRequest.getFirstName());
 //          updatedEmployee.setNumberOfLeaveDays(employeeRequest.getNumberOfLeaveDays());
+            employeeRepository.save(updatedEmployee);
 
-            return ResponseEntity.ok().body(employeeRepository.save(updatedEmployee));
+            return  employeeRepository.save(updatedEmployee);
         }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Employee Not Found");
+
+        return null;
     }
     @Override
     public ResponseEntity getEmployee(Long id) {

@@ -1,82 +1,54 @@
 package zw.co.afrosoft.service;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import zw.co.afrosoft.model.Employee;
-import zw.co.afrosoft.model.EmployeeLeave;
-import zw.co.afrosoft.model.Leaves;
-import zw.co.afrosoft.model.Status;
-import zw.co.afrosoft.repository.EmployeeLeaveRepository;
+import zw.co.afrosoft.model.*;
 import zw.co.afrosoft.repository.EmployeeRepository;
-import zw.co.afrosoft.repository.LeavesRepository;
+import zw.co.afrosoft.repository.LeaveRepository;
 
 import java.time.Period;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
+
 public class LeaveServiceImplementation implements LeaveService{
-
-
-    private final EmployeeLeaveRepository employeeLeaveRepository;
     private final EmployeeRepository employeeRepository;
-    private final LeavesRepository leavesRepository;
+    private final LeaveRepository leaveRepository;
 
-    public LeaveServiceImplementation(EmployeeLeaveRepository employeeLeaveRepository,
-                                      EmployeeRepository employeeRepository,
-                                      LeavesRepository leavesRepository) {
-        this.employeeLeaveRepository = employeeLeaveRepository;
+    public LeaveServiceImplementation(EmployeeRepository employeeRepository, LeaveRepository leaveRepository) {
         this.employeeRepository = employeeRepository;
-        this.leavesRepository = leavesRepository;
+        this.leaveRepository = leaveRepository;
     }
-
     @Override
-    public ResponseEntity applyLeave(LeaveRequest leaveRequest,Long id) {
-        EmployeeLeave employeeLeave = new EmployeeLeave();
+    public ResponseEntity applyLeave(LeaveRequest request) {
+
+        Leave leave = new Leave();
         Status status = Status.PENDING;
-        Optional<Leaves>leaves = leavesRepository.findById(leaveRequest.getLeaveTypeId());
-        Optional<Employee> employee = employeeRepository.findById(id);
-        if (!leaves.isPresent())
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("leave Type not available");
+        Optional<Employee> employee = employeeRepository.findById(request.getEmployeeId());
 
-        employeeLeave.setReason(leaveRequest.getReason());
-        employeeLeave.setToDate(leaveRequest.getToDate());
-        employeeLeave.setFromDate(leaveRequest.getFromDate());
-        Period period =Period.between(leaveRequest.getFromDate(),leaveRequest.getToDate());
-        employeeLeave.setDuration(period.getDays());
-//        employeeLeave.setEmployee(employee.get().getId().);
-        employeeLeave.setStatus(status);
-        employeeLeave.setLeaves(leaves.get());
-        employeeLeave.setEmployee(employee.get());
-        return ResponseEntity.ok().body(employeeLeaveRepository.save(employeeLeave));
+        leave.setReason(request.getReason());
+        leave.setLeaveType(request.getLeaveType());
+        leave.setToDate(request.getToDate());
+        leave.setFromDate(request.getFromDate());
+        Period period =Period.between(request.getFromDate(),request.getToDate());
+        leave.setDuration(period.getDays() + 1);
+        leave.setEmployee(employee.get());
+
+        leave.setStatus(status);
+
+        return ResponseEntity.ok().body(leaveRepository.save(leave));
     }
+
     @Override
-    public Page getAllAppliedLeaves(int offset, int size) {
-        return employeeLeaveRepository.findAll(PageRequest.of(offset, size));
+    public ResponseEntity getAll() {
+        List<Leave> leaveList = leaveRepository.findAll();
+        List<Leave> filteredLeave = leaveList.stream()
+                .filter(leave ->leave.getStatus().
+                        equals(Status.PENDING)).collect(Collectors.toList());
+        return ResponseEntity.ok().body(filteredLeave) ;
     }
-    @Override
-    public ResponseEntity approveLeave(Long id) {
-        Status status = Status.APPROVED;
-        Optional<EmployeeLeave> employeeLeave = employeeLeaveRepository.findById(id);
 
-        if (!employeeLeave.isPresent())
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("not available");
-        EmployeeLeave approvedLeave =employeeLeave.get();
-        approvedLeave.setReason(approvedLeave.getReason());
-        int availableDays = approvedLeave.getLeaves().getDefaultDays() - approvedLeave.getDuration();
-        approvedLeave.setToDate(approvedLeave.getToDate());
-        approvedLeave.setFromDate(approvedLeave.getFromDate());
-        approvedLeave.setDuration(approvedLeave.getDuration());
-        approvedLeave.setStatus(status);
-
-        employeeRepository.save(approvedLeave.getEmployee());
-
-        return ResponseEntity.ok().body(employeeLeaveRepository.save(approvedLeave));
-
-    }
 
 }

@@ -7,7 +7,7 @@ import zw.co.afrosoft.security.dto.RegistrationRequest;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2023-01-30T15:06:43+0200",
+    date = "2023-02-07T09:35:08+0200",
     comments = "version: 1.5.2.Final, compiler: javac, environment: Java 17.0.5 (Amazon.com Inc.)"
 )
 public class UserMapperImpl implements UserMapper {
@@ -20,9 +20,9 @@ public class UserMapperImpl implements UserMapper {
 
         User.UserBuilder user = User.builder();
 
+        user.companyName( registrationRequest.getCompanyName() );
         user.name( registrationRequest.getName() );
-        user.name( registrationRequest.getCompanyName() );
-        user.name( registrationRequest.getLastName() );
+        user.lastName( registrationRequest.getLastName() );
         user.username( registrationRequest.getUsername() );
         user.password( registrationRequest.getPassword() );
         user.email( registrationRequest.getEmail() );
