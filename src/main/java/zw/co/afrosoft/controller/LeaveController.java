@@ -25,5 +25,29 @@ public class LeaveController {
 
         return leaveService.getAll();
     }
+    @GetMapping("getApprovedLeaves")
+    public ResponseEntity getAllApproved(){
+
+        return leaveService.getAllApproved();
+    }
+    @GetMapping("getRejectedLeaves")
+    public ResponseEntity getAllRejected(){
+
+        return leaveService.getAllRejected();
+    }
+    @GetMapping("getAllLeaves")
+    public ResponseEntity getAllLeaves(){
+
+        return leaveService.getAllLeaves();
+    }
+    @PutMapping("/approve/{id}")
+    public  ResponseEntity approveLeave(@PathVariable Long id){
+        return leaveService.approveLeave(id);
+    }
+
+    @PutMapping("/reject/{id}")
+    public  ResponseEntity rejectLeave(@PathVariable Long id){
+        return leaveService.rejectLeave(id);
+    }
 
 }
