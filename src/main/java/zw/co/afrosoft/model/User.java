@@ -17,20 +17,20 @@ public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-
-	private String companyName;
-
-	private String name;
+//	private String companyName;
+	private String firstName;
 	private String lastName;
-
 	@Column(unique = true)
 	private String username;
-
 	private String password;
-
 	private String email;
+	@OneToOne
+	private Employee employee;
 
 	@Enumerated(EnumType.STRING)
 	private UserRole userRole;
+
+
+
 
 }

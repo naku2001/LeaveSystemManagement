@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.util.List;
 import java.util.Set;
+import java.util.Timer;
 
 @Data
 @Builder
@@ -22,9 +23,17 @@ public class Employee {
     private Long id;
     private String firstName;
     private String lastName;
+
+    public Long getId() {
+        return id;
+    }
+
     private Gender gender;
     private String dateOfBirth;
     private String email;
+    private String password;
+    private String username;
+
     private int availableSickLeave;
     private int availableVacationLeave;
 
@@ -35,6 +44,8 @@ public class Employee {
     }
 
     private int availableUnpaidLeave;
+
+
 
 
 }

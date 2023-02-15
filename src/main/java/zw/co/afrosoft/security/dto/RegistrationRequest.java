@@ -15,14 +15,10 @@ import javax.validation.constraints.NotEmpty;
 public class RegistrationRequest {
 
 	@NotEmpty(message = "{registration_name_not_empty}")
-	private String name;
+	private String firstName;
 
 	@NotEmpty(message = "{registration_name_not_empty}")
 	private String lastName;
-
-
-	@NotEmpty(message = "{company_name_not_empty}")
-	private String companyName;
 
 	@Email(message = "{registration_email_is_not_valid}")
 	@NotEmpty(message = "{registration_email_not_empty}")

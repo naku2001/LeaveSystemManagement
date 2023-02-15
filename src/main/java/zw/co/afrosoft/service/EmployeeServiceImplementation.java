@@ -5,19 +5,28 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import zw.co.afrosoft.model.Employee;
+import zw.co.afrosoft.model.User;
+import zw.co.afrosoft.model.UserRole;
 import zw.co.afrosoft.repository.EmployeeRepository;
+import zw.co.afrosoft.repository.UserRepository;
+import zw.co.afrosoft.security.mapper.UserMapper;
 
 import java.util.Optional;
 
 @Service
 public class EmployeeServiceImplementation implements EmployeeService {
     private final EmployeeRepository employeeRepository;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final UserRepository userRepository;
 
-    public EmployeeServiceImplementation(EmployeeRepository employeeRepository) {
+    public EmployeeServiceImplementation(EmployeeRepository employeeRepository, BCryptPasswordEncoder bCryptPasswordEncoder, UserRepository userRepository) {
         this.employeeRepository = employeeRepository;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.userRepository = userRepository;
     }
 
 
@@ -30,10 +39,20 @@ public class EmployeeServiceImplementation implements EmployeeService {
         employees.setDateOfBirth(request.getDateOfBirth());
         employees.setLastName(request.getLastName());
         employees.setFirstName(request.getFirstName());
-
-        return ResponseEntity.ok().body(employeeRepository.save(employees));
+        employees.setPassword(request.getPassword());
+        employees.setUsername(request.getUsername());
+       Employee employeeSaved = employeeRepository.save(employees);
+       final User user = UserMapper.INSTANCE.convertToUser(request);
+        user.setUserRole(UserRole.USER);
+        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+        user.setEmployee(employeeSaved);
+        userRepository.save(user);
+        return ResponseEntity.ok().body(employees);
 
     }
+
+
+
 
     @Override
     public Page<Employee> getAll(Pageable pageable) {

@@ -16,6 +16,8 @@ public class EmployeeRequest {
     private String dateOfBirth;
 
     private String email;
+    private String password;
+    private String username;
 
     public String getFirstName() {
         return firstName;

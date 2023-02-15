@@ -1,5 +1,6 @@
 package zw.co.afrosoft.security.service;
 
+import org.springframework.http.ResponseEntity;
 import zw.co.afrosoft.model.User;
 import zw.co.afrosoft.model.UserRole;
 import zw.co.afrosoft.repository.UserRepository;
@@ -61,5 +62,10 @@ public class UserServiceImpl implements UserService {
 		final User user = findByUsername(username);
 
 		return UserMapper.INSTANCE.convertToAuthenticatedUserDto(user);
+	}
+
+	@Override
+	public ResponseEntity findAll() {
+		return ResponseEntity.ok().body(userRepository.findAll());
 	}
 }

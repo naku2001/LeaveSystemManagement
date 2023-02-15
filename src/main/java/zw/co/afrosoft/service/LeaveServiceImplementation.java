@@ -1,11 +1,13 @@
 package zw.co.afrosoft.service;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import zw.co.afrosoft.model.*;
 import zw.co.afrosoft.repository.EmployeeRepository;
 import zw.co.afrosoft.repository.LeaveRepository;
 
+import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
 import java.util.Optional;
@@ -28,9 +30,28 @@ public class LeaveServiceImplementation implements LeaveService{
         Status status = Status.PENDING;
         Optional<Employee> employee = employeeRepository.findById(request.getEmployeeId());
 
-        leave.setReason(request.getReason());
 
+        leave.setReason(request.getReason());
+        if(request.getLeaveType().equals(LeaveType.SICK_LEAVE)){
+            if(employee.get().getAvailableSickLeave()==0 )
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("You cant apply you have no available sick leave days left");
+        } else if (request.getLeaveType().equals(LeaveType.VACATION)){
+            if (employee.get().getAvailableVacationLeave() == 0 )
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("You cant apply you have no available vacation leave days left");
+        }
+        else {
+            if (employee.get().getAvailableUnpaidLeave()==0)
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("You cant apply you have no available un paid leave days left");
+        }
+        leave.setLeaveType(request.getLeaveType());
+        if(request.getToDate().isBefore(request.getFromDate()))
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("to date should be after from date");
         leave.setToDate(request.getToDate());
+        if(request.getFromDate().isAfter(LocalDate.now()))
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("cannot apply for past date");
         leave.setFromDate(request.getFromDate());
         Period period =Period.between(request.getFromDate(),request.getToDate());
         leave.setDuration(period.getDays() + 1);

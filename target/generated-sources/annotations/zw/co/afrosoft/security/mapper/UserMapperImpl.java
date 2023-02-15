@@ -4,10 +4,11 @@ import javax.annotation.processing.Generated;
 import zw.co.afrosoft.model.User;
 import zw.co.afrosoft.security.dto.AuthenticatedUserDto;
 import zw.co.afrosoft.security.dto.RegistrationRequest;
+import zw.co.afrosoft.service.EmployeeRequest;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2023-02-07T09:35:08+0200",
+    date = "2023-02-15T14:21:35+0200",
     comments = "version: 1.5.2.Final, compiler: javac, environment: Java 17.0.5 (Amazon.com Inc.)"
 )
 public class UserMapperImpl implements UserMapper {
@@ -20,8 +21,8 @@ public class UserMapperImpl implements UserMapper {
 
         User.UserBuilder user = User.builder();
 
-        user.companyName( registrationRequest.getCompanyName() );
-        user.name( registrationRequest.getName() );
+
+       user.firstName(registrationRequest.getFirstName());
         user.lastName( registrationRequest.getLastName() );
         user.username( registrationRequest.getUsername() );
         user.password( registrationRequest.getPassword() );
@@ -38,7 +39,7 @@ public class UserMapperImpl implements UserMapper {
 
         AuthenticatedUserDto authenticatedUserDto = new AuthenticatedUserDto();
 
-        authenticatedUserDto.setName( user.getName() );
+        authenticatedUserDto.setFirstName(user.getFirstName());
         authenticatedUserDto.setUsername( user.getUsername() );
         authenticatedUserDto.setPassword( user.getPassword() );
         authenticatedUserDto.setUserRole( user.getUserRole() );
@@ -54,10 +55,27 @@ public class UserMapperImpl implements UserMapper {
 
         User.UserBuilder user = User.builder();
 
-        user.name( authenticatedUserDto.getName() );
+        user.firstName( authenticatedUserDto.getFirstName() );
         user.username( authenticatedUserDto.getUsername() );
         user.password( authenticatedUserDto.getPassword() );
         user.userRole( authenticatedUserDto.getUserRole() );
+
+        return user.build();
+    }
+
+    @Override
+    public User convertToUser(EmployeeRequest request) {
+        if ( request == null ) {
+            return null;
+        }
+
+        User.UserBuilder user = User.builder();
+
+        user.lastName( request.getLastName() );
+        user.firstName(request.getFirstName());
+        user.username( request.getUsername() );
+        user.password( request.getPassword() );
+        user.email( request.getEmail() );
 
         return user.build();
     }
