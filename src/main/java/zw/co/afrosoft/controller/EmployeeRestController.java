@@ -3,15 +3,12 @@ package zw.co.afrosoft.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import zw.co.afrosoft.model.Employee;
-import zw.co.afrosoft.service.EmployeeRequest;
+import zw.co.afrosoft.service.EmailService;
+import zw.co.afrosoft.security.dto.EmployeeRequest;
 import zw.co.afrosoft.service.EmployeeService;
-
-import java.util.Timer;
 
 @CrossOrigin
 @RestController
@@ -20,6 +17,7 @@ import java.util.Timer;
 public class EmployeeRestController {
 
     private final EmployeeService employeeService;
+    private final EmailService emailService;
 
    @PostMapping("create")
   public ResponseEntity createEmployee(@RequestBody EmployeeRequest   request){

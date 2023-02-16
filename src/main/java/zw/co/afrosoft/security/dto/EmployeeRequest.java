@@ -1,22 +1,37 @@
-package zw.co.afrosoft.service;
+package zw.co.afrosoft.security.dto;
 
 import lombok.*;
 import zw.co.afrosoft.model.Gender;
+
+import javax.validation.constraints.Email;
+
+import javax.validation.constraints.NotEmpty;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@ToString
 
 public class EmployeeRequest {
 
+    @NotEmpty(message = "{first_name_not_empty}")
     private String firstName;
+    @NotEmpty(message = "{lastname_not_empty}")
     private String lastName;
+    @NotEmpty(message = "{gender_not_empty}")
     private Gender gender;
-    private String dateOfBirth;
 
+    @NotEmpty(message = "{date_of_birth_not_empty}")
+    private String dateOfBirth;
+    @Email(message = "{registration_email_is_not_valid}")
+    @NotEmpty(message = "{registration_email_not_empty}")
     private String email;
+
+    @NotEmpty(message = "{password_not_empty}")
     private String password;
+
+    @NotEmpty(message = "{username_not_empty}")
     private String username;
 
     public String getFirstName() {

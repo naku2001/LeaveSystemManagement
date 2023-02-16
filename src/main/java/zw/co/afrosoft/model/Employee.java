@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
 import java.util.List;
 import java.util.Set;
 import java.util.Timer;
@@ -30,6 +31,8 @@ public class Employee {
 
     private Gender gender;
     private String dateOfBirth;
+
+
     private String email;
     private String password;
     private String username;

@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import zw.co.afrosoft.model.Employee;
+import zw.co.afrosoft.security.dto.EmployeeRequest;
 
 
 public interface EmployeeService {

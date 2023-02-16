@@ -5,6 +5,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,6 +15,7 @@ import zw.co.afrosoft.model.User;
 import zw.co.afrosoft.model.UserRole;
 import zw.co.afrosoft.repository.EmployeeRepository;
 import zw.co.afrosoft.repository.UserRepository;
+import zw.co.afrosoft.security.dto.EmployeeRequest;
 import zw.co.afrosoft.security.mapper.UserMapper;
 
 import java.util.Optional;
@@ -22,51 +25,74 @@ public class EmployeeServiceImplementation implements EmployeeService {
     private final EmployeeRepository employeeRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final UserRepository userRepository;
+    private final JavaMailSender javaMailSender;
+    private final UserValidationService userValidationService;
 
-    public EmployeeServiceImplementation(EmployeeRepository employeeRepository, BCryptPasswordEncoder bCryptPasswordEncoder, UserRepository userRepository) {
+    public EmployeeServiceImplementation(EmployeeRepository employeeRepository, BCryptPasswordEncoder bCryptPasswordEncoder, UserRepository userRepository, JavaMailSender javaMailSender, UserValidationService userValidationService) {
         this.employeeRepository = employeeRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.userRepository = userRepository;
+        this.javaMailSender = javaMailSender;
+        this.userValidationService = userValidationService;
     }
 
 
     @Override
     public ResponseEntity createEmployee( EmployeeRequest request) {
 
-        Employee employees =  new Employee();
-        employees .setGender(request.getGender());
+        userValidationService.validateUser(request);
+
+        Employee employees = new Employee();
+        employees.setGender(request.getGender());
         employees.setEmail(request.getEmail());
         employees.setDateOfBirth(request.getDateOfBirth());
         employees.setLastName(request.getLastName());
         employees.setFirstName(request.getFirstName());
-        employees.setPassword(request.getPassword());
+        employees.setPassword(bCryptPasswordEncoder.encode(request.getPassword()));
         employees.setUsername(request.getUsername());
-       Employee employeeSaved = employeeRepository.save(employees);
-       final User user = UserMapper.INSTANCE.convertToUser(request);
+        Employee employeeSaved = employeeRepository.save(employees);
+        final User user = UserMapper.INSTANCE.convertToUser(request);
         user.setUserRole(UserRole.USER);
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         user.setEmployee(employeeSaved);
         userRepository.save(user);
-        return ResponseEntity.ok().body(employees);
-
+        {
+            try {
+                SimpleMailMessage mailMessage
+                        = new SimpleMailMessage();
+                String sender = "perfect.makuwerere@students.uz.zw";
+                // Setting up necessary details
+                mailMessage.setFrom(sender);
+                mailMessage.setTo(employees.getEmail());
+                mailMessage.setText("Dear "+ " "+ employees.getFirstName().toUpperCase() + " " + employees
+                        .getLastName().toUpperCase()+"\n\n Your Leave Management System account " +
+                        "has been created"
+                        + "\n Use the details below to login into the sytem"
+                        +"\n\n Password:" + " " +request.getPassword()
+                        + "\n\n Username:" + " " + request.getUsername()
+                );
+                mailMessage.setSubject("LEAVE SYSTEM LOGIN DETAILS");
+                javaMailSender.send(mailMessage);
+                return ResponseEntity.ok().body("Successfully registered Employee!!");
+            }
+            catch (Exception e) {
+                return ResponseEntity.ok().body("Error while Sending Mail Please Check If" +
+                        " Your Email Address Is Correct");
+            }
+        }
     }
-
-
-
-
     @Override
     public Page<Employee> getAll(Pageable pageable) {
         return  employeeRepository.findAll(pageable);
     }
-
     @Override
     public Page getAll(int offset, int size) {
         return employeeRepository.findAll(PageRequest.of(offset, size));
     }
-
     @Override
     public Employee updateEmployee(Long id, @RequestBody EmployeeRequest employeeRequest) {
         Optional<Employee> user = employeeRepository.findById(id);
+        String response = "Employee not found";
         if(user.isPresent()){
             Employee updatedEmployee = user.get();
 
@@ -93,9 +119,6 @@ public class EmployeeServiceImplementation implements EmployeeService {
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Employee Not Found");
     }
-
-
-
     @Override
     public ResponseEntity deleteEmployee(Long id) {
         Optional<Employee> user = employeeRepository.findById(id);

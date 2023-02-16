@@ -39,11 +39,11 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public RegistrationResponse registration(RegistrationRequest registrationRequest) {
 
-		userValidationService.validateUser(registrationRequest);
+        userValidationService.validateUser(registrationRequest);
 
 		final User user = UserMapper.INSTANCE.convertToUser(registrationRequest);
 		user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-		user.setUserRole(UserRole.USER);
+		user.setUserRole(UserRole.ADMIN);
 
 		userRepository.save(user);
 

@@ -2,6 +2,7 @@ package zw.co.afrosoft.service;
 
 import zw.co.afrosoft.exceptions.RegistrationException;
 import zw.co.afrosoft.repository.UserRepository;
+import zw.co.afrosoft.security.dto.EmployeeRequest;
 import zw.co.afrosoft.security.dto.RegistrationRequest;
 import zw.co.afrosoft.utils.ExceptionMessageAccessor;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +39,7 @@ public class UserValidationService {
 
 			log.warn("{} is already being used!", username);
 
-			final String existsUsername = exceptionMessageAccessor.getMessage(null, USERNAME_ALREADY_EXISTS);
+			final String existsUsername = USERNAME_ALREADY_EXISTS;
 			throw new RegistrationException(existsUsername);
 		}
 
@@ -52,9 +53,16 @@ public class UserValidationService {
 
 			log.warn("{} is already being used!", email);
 
-			final String existsEmail = exceptionMessageAccessor.getMessage(null, EMAIL_ALREADY_EXISTS);
+			final String existsEmail =  EMAIL_ALREADY_EXISTS;
 			throw new RegistrationException(existsEmail);
 		}
 	}
 
+	public void validateUser(EmployeeRequest request) {
+		final String email = request.getEmail();
+		final String username = request.getUsername();
+
+		checkEmail(email);
+		checkUsername(username);
+	}
 }

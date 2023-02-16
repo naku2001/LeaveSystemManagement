@@ -3,12 +3,12 @@ package zw.co.afrosoft.security.mapper;
 import javax.annotation.processing.Generated;
 import zw.co.afrosoft.model.User;
 import zw.co.afrosoft.security.dto.AuthenticatedUserDto;
+import zw.co.afrosoft.security.dto.EmployeeRequest;
 import zw.co.afrosoft.security.dto.RegistrationRequest;
-import zw.co.afrosoft.service.EmployeeRequest;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2023-02-15T14:21:35+0200",
+    date = "2023-02-16T10:46:53+0200",
     comments = "version: 1.5.2.Final, compiler: javac, environment: Java 17.0.5 (Amazon.com Inc.)"
 )
 public class UserMapperImpl implements UserMapper {
@@ -21,8 +21,7 @@ public class UserMapperImpl implements UserMapper {
 
         User.UserBuilder user = User.builder();
 
-
-       user.firstName(registrationRequest.getFirstName());
+        user.firstName( registrationRequest.getFirstName() );
         user.lastName( registrationRequest.getLastName() );
         user.username( registrationRequest.getUsername() );
         user.password( registrationRequest.getPassword() );
@@ -39,7 +38,7 @@ public class UserMapperImpl implements UserMapper {
 
         AuthenticatedUserDto authenticatedUserDto = new AuthenticatedUserDto();
 
-        authenticatedUserDto.setFirstName(user.getFirstName());
+        authenticatedUserDto.setFirstName( user.getFirstName() );
         authenticatedUserDto.setUsername( user.getUsername() );
         authenticatedUserDto.setPassword( user.getPassword() );
         authenticatedUserDto.setUserRole( user.getUserRole() );
@@ -71,8 +70,8 @@ public class UserMapperImpl implements UserMapper {
 
         User.UserBuilder user = User.builder();
 
+        user.firstName( request.getFirstName() );
         user.lastName( request.getLastName() );
-        user.firstName(request.getFirstName());
         user.username( request.getUsername() );
         user.password( request.getPassword() );
         user.email( request.getEmail() );
