@@ -56,8 +56,7 @@ public class EmployeeServiceImplementation implements EmployeeService {
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         user.setEmployee(employeeSaved);
         userRepository.save(user);
-        {
-            try {
+        try {
                 SimpleMailMessage mailMessage
                         = new SimpleMailMessage();
                 String sender = "perfect.makuwerere@students.uz.zw";
@@ -79,7 +78,7 @@ public class EmployeeServiceImplementation implements EmployeeService {
                 return ResponseEntity.ok().body("Error while Sending Mail Please Check If" +
                         " Your Email Address Is Correct");
             }
-        }
+
     }
     @Override
     public Page<Employee> getAll(Pageable pageable) {
