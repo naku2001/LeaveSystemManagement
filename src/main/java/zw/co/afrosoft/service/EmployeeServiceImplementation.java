@@ -18,6 +18,7 @@ import zw.co.afrosoft.repository.UserRepository;
 import zw.co.afrosoft.security.dto.EmployeeRequest;
 import zw.co.afrosoft.security.mapper.UserMapper;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -123,7 +124,10 @@ public class EmployeeServiceImplementation implements EmployeeService {
     @Override
     public ResponseEntity deleteEmployee(Long id) {
         Optional<Employee> user = employeeRepository.findById(id);
-        if (user.isPresent()){
+        List<User> users = userRepository.findAll();
+        Optional<User> user1 = userRepository.findUserByEmployeeId(id);
+        if (user.isPresent() ){
+            userRepository.delete(user1.get());
             employeeRepository.delete(user.get());
             return ResponseEntity.ok().body(user);
         }
