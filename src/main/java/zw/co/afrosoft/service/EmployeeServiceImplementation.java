@@ -66,9 +66,11 @@ public class EmployeeServiceImplementation implements EmployeeService {
                 mailMessage.setText("Dear "+ " "+ employees.getFirstName().toUpperCase() + " " + employees
                         .getLastName().toUpperCase()+"\n\n Your Leave Management System account " +
                         "has been created"
-                        + "\n Use the details below to login into the sytem"
+                        + "\n Use the details below to login into the system"
                         +"\n\n Password:" + " " +request.getPassword()
                         + "\n\n Username:" + " " + request.getUsername()
+                        +"\n\n Click the link below to the login page"
+                        +"\n 44.196.52.76:4200 "
                 );
                 mailMessage.setSubject("LEAVE SYSTEM LOGIN DETAILS");
                 javaMailSender.send(mailMessage);
