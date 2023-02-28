@@ -1,5 +1,6 @@
 package zw.co.afrosoft.security.dto;
 
+import zw.co.afrosoft.model.Employee;
 import zw.co.afrosoft.model.UserRole;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,6 +11,10 @@ import lombok.Setter;
 public class AuthenticatedUserDto {
 
 	private String firstName;
+	private String lastName;
+	private Employee employee;
+	private String email;
+	private Long id;
 
 	private String username;
 

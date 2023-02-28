@@ -37,9 +37,17 @@ public class EmployeeRestController {
        return employeeService.deleteEmployee(id);
    }
 
-    @GetMapping("getAllEmployees")
+   @GetMapping("getAllEmployees")
     public Page getAll(int offset,int size) {
         return employeeService.getAll(PageRequest.of(offset, size));
+    }
+    @GetMapping("/findEmployeeByName")
+    public  ResponseEntity getEmployeeByName(String username){
+        return employeeService.getEmployeeByName(username);
+    }
+    @GetMapping("/totalEmployees")
+    public ResponseEntity totalEmployee(){
+       return  employeeService.totalEmployee();
     }
 
 

@@ -21,4 +21,7 @@ public interface EmployeeService {
    public Page getAll(int offset,int size);
 
 
+    ResponseEntity getEmployeeByName(String username);
+
+    ResponseEntity totalEmployee();
 }

@@ -33,6 +33,7 @@ public class EmailServiceImplementation implements EmailService{
                 mailMessage.setText(details.getMsgBody());
                 mailMessage.setSubject(details.getSubject());
 
+
                 // Sending the mail
                 javaMailSender.send(mailMessage);
                 return "Mail Sent Successfully...";

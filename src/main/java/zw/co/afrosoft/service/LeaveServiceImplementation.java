@@ -140,5 +140,45 @@ public class LeaveServiceImplementation implements LeaveService{
         return ResponseEntity.ok().body(leaveList);
     }
 
+    @Override
+    public ResponseEntity totalRejected() {
+        List<Leave> leaveList = leaveRepository.findAllByStatus(Status.REJECTED);
+        DashboardTotal dashboardTotal = DashboardTotal.builder()
+                .total(leaveList.size()).build();
+        return  ResponseEntity.ok().body(dashboardTotal);
+    }
+
+    @Override
+    public ResponseEntity totalPending() {
+        List<Leave> leaveList = leaveRepository.findAllByStatus(Status.PENDING);
+        DashboardTotal dashboardTotal = DashboardTotal.builder()
+                .total(leaveList.size()).build();
+        return  ResponseEntity.ok().body(dashboardTotal);
+    }
+
+    @Override
+    public ResponseEntity totalApproved() {
+        List<Leave> leaveList = leaveRepository.findAllByStatus(Status.APPROVED);
+        DashboardTotal dashboardTotal = DashboardTotal.builder()
+                .total(leaveList.size()).build();
+        return  ResponseEntity.ok().body(dashboardTotal);
+    }
+    @Override
+    public ResponseEntity leaveByStatus(Status status) {
+        List<Leave> leaveList = leaveRepository.findAllByStatus(status);
+        DashboardTotal dashboardTotal = DashboardTotal.builder()
+                .total(leaveList.size()).build();
+        return  ResponseEntity.ok().body(dashboardTotal);
+    }
+
+    @Override
+    public ResponseEntity totalLeaves() {
+        List<Leave> leaveList = leaveRepository.findAll();
+        DashboardTotal dashboardTotal = DashboardTotal.builder()
+                .total(leaveList.size()).build();
+
+        return ResponseEntity.ok().body(dashboardTotal);
+    }
+
 
 }

@@ -10,6 +10,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
+import zw.co.afrosoft.model.DashboardTotal;
 import zw.co.afrosoft.model.Employee;
 import zw.co.afrosoft.model.User;
 import zw.co.afrosoft.model.UserRole;
@@ -18,6 +19,9 @@ import zw.co.afrosoft.repository.UserRepository;
 import zw.co.afrosoft.security.dto.EmployeeRequest;
 import zw.co.afrosoft.security.mapper.UserMapper;
 
+
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
@@ -57,6 +61,7 @@ public class EmployeeServiceImplementation implements EmployeeService {
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         user.setEmployee(employeeSaved);
         userRepository.save(user);
+
         try {
                 SimpleMailMessage mailMessage
                         = new SimpleMailMessage();
@@ -64,18 +69,21 @@ public class EmployeeServiceImplementation implements EmployeeService {
                 // Setting up necessary details
                 mailMessage.setFrom(sender);
                 mailMessage.setTo(employees.getEmail());
-                mailMessage.setText("Dear "+ " "+ employees.getFirstName().toUpperCase() + " " + employees
+
+
+            String link = "44.196.52.76:4200";
+            mailMessage.setText("Dear "+ " "+ employees.getFirstName().toUpperCase() + " " + employees
                         .getLastName().toUpperCase()+"\n\n Your Leave Management System account " +
                         "has been created"
                         + "\n Use the details below to login into the system"
                         +"\n\n Password:" + " " +request.getPassword()
                         + "\n\n Username:" + " " + request.getUsername()
                         +"\n\n Click the link below to the login page"
-                        +"\n 44.196.52.76:4200 "
-                );
+                        +"\n " );
+
                 mailMessage.setSubject("LEAVE SYSTEM LOGIN DETAILS");
                 javaMailSender.send(mailMessage);
-                return ResponseEntity.ok().body("Successfully registered Employee!!");
+                return ResponseEntity.ok().body(employeeSaved);
             }
             catch (Exception e) {
                 return ResponseEntity.ok().body("Error while Sending Mail Please Check If" +
@@ -91,6 +99,23 @@ public class EmployeeServiceImplementation implements EmployeeService {
     public Page getAll(int offset, int size) {
         return employeeRepository.findAll(PageRequest.of(offset, size));
     }
+
+    @Override
+    public ResponseEntity getEmployeeByName(String username) {
+        Optional<Employee> employee = employeeRepository.findByUsername(username);
+        if(employee.isPresent())
+            return ResponseEntity.ok().body(employee);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("employee not found");
+    }
+
+    @Override
+    public ResponseEntity totalEmployee() {
+        List<Employee> employees = employeeRepository.findAll();
+        DashboardTotal dashboardTotal = DashboardTotal.builder()
+                .total(employees.size()).build();
+        return ResponseEntity.ok().body(dashboardTotal);
+    }
+
     @Override
     public Employee updateEmployee(Long id, @RequestBody EmployeeRequest employeeRequest) {
         Optional<Employee> user = employeeRepository.findById(id);

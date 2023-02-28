@@ -13,6 +13,8 @@ public interface EmployeeRepository extends JpaRepository<Employee,Long> {
 
     Page<Employee> findAll(Pageable pageable);
 
+    Optional<Employee> findByUsername(String username);
+
 //    Optional<Employee>
 
 
