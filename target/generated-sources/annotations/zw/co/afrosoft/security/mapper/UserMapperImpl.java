@@ -8,8 +8,8 @@ import zw.co.afrosoft.security.dto.RegistrationRequest;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2023-02-28T13:17:13+0200",
-    comments = "version: 1.5.2.Final, compiler: javac, environment: Java 17.0.5 (Amazon.com Inc.)"
+    date = "2023-03-01T10:03:50+0200",
+    comments = "version: 1.5.2.Final, compiler: javac, environment: Java 17.0.6 (Oracle Corporation)"
 )
 public class UserMapperImpl implements UserMapper {
 

@@ -67,8 +67,8 @@ public class LeaveController {
     public  ResponseEntity totalLeaves(){
         return leaveService.totalLeaves();
     }
-    @GetMapping("/findLeaveByStatus")
-    public  ResponseEntity leaveByStatus(Status status){
+    @GetMapping("/findLeaveByStatus/{status}")
+    public  ResponseEntity leaveByStatus(@PathVariable Status status){
         return leaveService.leaveByStatus(status);
     }
 

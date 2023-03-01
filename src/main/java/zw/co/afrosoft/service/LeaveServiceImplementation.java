@@ -50,7 +50,7 @@ public class LeaveServiceImplementation implements LeaveService{
         if(request.getToDate().isBefore(request.getFromDate()))
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("to date should be after from date");
         leave.setToDate(request.getToDate());
-        if(request.getFromDate().isAfter(LocalDate.now()))
+        if(request.getFromDate().isBefore(LocalDate.now()))
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("cannot apply for past date");
         leave.setFromDate(request.getFromDate());
         Period period =Period.between(request.getFromDate(),request.getToDate());
@@ -166,9 +166,8 @@ public class LeaveServiceImplementation implements LeaveService{
     @Override
     public ResponseEntity leaveByStatus(Status status) {
         List<Leave> leaveList = leaveRepository.findAllByStatus(status);
-        DashboardTotal dashboardTotal = DashboardTotal.builder()
-                .total(leaveList.size()).build();
-        return  ResponseEntity.ok().body(dashboardTotal);
+
+        return  ResponseEntity.ok().body(leaveList);
     }
 
     @Override

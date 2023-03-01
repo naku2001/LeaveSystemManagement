@@ -41,8 +41,8 @@ public class EmployeeRestController {
     public Page getAll(int offset,int size) {
         return employeeService.getAll(PageRequest.of(offset, size));
     }
-    @GetMapping("/findEmployeeByName")
-    public  ResponseEntity getEmployeeByName(String username){
+    @GetMapping("/findEmployeeByName/{username}")
+    public  ResponseEntity getEmployeeByName(@PathVariable String username){
         return employeeService.getEmployeeByName(username);
     }
     @GetMapping("/totalEmployees")

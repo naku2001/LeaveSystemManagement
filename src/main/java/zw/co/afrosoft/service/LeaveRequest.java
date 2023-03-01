@@ -19,7 +19,7 @@ public class LeaveRequest {
     private LocalDate fromDate;
     private LocalDate toDate;
     private String reason;
-    private Long EmployeeId;
+    private Long employeeId;
     private LeaveType leaveType;
 
 

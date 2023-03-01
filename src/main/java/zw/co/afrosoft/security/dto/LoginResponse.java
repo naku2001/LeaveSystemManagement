@@ -10,7 +10,7 @@ import zw.co.afrosoft.model.User;
 @AllArgsConstructor
 public class LoginResponse {
 
-	private String message;
+	private String token;
 	private User user;
 
 }

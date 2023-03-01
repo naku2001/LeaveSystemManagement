@@ -5,25 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6c46e9d2-4570-4e77-9cfe-aff4ff265af4" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/DashboardTotal.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/local.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/target/generated-sources/annotations/zw/co/afrosoft/security/mapper/UserMapperImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/EmployeeRestController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/EmployeeRestController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/LeaveController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/LeaveController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/EmailDetails.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/EmailDetails.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/EmployeeRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/EmployeeRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/LeaveRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/LeaveRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/dto/AuthenticatedUserDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/dto/AuthenticatedUserDto.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/dto/LoginResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/dto/LoginResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/jwt/JwtTokenManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/jwt/JwtTokenManager.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/jwt/JwtTokenService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/jwt/JwtTokenService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/EmailServiceImplementation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/EmailServiceImplementation.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/EmployeeService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/EmployeeService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/EmployeeServiceImplementation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/EmployeeServiceImplementation.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveRequest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveServiceImplementation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveServiceImplementation.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/generated-sources/annotations/zw/co/afrosoft/security/mapper/UserMapperImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/target/generated-sources/annotations/zw/co/afrosoft/security/mapper/UserMapperImpl.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,9 +50,6 @@
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
-  </component>
-  <component name="JpbToolWindowState">
-    <option name="isToolWindowVisible" value="false" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -157,7 +145,8 @@
       <workItem from="1677506175850" duration="3648000" />
       <workItem from="1677564719558" duration="935000" />
       <workItem from="1677565928546" duration="6823000" />
-      <workItem from="1677577096707" duration="5349000" />
+      <workItem from="1677577096707" duration="10824000" />
+      <workItem from="1677650978917" duration="4956000" />
     </task>
     <task id="LOCAL-00001" summary="leave now working">
       <created>1676293375930</created>
@@ -215,7 +204,14 @@
       <option name="project" value="LOCAL" />
       <updated>1677487064667</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="returning user details when logged in">
+      <created>1677583724987</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1677583724987</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -226,17 +222,12 @@
     <MESSAGE value="employeee can now login" />
     <MESSAGE value="EVERYTHING IN PLACE" />
     <MESSAGE value="java version t0 1.8" />
-    <option name="LAST_COMMIT_MESSAGE" value="java version t0 1.8" />
+    <MESSAGE value="returning user details when logged in" />
+    <option name="LAST_COMMIT_MESSAGE" value="returning user details when logged in" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveServiceImplementation.java</url>
-          <line>51</line>
-          <option name="temporary" value="true" />
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/EmailRestController.java</url>
           <line>24</line>
