@@ -5,15 +5,27 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6c46e9d2-4570-4e77-9cfe-aff4ff265af4" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/RoleController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/Authorities.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/CalendarInfo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/Role.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/RoleRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/RoleRepo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/RoleService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/RoleServiceImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/EmployeeRestController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/EmployeeRestController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/configuration/SecurityConfiguration.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/configuration/SecurityConfiguration.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/LeaveController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/LeaveController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/User.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/EmployeeRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/EmployeeRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/dto/LoginResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/dto/LoginResponse.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/jwt/JwtTokenManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/jwt/JwtTokenManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/jwt/JwtTokenService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/jwt/JwtTokenService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/service/UserServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/service/UserServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/EmployeeServiceImplementation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/EmployeeServiceImplementation.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveServiceImplementation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveServiceImplementation.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/application.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/generated-sources/annotations/zw/co/afrosoft/security/mapper/UserMapperImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/target/generated-sources/annotations/zw/co/afrosoft/security/mapper/UserMapperImpl.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -51,6 +63,9 @@
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="JpbToolWindowState">
+    <option name="isToolWindowVisible" value="false" />
+  </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
@@ -79,13 +94,15 @@
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
     &quot;last_opened_file_path&quot;: &quot;C:/Users/princessm/Desktop/ATTACHMENT PROJECTS/spring-boot-boilerplate&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;reference.projectsettings.compiler.annotationProcessors&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;show.migrate.to.gradle.popup&quot;: &quot;false&quot;,
     &quot;spring.configuration.checksum&quot;: &quot;3eff7c1ae62db047315b484c8933e7ca&quot;
   },
   &quot;keyToStringList&quot;: {
@@ -146,7 +163,29 @@
       <workItem from="1677564719558" duration="935000" />
       <workItem from="1677565928546" duration="6823000" />
       <workItem from="1677577096707" duration="10824000" />
-      <workItem from="1677650978917" duration="4956000" />
+      <workItem from="1677650978917" duration="11768000" />
+      <workItem from="1677739571164" duration="14545000" />
+      <workItem from="1677850292390" duration="578000" />
+      <workItem from="1678084657144" duration="6784000" />
+      <workItem from="1678105304536" duration="3126000" />
+      <workItem from="1678170135035" duration="12897000" />
+      <workItem from="1678257827808" duration="2407000" />
+      <workItem from="1678267498777" duration="2928000" />
+      <workItem from="1678281651014" duration="1826000" />
+      <workItem from="1679318411944" duration="844000" />
+      <workItem from="1679583154536" duration="584000" />
+      <workItem from="1679646622269" duration="562000" />
+      <workItem from="1679928192902" duration="694000" />
+      <workItem from="1679987359104" duration="666000" />
+      <workItem from="1681459893410" duration="845000" />
+      <workItem from="1681464606175" duration="3188000" />
+      <workItem from="1681548570521" duration="3416000" />
+      <workItem from="1681726630869" duration="639000" />
+      <workItem from="1681727575273" duration="549000" />
+      <workItem from="1681908267487" duration="3341000" />
+      <workItem from="1684228941020" duration="1862000" />
+      <workItem from="1684762070366" duration="3225000" />
+      <workItem from="1684826358448" duration="511000" />
     </task>
     <task id="LOCAL-00001" summary="leave now working">
       <created>1676293375930</created>
@@ -211,7 +250,14 @@
       <option name="project" value="LOCAL" />
       <updated>1677583724987</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="PATHVARIABLE">
+      <created>1677662497032</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1677662497032</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -223,7 +269,8 @@
     <MESSAGE value="EVERYTHING IN PLACE" />
     <MESSAGE value="java version t0 1.8" />
     <MESSAGE value="returning user details when logged in" />
-    <option name="LAST_COMMIT_MESSAGE" value="returning user details when logged in" />
+    <MESSAGE value="PATHVARIABLE" />
+    <option name="LAST_COMMIT_MESSAGE" value="PATHVARIABLE" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -247,6 +294,16 @@
           <url>file://$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/LeaveController.java</url>
           <line>31</line>
           <option name="timeStamp" value="46" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveServiceImplementation.java</url>
+          <line>187</line>
+          <option name="timeStamp" value="48" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/jwt/JwtTokenService.java</url>
+          <line>34</line>
+          <option name="timeStamp" value="49" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-method">
           <url>file://$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/LeaveController.java</url>

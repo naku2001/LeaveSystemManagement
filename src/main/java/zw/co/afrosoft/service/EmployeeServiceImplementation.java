@@ -22,6 +22,7 @@ import zw.co.afrosoft.security.mapper.UserMapper;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -102,8 +103,10 @@ public class EmployeeServiceImplementation implements EmployeeService {
 
     @Override
     public ResponseEntity getEmployeeByName(String username) {
-        Optional<Employee> employee = employeeRepository.findByUsername(username);
-        if(employee.isPresent())
+        List<Employee> employee = employeeRepository.findByUsername(username);
+//        List<Employee> employees = new ArrayList<>();
+//        employees.add(employee);
+        if(!employee.isEmpty())
             return ResponseEntity.ok().body(employee);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("employee not found");
     }

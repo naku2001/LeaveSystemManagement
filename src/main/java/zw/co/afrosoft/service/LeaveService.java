@@ -31,4 +31,6 @@ public interface LeaveService {
 
 
     ResponseEntity totalLeaves();
+
+    ResponseEntity calenda();
 }

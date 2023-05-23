@@ -9,6 +9,7 @@ import zw.co.afrosoft.repository.LeaveRepository;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -177,6 +178,24 @@ public class LeaveServiceImplementation implements LeaveService{
                 .total(leaveList.size()).build();
 
         return ResponseEntity.ok().body(dashboardTotal);
+    }
+
+    @Override
+    public ResponseEntity calenda() {
+
+        List<Leave> leaveList = leaveRepository.findAllByStatus(Status.APPROVED);
+        List<CalendarInfo> calendarInfos =new ArrayList<>();
+        for(Leave leave : leaveList){
+            CalendarInfo calendarInfo = new CalendarInfo();
+
+            calendarInfo.setStart(leave.getFromDate().toString());
+            calendarInfo.setEnd(leave.getToDate().toString());
+            calendarInfo.setTitle(leave.getEmployee().getFirstName()+ " " +
+                    leave.getEmployee().getLastName());
+            calendarInfos.add(calendarInfo);
+        }
+
+        return ResponseEntity.ok().body(calendarInfos);
     }
 
 

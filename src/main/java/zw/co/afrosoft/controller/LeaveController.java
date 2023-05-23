@@ -10,7 +10,7 @@ import zw.co.afrosoft.service.LeaveService;
 @CrossOrigin
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/employee")
+@RequestMapping("/leave")
 public class LeaveController {
 
     private final LeaveService leaveService;
@@ -68,8 +68,12 @@ public class LeaveController {
         return leaveService.totalLeaves();
     }
     @GetMapping("/findLeaveByStatus/{status}")
-    public  ResponseEntity leaveByStatus(@PathVariable Status status){
+    public  ResponseEntity leaveByStatus(@PathVariable  Status status){
         return leaveService.leaveByStatus(status);
+    }
+    @GetMapping("/calendar")
+    public  ResponseEntity calenda(){
+        return leaveService.calenda();
     }
 
 

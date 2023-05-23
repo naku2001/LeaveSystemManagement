@@ -26,7 +26,6 @@ public class User {
 	private String email;
 	@OneToOne
 	private Employee employee;
-
 	@Enumerated(EnumType.STRING)
 	private UserRole userRole;
 
