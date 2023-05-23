@@ -198,5 +198,11 @@ public class LeaveServiceImplementation implements LeaveService{
         return ResponseEntity.ok().body(calendarInfos);
     }
 
+    @Override
+    public ResponseEntity myleaves(Long id) {
+        List<Leave> leaveList = leaveRepository.findAllByEmployeeId(id);
+        return null;
+    }
+
 
 }

@@ -51,6 +51,10 @@ public class LeaveController {
         return leaveService.rejectLeave(id);
     }
 
+    @GetMapping("/myleaves/{id}")
+    public  ResponseEntity myleaves(Long id){
+        return leaveService.myleaves(id);
+    }
     @GetMapping("/numberOfRejectedLeaves")
     public  ResponseEntity totalRejected(){
         return leaveService.totalRejected();
