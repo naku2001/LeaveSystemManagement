@@ -5,11 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6c46e9d2-4570-4e77-9cfe-aff4ff265af4" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/PasswordReset.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/PassWordResetCode.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/PasswordTokenRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/PasswordResetService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/LeaveController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/LeaveController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/LeaveRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/LeaveRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveServiceImplementation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveServiceImplementation.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/configuration/SecurityConfiguration.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/configuration/SecurityConfiguration.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/UserRepository.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -169,6 +171,7 @@
       <workItem from="1684228941020" duration="1862000" />
       <workItem from="1684762070366" duration="3225000" />
       <workItem from="1684826358448" duration="5276000" />
+      <workItem from="1684907248116" duration="4319000" />
     </task>
     <task id="LOCAL-00001" summary="leave now working">
       <created>1676293375930</created>
