@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Data
 @Entity
@@ -16,10 +16,10 @@ public class PassWordResetCode {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String code;
-    @OneToOne
-    @JoinColumn(name = "user_id")
+    @ManyToOne
+//    @JoinColumn(name = "user_id")
     private User user;
-    private LocalDateTime expiryDate;
+    private LocalTime expirytime;
 
 
 }
