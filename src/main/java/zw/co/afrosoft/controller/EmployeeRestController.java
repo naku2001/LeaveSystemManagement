@@ -6,7 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import zw.co.afrosoft.model.Employee;
-import zw.co.afrosoft.service.EmailService;
+//import zw.co.afrosoft.service.EmailService;
 import zw.co.afrosoft.security.dto.EmployeeRequest;
 import zw.co.afrosoft.service.EmployeeService;
 
@@ -17,7 +17,7 @@ import zw.co.afrosoft.service.EmployeeService;
 public class EmployeeRestController {
 
     private final EmployeeService employeeService;
-    private final EmailService emailService;
+//    private final EmailService emailService;
 
    @PostMapping("create")
   public ResponseEntity createEmployee(@RequestBody EmployeeRequest   request){

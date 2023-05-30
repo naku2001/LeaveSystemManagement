@@ -201,7 +201,60 @@ public class LeaveServiceImplementation implements LeaveService{
     @Override
     public ResponseEntity myleaves(Long id) {
         List<Leave> leaveList = leaveRepository.findAllByEmployeeId(id);
-        return null;
+        return ResponseEntity.ok().body(leaveList);
+    }
+
+    @Override
+    public ResponseEntity getRemainingLeaveDays(Long id) {
+        Optional<Employee> employee = employeeRepository.findById(id);
+        if(employee.isPresent()){
+            TotalLeaveDaysLeft totalLeaveDaysLeft = new TotalLeaveDaysLeft();
+            totalLeaveDaysLeft.setAvailableSickLeave(employee.get().getAvailableSickLeave());
+            totalLeaveDaysLeft.setAvailableUnpaidLeave(employee.get().getAvailableUnpaidLeave());
+            totalLeaveDaysLeft.setAvailableVacationLeave(employee.get().getAvailableVacationLeave());
+            return ResponseEntity.ok().body(totalLeaveDaysLeft);
+
+        }
+        return ResponseEntity.ok().body("employee not found");
+    }
+
+    @Override
+    public ResponseEntity cancelLeave(Long id, Long employeeId) {
+        Optional<Employee> employee = employeeRepository.findById(employeeId);
+        Optional<Leave> leave = leaveRepository.findById(id);
+        if(employee.isPresent()){
+            if(leave.isPresent() & leave.get().getStatus().equals(Status.PENDING)){
+                if(leave.get().getEmployee().getId() == employeeId){
+                    leaveRepository.delete(leave.get());
+                    return ResponseEntity.ok().body(leave.get());
+                }
+            }
+        }
+        return ResponseEntity.ok().body("Employee or Leave not found");
+    }
+
+    @Override
+    public ResponseEntity updateLeave(Long leaveId, Long employeeId,LeaveUpdate leaveRequestUpdate) {
+        Optional<Employee> employee = employeeRepository.findById(employeeId);
+        Optional<Leave> leave = leaveRepository.findById(leaveId);
+        if(employee.isPresent()){
+            if(leave.isPresent() & leave.get().getStatus().equals(Status.PENDING)){
+                if(leave.get().getEmployee().getId() == employeeId){
+                    Leave leaveUpdate = leave.get();
+                    leaveUpdate.setLeaveType(leaveRequestUpdate.getLeaveType());
+                    leaveUpdate.setReason(leaveRequestUpdate.getReason());
+                    leaveUpdate.setFromDate(leaveRequestUpdate.getFromDate());
+                    leaveUpdate.setToDate(leaveRequestUpdate.getToDate());
+                    leaveUpdate.setLeaveType(leaveRequestUpdate.getLeaveType());
+                    Period period =Period.between(leaveRequestUpdate.getFromDate(),leaveRequestUpdate.getToDate());
+                    leaveUpdate.setDuration(period.getDays()+ 1);
+                    leaveRepository.save(leaveUpdate);
+                    return ResponseEntity.ok().body(leaveUpdate);
+                }
+            }
+        }
+
+        return ResponseEntity.ok().body("Employee or Leave not found");
     }
 
 

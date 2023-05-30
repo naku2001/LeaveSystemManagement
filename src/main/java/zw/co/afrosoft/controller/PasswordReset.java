@@ -18,7 +18,7 @@ public class PasswordReset {
     public ResponseEntity initiatePasswordReset(@RequestBody EmailRequest request) {
         return passwordResetService.initiatePasswordReset(request);
     }
-    @PutMapping("/reset-password")
+    @PostMapping("/reset-password")
     public ResponseEntity resetPassword(@RequestBody PasswordResetRequest request) {
         return  passwordResetService.resetPassword(request);
     }

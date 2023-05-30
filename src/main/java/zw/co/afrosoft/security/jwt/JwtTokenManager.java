@@ -28,6 +28,7 @@ public class JwtTokenManager {
 		final UserRole userRole = user.getUserRole();
 		final Long user1 = user.getId();
 
+
 		final Employee employee = user.getEmployee();
 
 
@@ -36,7 +37,7 @@ public class JwtTokenManager {
 
 		//@formatter:off
 		return JWT.create()
-				.withSubject(String.valueOf(employee))
+				.withSubject(username)
 				.withIssuer(jwtProperties.getIssuer())
 				.withClaim("role", userRole.name())
 				.withClaim("userId",user1)

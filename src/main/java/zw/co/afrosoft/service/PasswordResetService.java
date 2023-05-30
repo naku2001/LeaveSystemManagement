@@ -21,17 +21,17 @@ import java.util.Random;
 @Service
 public class PasswordResetService {
     private final PasswordResetRepository passwordResetRepository;
-    private final EmailService emailService;
+//    private final EmailService emailService;
     private final JavaMailSender javaMailSender;
 
     private final UserRepository userRepository;
 
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public PasswordResetService(PasswordResetRepository passwordResetRepository, EmailService emailService, JavaMailSender javaMailSender, UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    public PasswordResetService(PasswordResetRepository passwordResetRepository, JavaMailSender javaMailSender, UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.passwordResetRepository = passwordResetRepository;
-
-        this.emailService = emailService;
+//
+//        this.emailService = emailService;
         this.javaMailSender = javaMailSender;
         this.userRepository = userRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
@@ -82,7 +82,7 @@ public class PasswordResetService {
     }
 
     public ResponseEntity resetPassword(PasswordResetRequest request) {
-//         Long id = 14; String code = request.getCode();
+
         Optional<PassWordResetCode> resetToken = passwordResetRepository.findByCode(request.getCode());
 
             if (resetToken.isPresent()) {

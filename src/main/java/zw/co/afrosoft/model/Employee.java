@@ -40,13 +40,14 @@ public class Employee {
     private int availableSickLeave;
     private int availableVacationLeave;
 
+
+
+    private int availableUnpaidLeave;
     public Employee() {
         this.availableSickLeave = 10;
         this.availableVacationLeave = 22;
         this.availableUnpaidLeave = 365;
     }
-
-    private int availableUnpaidLeave;
 
 
 

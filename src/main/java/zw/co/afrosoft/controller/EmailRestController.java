@@ -2,8 +2,10 @@ package zw.co.afrosoft.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import zw.co.afrosoft.model.Email;
 import zw.co.afrosoft.model.EmailDetails;
-import zw.co.afrosoft.service.EmailService;
+import zw.co.afrosoft.service.EmailSend;
+//import zw.co.afrosoft.service.EmailService;
 
 @CrossOrigin
 @RestController
@@ -11,19 +13,16 @@ import zw.co.afrosoft.service.EmailService;
 @RequestMapping("/employee")
 public class EmailRestController {
 
-    private final EmailService emailService;
+    private final EmailSend emailService;
 
-    public EmailRestController(EmailService emailService) {
+    public EmailRestController(EmailSend emailService) {
         this.emailService = emailService;
     }
 
     // Sending a simple Email
     @PostMapping("/sendMail")
-    public String
-    sendMail(@RequestBody EmailDetails details)
+    public void sendMail(@RequestBody Email email)
     {
-        String status = emailService.sendSimpleMail(details);
-
-        return status;
+    emailService.sendEmail(email);
     }
 }

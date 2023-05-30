@@ -3,6 +3,7 @@ package zw.co.afrosoft.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import zw.co.afrosoft.model.LeaveUpdate;
 import zw.co.afrosoft.model.Status;
 import zw.co.afrosoft.service.LeaveRequest;
 import zw.co.afrosoft.service.LeaveService;
@@ -41,9 +42,23 @@ public class LeaveController {
 
         return leaveService.getAllLeaves();
     }
+    @GetMapping("getAllRemainingLeaveDays/{id}")
+    public ResponseEntity getRemainingLeaveDays(@PathVariable Long id){
+
+        return leaveService.getRemainingLeaveDays(id);
+    }
     @PutMapping("/approve/{id}")
     public  ResponseEntity approveLeave(@PathVariable Long id){
         return leaveService.approveLeave(id);
+    }
+
+    @DeleteMapping ("/cancelLeave/{leaveId}/{employeeId}")
+    public  ResponseEntity cancelLeave(@PathVariable Long leaveId,@PathVariable Long employeeId){
+        return leaveService.cancelLeave(leaveId,employeeId);
+    }
+    @PutMapping ("/updateLeave/{leaveId}/{employeeId}")
+    public  ResponseEntity updateLeave(@PathVariable Long leaveId, @PathVariable Long employeeId, @RequestBody LeaveUpdate update){
+        return leaveService.updateLeave(leaveId,employeeId,update);
     }
 
     @PutMapping("/reject/{id}")
@@ -52,7 +67,7 @@ public class LeaveController {
     }
 
     @GetMapping("/myleaves/{id}")
-    public  ResponseEntity myleaves(Long id){
+    public  ResponseEntity myleaves(@PathVariable  Long id){
         return leaveService.myleaves(id);
     }
     @GetMapping("/numberOfRejectedLeaves")

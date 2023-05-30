@@ -1,7 +1,7 @@
 package zw.co.afrosoft.service;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
+import zw.co.afrosoft.model.LeaveUpdate;
 import zw.co.afrosoft.model.Status;
 
 public interface LeaveService {
@@ -35,4 +35,10 @@ public interface LeaveService {
     ResponseEntity calenda();
 
     ResponseEntity myleaves(Long id);
+
+    ResponseEntity getRemainingLeaveDays(Long id);
+
+    ResponseEntity cancelLeave(Long id, Long employeeId);
+
+    ResponseEntity updateLeave(Long leaveId, Long employeeId, LeaveUpdate update);
 }
