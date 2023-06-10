@@ -5,6 +5,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import zw.co.afrosoft.model.LeaveUpdate;
 import zw.co.afrosoft.model.Status;
+import zw.co.afrosoft.service.EmailNotificationService;
+import zw.co.afrosoft.service.EmployeeReportService;
 import zw.co.afrosoft.service.LeaveRequest;
 import zw.co.afrosoft.service.LeaveService;
 
@@ -15,21 +17,20 @@ import zw.co.afrosoft.service.LeaveService;
 public class LeaveController {
 
     private final LeaveService leaveService;
+    private  final EmailNotificationService emailNotificationService;
+
 
 
     @PostMapping("applyLeave")
     public ResponseEntity applyLeave(@RequestBody LeaveRequest request){
-
         return leaveService.applyLeave(request);
     }
     @GetMapping("getPendingLeaves")
     public ResponseEntity getAll(){
-
         return leaveService.getAll();
     }
     @GetMapping("getApprovedLeaves")
     public ResponseEntity getAllApproved(){
-
         return leaveService.getAllApproved();
     }
     @GetMapping("getRejectedLeaves")
@@ -60,12 +61,10 @@ public class LeaveController {
     public  ResponseEntity updateLeave(@PathVariable Long leaveId, @PathVariable Long employeeId, @RequestBody LeaveUpdate update){
         return leaveService.updateLeave(leaveId,employeeId,update);
     }
-
     @PutMapping("/reject/{id}")
     public  ResponseEntity rejectLeave(@PathVariable Long id){
         return leaveService.rejectLeave(id);
     }
-
     @GetMapping("/myleaves/{id}")
     public  ResponseEntity myleaves(@PathVariable  Long id){
         return leaveService.myleaves(id);
@@ -93,6 +92,11 @@ public class LeaveController {
     @GetMapping("/calendar")
     public  ResponseEntity calenda(){
         return leaveService.calenda();
+    }
+    @PostMapping("/email")
+    public  ResponseEntity send(){
+        emailNotificationService.sendEmail();
+        return null;
     }
 
 

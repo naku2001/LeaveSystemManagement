@@ -9,7 +9,7 @@ import javax.persistence.*;
 @Setter
 @Entity
 @Builder
-@NoArgsConstructor
+
 @AllArgsConstructor
 @Table(name = "USERS")
 public class User {
@@ -28,6 +28,17 @@ public class User {
 	private Employee employee;
 	@Enumerated(EnumType.STRING)
 	private UserRole userRole;
+	private int availableSickLeave;
+	private int availableVacationLeave;
+
+
+
+	private int availableUnpaidLeave;
+	public User() {
+		this.availableSickLeave = 10;
+		this.availableVacationLeave = 22;
+		this.availableUnpaidLeave = 365;
+	}
 
 
 

@@ -1,14 +1,19 @@
 package zw.co.afrosoft.controller;
 
 import lombok.RequiredArgsConstructor;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import zw.co.afrosoft.model.Employee;
 //import zw.co.afrosoft.service.EmailService;
+import zw.co.afrosoft.model.LeaveType;
+import zw.co.afrosoft.model.Status;
 import zw.co.afrosoft.security.dto.EmployeeRequest;
 import zw.co.afrosoft.service.EmployeeService;
+
+import javax.servlet.http.HttpServletResponse;
 
 @CrossOrigin
 @RestController
@@ -48,6 +53,23 @@ public class EmployeeRestController {
     @GetMapping("/totalEmployees")
     public ResponseEntity totalEmployee(){
        return  employeeService.totalEmployee();
+    }
+
+    @RequestMapping(value = "employees/report", method = RequestMethod.GET)
+    public ResponseEntity<byte[]> employees(HttpServletResponse response) throws Exception {
+        JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource
+                (employeeService.employees());
+        String report;
+        report= "employee";
+        return employeeService.generateReports(dataSource,report);
+    }
+    @RequestMapping(value = "leave/report", method = RequestMethod.GET)
+    public ResponseEntity<byte[]> leave(HttpServletResponse response) throws Exception {
+        JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource
+                (employeeService.leave());
+        String report;
+        report= "Leave";
+        return employeeService.generateReport(dataSource,report);
     }
 
 

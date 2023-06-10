@@ -14,4 +14,5 @@ public class CalendarInfo {
     private String start;
     private String end;
     private String title;
+    private String leaveType;
 }

@@ -1,17 +1,24 @@
 package zw.co.afrosoft.service;
 
+import freemarker.template.Configuration;
+import freemarker.template.Template;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailException;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import zw.co.afrosoft.model.*;
 import zw.co.afrosoft.repository.EmployeeRepository;
 import zw.co.afrosoft.repository.LeaveRepository;
 
+import javax.mail.internet.MimeMessage;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -19,10 +26,14 @@ import java.util.stream.Collectors;
 public class LeaveServiceImplementation implements LeaveService{
     private final EmployeeRepository employeeRepository;
     private final LeaveRepository leaveRepository;
+    private final JavaMailSender javaMailSender;
+    private final Configuration freemarkerConfig;
 
-    public LeaveServiceImplementation(EmployeeRepository employeeRepository, LeaveRepository leaveRepository) {
+    public LeaveServiceImplementation(EmployeeRepository employeeRepository, LeaveRepository leaveRepository, JavaMailSender javaMailSender, Configuration freemarkerConfig) {
         this.employeeRepository = employeeRepository;
         this.leaveRepository = leaveRepository;
+        this.javaMailSender = javaMailSender;
+        this.freemarkerConfig = freemarkerConfig;
     }
     @Override
     public ResponseEntity applyLeave(LeaveRequest request) {
@@ -30,6 +41,7 @@ public class LeaveServiceImplementation implements LeaveService{
         Leave leave = new Leave();
         Status status = Status.PENDING;
         Optional<Employee> employee = employeeRepository.findById(request.getEmployeeId());
+
 
 
         leave.setReason(request.getReason());
@@ -49,16 +61,77 @@ public class LeaveServiceImplementation implements LeaveService{
         }
         leave.setLeaveType(request.getLeaveType());
         if(request.getToDate().isBefore(request.getFromDate()))
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("to date should be after from date");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("To Date Should Be After From Date");
         leave.setToDate(request.getToDate());
         if(request.getFromDate().isBefore(LocalDate.now()))
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("cannot apply for past date");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Cannot Apply For Past Date");
         leave.setFromDate(request.getFromDate());
         Period period =Period.between(request.getFromDate(),request.getToDate());
         leave.setDuration(period.getDays() + 1);
         leave.setEmployee(employee.get());
-
         leave.setStatus(status);
+        try {
+            SimpleMailMessage mailMessage = new SimpleMailMessage();
+            String sender = "perfect.makuwerere@students.uz.zw";
+            SimpleMailMessage mail = new SimpleMailMessage();
+
+            String user1 = employee.get().getFirstName().toUpperCase() + " " + employee
+                    .get().getLastName().toUpperCase();
+
+
+
+
+            String textEmail = "Dear "+ " "+ employee.get().getFirstName().toUpperCase() + " " + employee.get()
+                    .getLastName().toUpperCase()+"\n\n Your Leave Management System account " +
+                    "has been created"
+                    + "\n Use the details below to login into the system"
+
+                    +"\n\n Click the link below to the login page"
+                    +"\n ";
+            Map model = new HashMap();
+            model.put("user", user1);
+            model.put("link", "wattie");
+            model.put("message", textEmail);
+            model.put("year", "2023");
+            MimeMessage message = javaMailSender.createMimeMessage();
+
+            MimeMessageHelper helper = new MimeMessageHelper(message,
+                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                    StandardCharsets.UTF_8.name());
+            mail.setFrom(sender);
+            mail.setTo(employee.get().getEmail());
+            mail.setSentDate(new Date());
+            mail.setSubject("AFROTECH LEAVE BOARD SYSTEM LOGIN DETAILS");
+            Template t = freemarkerConfig.getTemplate("email-template.ftl");
+//            if (notification.getUserAccount().getUserType().equals(UserType.MEMBER.name())) {
+//                t = freemarkerConfig.getTemplate("response-email-template.ftl");
+//                model.remove("message");
+//                model.put("message", notification.getContent().concat(" ").concat(notification.getMessageLink()));
+//            }
+            String html = FreeMarkerTemplateUtils.processTemplateIntoString(t, model);
+            helper.setTo(employee.get().getEmail());
+            helper.setText(html, true);
+            helper.setSubject(mail.getSubject());
+            helper.setFrom(mail.getFrom());
+
+            javaMailSender.send(message);
+//            notification.setIsEmail(true);
+//            notification.setStatus(Status.COMPLETED);
+//            notificationRepository.save(notification);
+        } catch (MailException e) {
+            //catch error
+//            log.error("Error while sending out email..{}", e.getMessage());
+
+        } catch (Exception e) {
+            //catch error
+
+//            log.error("Error while sending out email..{}", e.getMessage());
+//            log.error("stack trace..{}", e.getStackTrace());
+//            log.error("throwable..{}", e.getCause());
+//            log.error("Erro localised..{}", e.getLocalizedMessage());
+//            log.error("exceptionl..{}", e);
+
+        }
 
         return ResponseEntity.ok().body(leaveRepository.save(leave));
     }
@@ -190,6 +263,7 @@ public class LeaveServiceImplementation implements LeaveService{
 
             calendarInfo.setStart(leave.getFromDate().toString());
             calendarInfo.setEnd(leave.getToDate().toString());
+            calendarInfo.setLeaveType(leave.getLeaveType().toString());
             calendarInfo.setTitle(leave.getEmployee().getFirstName()+ " " +
                     leave.getEmployee().getLastName());
             calendarInfos.add(calendarInfo);

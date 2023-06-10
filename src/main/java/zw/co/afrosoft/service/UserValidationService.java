@@ -14,9 +14,9 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserValidationService {
 
-	private static final String EMAIL_ALREADY_EXISTS = "email_already_exists";
+	private static final String EMAIL_ALREADY_EXISTS = "Email Already Exists";
 
-	private static final String USERNAME_ALREADY_EXISTS = "username_already_exists";
+	private static final String USERNAME_ALREADY_EXISTS = "username Already Exists";
 
 	private final UserRepository userRepository;
 

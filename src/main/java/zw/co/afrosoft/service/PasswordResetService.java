@@ -1,10 +1,12 @@
 package zw.co.afrosoft.service;
 
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import zw.co.afrosoft.model.EmailRequest;
 import zw.co.afrosoft.model.PassWordResetCode;
@@ -19,6 +21,7 @@ import java.util.Optional;
 import java.util.Random;
 
 @Service
+@Component
 public class PasswordResetService {
     private final PasswordResetRepository passwordResetRepository;
 //    private final EmailService emailService;
@@ -67,7 +70,7 @@ public class PasswordResetService {
 
             }
             else {
-                return ResponseEntity.ok().body("user not found");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email Not Found");
             }
 
     }
@@ -81,6 +84,7 @@ public class PasswordResetService {
 
     }
 
+
     public ResponseEntity resetPassword(PasswordResetRequest request) {
 
         Optional<PassWordResetCode> resetToken = passwordResetRepository.findByCode(request.getCode());
@@ -88,28 +92,24 @@ public class PasswordResetService {
             if (resetToken.isPresent()) {
                 PassWordResetCode passwordResetToken = resetToken.get();
                 if (passwordResetToken.getExpirytime() != LocalTime.of(0,0,0)) {
-                    User user = passwordResetToken.getUser();
-                    user.setPassword(bCryptPasswordEncoder.encode(request.getNewPassword()));
-                    User user1 = userRepository.save(user);
+                   User user =  passwordResetToken.getUser();
+                   user = passwordResetToken.getUser();
+                   user.setPassword(bCryptPasswordEncoder.encode(request.getNewPassword()));
+                   user.getEmployee().setPassword(bCryptPasswordEncoder.encode(request.getNewPassword()));
+                   User user1 = userRepository.save(user);
+
                      passwordResetToken.setCode(null);
-                   return ResponseEntity.ok().body(user);
+                   return ResponseEntity.ok().body(user1);
                 } else {
                     throw new RuntimeException("Password reset code has expired");
                 }
             } else {
 //                throw new RuntimeException("Invalid password reset code");
-                return ResponseEntity.ok().body("wrong activation code");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid Verification Code");
             }
         }
 
-    public ResponseEntity getAll() {
-        List<PassWordResetCode> passWordResetCodeList = passwordResetRepository.findAll();
-        return ResponseEntity.ok().body(passWordResetCodeList);
-    }
 
-//        private String generateCode() {
-//            // Generate a 6-digit code
-//            // You can use a random number generator or any other method to generate the code
-//        }
+
     }
 

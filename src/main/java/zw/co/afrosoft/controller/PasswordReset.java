@@ -22,6 +22,10 @@ public class PasswordReset {
     public ResponseEntity resetPassword(@RequestBody PasswordResetRequest request) {
         return  passwordResetService.resetPassword(request);
     }
+//    @PutMapping("/reset")
+//    public ResponseEntity reset(@RequestBody PasswordResetRequest request) {
+//        return  passwordResetService.reset(request);
+//    }
 //    @GetMapping("/tokenss")
 //    public ResponseEntity getAll() {
 //        return passwordResetService.getAll();

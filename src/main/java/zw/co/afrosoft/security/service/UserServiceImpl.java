@@ -3,6 +3,7 @@ package zw.co.afrosoft.security.service;
 import org.springframework.http.ResponseEntity;
 import zw.co.afrosoft.model.User;
 import zw.co.afrosoft.model.UserRole;
+import zw.co.afrosoft.repository.EmployeeRepository;
 import zw.co.afrosoft.repository.UserRepository;
 import zw.co.afrosoft.security.dto.AuthenticatedUserDto;
 import zw.co.afrosoft.security.dto.RegistrationRequest;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+	private final EmployeeRepository employeeRepository;
 
 	private static final String REGISTRATION_SUCCESSFUL = "registration_successful";
 
@@ -49,6 +51,7 @@ public class UserServiceImpl implements UserService {
 
 
 		userRepository.save(user);
+
 
 		final String username = registrationRequest.getUsername();
 

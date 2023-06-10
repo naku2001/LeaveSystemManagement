@@ -25,6 +25,7 @@ public class Leave {
     @NotNull(message = "Please provide end date!")
     private LocalDate toDate;
     @ManyToOne
+
     private Employee employee;
     @NotEmpty(message = "Please provide a reason for the leave!")
     private String reason;

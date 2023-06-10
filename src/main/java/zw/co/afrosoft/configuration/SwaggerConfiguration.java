@@ -87,6 +87,7 @@ public class SwaggerConfiguration {
 		UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
 		urlBasedCorsConfigurationSource.registerCorsConfiguration("/**" , corsConfiguration);
 		return urlBasedCorsConfigurationSource;
+
 	}
 
 }
