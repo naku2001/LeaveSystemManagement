@@ -1,0 +1,912 @@
+Index: src/main/java/zw/co/afrosoft/service/EmployeeServiceImplementation.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/zw/co/afrosoft/service/EmployeeServiceImplementation.java b/src/main/java/zw/co/afrosoft/service/EmployeeServiceImplementation.java
+--- a/src/main/java/zw/co/afrosoft/service/EmployeeServiceImplementation.java	
++++ b/src/main/java/zw/co/afrosoft/service/EmployeeServiceImplementation.java	
+@@ -5,8 +5,6 @@
+ import org.springframework.data.domain.Pageable;
+ import org.springframework.http.HttpStatus;
+ import org.springframework.http.ResponseEntity;
+-import org.springframework.mail.SimpleMailMessage;
+-import org.springframework.mail.javamail.JavaMailSender;
+ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+ import org.springframework.stereotype.Service;
+ import org.springframework.web.bind.annotation.RequestBody;
+@@ -25,74 +23,51 @@
+     private final EmployeeRepository employeeRepository;
+     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+     private final UserRepository userRepository;
+-    private final JavaMailSender javaMailSender;
+-    private final UserValidationService userValidationService;
+ 
+-    public EmployeeServiceImplementation(EmployeeRepository employeeRepository, BCryptPasswordEncoder bCryptPasswordEncoder, UserRepository userRepository, JavaMailSender javaMailSender, UserValidationService userValidationService) {
++    public EmployeeServiceImplementation(EmployeeRepository employeeRepository, BCryptPasswordEncoder bCryptPasswordEncoder, UserRepository userRepository) {
+         this.employeeRepository = employeeRepository;
+         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+         this.userRepository = userRepository;
+-        this.javaMailSender = javaMailSender;
+-        this.userValidationService = userValidationService;
+     }
+ 
+ 
+     @Override
+     public ResponseEntity createEmployee( EmployeeRequest request) {
+ 
+-        userValidationService.validateUser(request);
+-
+-        Employee employees = new Employee();
+-        employees.setGender(request.getGender());
++        Employee employees =  new Employee();
++        employees .setGender(request.getGender());
+         employees.setEmail(request.getEmail());
+         employees.setDateOfBirth(request.getDateOfBirth());
+         employees.setLastName(request.getLastName());
+         employees.setFirstName(request.getFirstName());
+-        employees.setPassword(bCryptPasswordEncoder.encode(request.getPassword()));
++        employees.setPassword(request.getPassword());
+         employees.setUsername(request.getUsername());
+-        Employee employeeSaved = employeeRepository.save(employees);
+-        final User user = UserMapper.INSTANCE.convertToUser(request);
++       Employee employeeSaved = employeeRepository.save(employees);
++       final User user = UserMapper.INSTANCE.convertToUser(request);
+         user.setUserRole(UserRole.USER);
+         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+         user.setEmployee(employeeSaved);
+         userRepository.save(user);
+-        {
+-            try {
+-                SimpleMailMessage mailMessage
+-                        = new SimpleMailMessage();
+-                String sender = "perfect.makuwerere@students.uz.zw";
+-                // Setting up necessary details
+-                mailMessage.setFrom(sender);
+-                mailMessage.setTo(employees.getEmail());
+-                mailMessage.setText("Dear "+ " "+ employees.getFirstName().toUpperCase() + " " + employees
+-                        .getLastName().toUpperCase()+"\n\n Your Leave Management System account " +
+-                        "has been created"
+-                        + "\n Use the details below to login into the sytem"
+-                        +"\n\n Password:" + " " +request.getPassword()
+-                        + "\n\n Username:" + " " + request.getUsername()
+-                );
+-                mailMessage.setSubject("LEAVE SYSTEM LOGIN DETAILS");
+-                javaMailSender.send(mailMessage);
+-                return ResponseEntity.ok().body("Successfully registered Employee!!");
+-            }
+-            catch (Exception e) {
+-                return ResponseEntity.ok().body("Error while Sending Mail Please Check If" +
+-                        " Your Email Address Is Correct");
+-            }
+-        }
++        return ResponseEntity.ok().body(employees);
++
+     }
++
++
++
++
+     @Override
+     public Page<Employee> getAll(Pageable pageable) {
+         return  employeeRepository.findAll(pageable);
+     }
++
+     @Override
+     public Page getAll(int offset, int size) {
+         return employeeRepository.findAll(PageRequest.of(offset, size));
+     }
++
+     @Override
+     public Employee updateEmployee(Long id, @RequestBody EmployeeRequest employeeRequest) {
+         Optional<Employee> user = employeeRepository.findById(id);
+-        String response = "Employee not found";
+         if(user.isPresent()){
+             Employee updatedEmployee = user.get();
+ 
+@@ -119,6 +94,9 @@
+         }
+         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Employee Not Found");
+     }
++
++
++
+     @Override
+     public ResponseEntity deleteEmployee(Long id) {
+         Optional<Employee> user = employeeRepository.findById(id);
+Index: src/main/java/zw/co/afrosoft/security/jwt/JwtTokenService.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/zw/co/afrosoft/security/jwt/JwtTokenService.java b/src/main/java/zw/co/afrosoft/security/jwt/JwtTokenService.java
+--- a/src/main/java/zw/co/afrosoft/security/jwt/JwtTokenService.java	
++++ b/src/main/java/zw/co/afrosoft/security/jwt/JwtTokenService.java	
+@@ -36,11 +36,12 @@
+ 
+ 		final User user = UserMapper.INSTANCE.convertToUser(authenticatedUserDto);
+ 		final String token = jwtTokenManager.generateToken(user);
++		final String user1 = user.getUsername();
+ 		final String message= "You have successfuly logged in  " + user.getUsername();
+ 
+ 		log.info("{} has successfully logged in!", user.getUsername());
+ 
+-		return new LoginResponse(token);
++		return new LoginResponse(token,user1);
+ 	}
+ 
+ }
+Index: src/main/java/zw/co/afrosoft/security/jwt/JwtTokenManager.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/zw/co/afrosoft/security/jwt/JwtTokenManager.java b/src/main/java/zw/co/afrosoft/security/jwt/JwtTokenManager.java
+--- a/src/main/java/zw/co/afrosoft/security/jwt/JwtTokenManager.java	
++++ b/src/main/java/zw/co/afrosoft/security/jwt/JwtTokenManager.java	
+@@ -27,6 +27,7 @@
+ 		return JWT.create()
+ 				.withSubject(username)
+ 				.withIssuer(jwtProperties.getIssuer())
++				.withClaim("username",username)
+ 				.withClaim("role", userRole.name())
+ 				.withIssuedAt(new Date())
+ 				.withExpiresAt(new Date(System.currentTimeMillis() + jwtProperties.getExpirationMinute() * 60 * 1000))
+Index: src/main/java/zw/co/afrosoft/service/LeaveRequest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/zw/co/afrosoft/service/LeaveRequest.java b/src/main/java/zw/co/afrosoft/service/LeaveRequest.java
+--- a/src/main/java/zw/co/afrosoft/service/LeaveRequest.java	
++++ b/src/main/java/zw/co/afrosoft/service/LeaveRequest.java	
+@@ -19,8 +19,9 @@
+     private LocalDate fromDate;
+     private LocalDate toDate;
+     private String reason;
+-    private Long EmployeeId;
++//    private Long EmployeeId;
+     private LeaveType leaveType;
++    private String username;
+ 
+ 
+ 
+Index: src/main/resources/application.yml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/resources/application.yml b/src/main/resources/application.yml
+--- a/src/main/resources/application.yml	
++++ b/src/main/resources/application.yml	
+@@ -2,9 +2,9 @@
+   port: 8080
+ spring:
+   datasource:
+-    url: jdbc:mysql://localhost:3306/employee
+-    username: root
+-    password: Perfect2001
++    url: jdbc:mysql://54.156.63.145:3306/employee
++    username: tafadzwa
++    password: tafadzwa25
+ 
+   jpa:
+ #    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+Index: src/main/java/zw/co/afrosoft/service/LeaveServiceImplementation.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/zw/co/afrosoft/service/LeaveServiceImplementation.java b/src/main/java/zw/co/afrosoft/service/LeaveServiceImplementation.java
+--- a/src/main/java/zw/co/afrosoft/service/LeaveServiceImplementation.java	
++++ b/src/main/java/zw/co/afrosoft/service/LeaveServiceImplementation.java	
+@@ -28,11 +28,8 @@
+ 
+         Leave leave = new Leave();
+         Status status = Status.PENDING;
+-        Optional<Employee> employee = employeeRepository.findById(request.getEmployeeId());
+-
+-
+-        leave.setReason(request.getReason());
+-        if(request.getLeaveType().equals(LeaveType.SICK_LEAVE)){
++        Optional<Employee> employee = employeeRepository.findEmployeeByUsername(request.getUsername());
++        if (employee.isPresent()){ if(request.getLeaveType().equals(LeaveType.SICK_LEAVE)){
+             if(employee.get().getAvailableSickLeave()==0 )
+                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                         .body("You cant apply you have no available sick leave days left");
+@@ -46,20 +43,25 @@
+                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                         .body("You cant apply you have no available un paid leave days left");
+         }
+-        leave.setLeaveType(request.getLeaveType());
+-        if(request.getToDate().isBefore(request.getFromDate()))
+-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("to date should be after from date");
+-        leave.setToDate(request.getToDate());
+-        if(request.getFromDate().isAfter(LocalDate.now()))
+-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("cannot apply for past date");
+-        leave.setFromDate(request.getFromDate());
+-        Period period =Period.between(request.getFromDate(),request.getToDate());
+-        leave.setDuration(period.getDays() + 1);
+-        leave.setEmployee(employee.get());
++            leave.setLeaveType(request.getLeaveType());
++            if(request.getToDate().isBefore(request.getFromDate()))
++                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("to date should be after from date");
++            leave.setToDate(request.getToDate());
++            if(request.getFromDate().isAfter(LocalDate.now()))
++                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("cannot apply for past date");
++            leave.setFromDate(request.getFromDate());
++            Period period =Period.between(request.getFromDate(),request.getToDate());
++            leave.setDuration(period.getDays() + 1);
++            leave.setEmployee(employee.get());
++            leave.setReason(request.getReason());
+ 
+-        leave.setStatus(status);
++            leave.setStatus(status);
+ 
+-        return ResponseEntity.ok().body(leaveRepository.save(leave));
++            return ResponseEntity.ok().body(leaveRepository.save(leave));}
++        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("employee not found");
++
++
++
+     }
+ 
+     @Override
+Index: src/main/java/zw/co/afrosoft/security/dto/LoginResponse.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/zw/co/afrosoft/security/dto/LoginResponse.java b/src/main/java/zw/co/afrosoft/security/dto/LoginResponse.java
+--- a/src/main/java/zw/co/afrosoft/security/dto/LoginResponse.java	
++++ b/src/main/java/zw/co/afrosoft/security/dto/LoginResponse.java	
+@@ -10,5 +10,6 @@
+ public class LoginResponse {
+ 
+ 	private String message;
++	private String username;
+ 
+ }
+Index: target/generated-sources/annotations/varsi/dev/security/mapper/UserMapperImpl.java
+===================================================================
+diff --git a/target/generated-sources/annotations/varsi/dev/security/mapper/UserMapperImpl.java b/target/generated-sources/annotations/varsi/dev/security/mapper/UserMapperImpl.java
+deleted file mode 100644
+--- a/target/generated-sources/annotations/varsi/dev/security/mapper/UserMapperImpl.java	
++++ /dev/null	
+@@ -1,62 +0,0 @@
+-package varsi.dev.security.mapper;
+-
+-import javax.annotation.processing.Generated;
+-import varsi.dev.model.User;
+-import varsi.dev.security.dto.AuthenticatedUserDto;
+-import varsi.dev.security.dto.RegistrationRequest;
+-
+-@Generated(
+-    value = "org.mapstruct.ap.MappingProcessor",
+-    date = "2023-01-16T22:26:41+0200",
+-    comments = "version: 1.5.2.Final, compiler: javac, environment: Java 11.0.5 (Oracle Corporation)"
+-)
+-public class UserMapperImpl implements UserMapper {
+-
+-    @Override
+-    public User convertToUser(RegistrationRequest registrationRequest) {
+-        if ( registrationRequest == null ) {
+-            return null;
+-        }
+-
+-        User.UserBuilder user = User.builder();
+-
+-        user.name( registrationRequest.getName() );
+-        user.username( registrationRequest.getUsername() );
+-        user.password( registrationRequest.getPassword() );
+-        user.email( registrationRequest.getEmail() );
+-
+-        return user.build();
+-    }
+-
+-    @Override
+-    public AuthenticatedUserDto convertToAuthenticatedUserDto(User user) {
+-        if ( user == null ) {
+-            return null;
+-        }
+-
+-        AuthenticatedUserDto authenticatedUserDto = new AuthenticatedUserDto();
+-
+-        authenticatedUserDto.setName( user.getName() );
+-        authenticatedUserDto.setUsername( user.getUsername() );
+-        authenticatedUserDto.setPassword( user.getPassword() );
+-        authenticatedUserDto.setUserRole( user.getUserRole() );
+-
+-        return authenticatedUserDto;
+-    }
+-
+-    @Override
+-    public User convertToUser(AuthenticatedUserDto authenticatedUserDto) {
+-        if ( authenticatedUserDto == null ) {
+-            return null;
+-        }
+-
+-        User.UserBuilder user = User.builder();
+-
+-        user.name( authenticatedUserDto.getName() );
+-        user.username( authenticatedUserDto.getUsername() );
+-        user.password( authenticatedUserDto.getPassword() );
+-        user.userRole( authenticatedUserDto.getUserRole() );
+-
+-        return user.build();
+-    }
+-}
+Index: target/classes/META-INF/spring-configuration-metadata.json
+===================================================================
+diff --git a/target/classes/META-INF/spring-configuration-metadata.json b/target/classes/META-INF/spring-configuration-metadata.json
+deleted file mode 100644
+--- a/target/classes/META-INF/spring-configuration-metadata.json	
++++ /dev/null	
+@@ -1,73 +0,0 @@
+-{
+-  "groups": [
+-    {
+-      "name": "jwt",
+-      "type": "zw.co.afrosoft.security.jwt.JwtProperties",
+-      "sourceType": "zw.co.afrosoft.security.jwt.JwtProperties"
+-    },
+-    {
+-      "name": "swagger",
+-      "type": "zw.co.afrosoft.configuration.SwaggerConfiguration",
+-      "sourceType": "zw.co.afrosoft.configuration.SwaggerConfiguration"
+-    }
+-  ],
+-  "properties": [
+-    {
+-      "name": "jwt.expiration-minute",
+-      "type": "java.lang.Long",
+-      "sourceType": "zw.co.afrosoft.security.jwt.JwtProperties",
+-      "defaultValue": 0
+-    },
+-    {
+-      "name": "jwt.issuer",
+-      "type": "java.lang.String",
+-      "sourceType": "zw.co.afrosoft.security.jwt.JwtProperties"
+-    },
+-    {
+-      "name": "jwt.secret-key",
+-      "type": "java.lang.String",
+-      "sourceType": "zw.co.afrosoft.security.jwt.JwtProperties"
+-    },
+-    {
+-      "name": "swagger.app-description",
+-      "type": "java.lang.String",
+-      "sourceType": "zw.co.afrosoft.configuration.SwaggerConfiguration"
+-    },
+-    {
+-      "name": "swagger.app-license",
+-      "type": "java.lang.String",
+-      "sourceType": "zw.co.afrosoft.configuration.SwaggerConfiguration"
+-    },
+-    {
+-      "name": "swagger.app-license-url",
+-      "type": "java.lang.String",
+-      "sourceType": "zw.co.afrosoft.configuration.SwaggerConfiguration"
+-    },
+-    {
+-      "name": "swagger.app-name",
+-      "type": "java.lang.String",
+-      "sourceType": "zw.co.afrosoft.configuration.SwaggerConfiguration"
+-    },
+-    {
+-      "name": "swagger.app-version",
+-      "type": "java.lang.String",
+-      "sourceType": "zw.co.afrosoft.configuration.SwaggerConfiguration"
+-    },
+-    {
+-      "name": "swagger.contact-mail",
+-      "type": "java.lang.String",
+-      "sourceType": "zw.co.afrosoft.configuration.SwaggerConfiguration"
+-    },
+-    {
+-      "name": "swagger.contact-name",
+-      "type": "java.lang.String",
+-      "sourceType": "zw.co.afrosoft.configuration.SwaggerConfiguration"
+-    },
+-    {
+-      "name": "swagger.contact-url",
+-      "type": "java.lang.String",
+-      "sourceType": "zw.co.afrosoft.configuration.SwaggerConfiguration"
+-    }
+-  ],
+-  "hints": []
+-}
+\ No newline at end of file
+Index: target/generated-sources/annotations/zw/co/afrosoft/security/mapper/UserMapperImpl.java
+===================================================================
+diff --git a/target/generated-sources/annotations/zw/co/afrosoft/security/mapper/UserMapperImpl.java b/target/generated-sources/annotations/zw/co/afrosoft/security/mapper/UserMapperImpl.java
+deleted file mode 100644
+--- a/target/generated-sources/annotations/zw/co/afrosoft/security/mapper/UserMapperImpl.java	
++++ /dev/null	
+@@ -1,81 +0,0 @@
+-package zw.co.afrosoft.security.mapper;
+-
+-import javax.annotation.processing.Generated;
+-import zw.co.afrosoft.model.User;
+-import zw.co.afrosoft.security.dto.AuthenticatedUserDto;
+-import zw.co.afrosoft.security.dto.EmployeeRequest;
+-import zw.co.afrosoft.security.dto.RegistrationRequest;
+-
+-@Generated(
+-    value = "org.mapstruct.ap.MappingProcessor",
+-    date = "2023-02-16T10:46:53+0200",
+-    comments = "version: 1.5.2.Final, compiler: javac, environment: Java 17.0.5 (Amazon.com Inc.)"
+-)
+-public class UserMapperImpl implements UserMapper {
+-
+-    @Override
+-    public User convertToUser(RegistrationRequest registrationRequest) {
+-        if ( registrationRequest == null ) {
+-            return null;
+-        }
+-
+-        User.UserBuilder user = User.builder();
+-
+-        user.firstName( registrationRequest.getFirstName() );
+-        user.lastName( registrationRequest.getLastName() );
+-        user.username( registrationRequest.getUsername() );
+-        user.password( registrationRequest.getPassword() );
+-        user.email( registrationRequest.getEmail() );
+-
+-        return user.build();
+-    }
+-
+-    @Override
+-    public AuthenticatedUserDto convertToAuthenticatedUserDto(User user) {
+-        if ( user == null ) {
+-            return null;
+-        }
+-
+-        AuthenticatedUserDto authenticatedUserDto = new AuthenticatedUserDto();
+-
+-        authenticatedUserDto.setFirstName( user.getFirstName() );
+-        authenticatedUserDto.setUsername( user.getUsername() );
+-        authenticatedUserDto.setPassword( user.getPassword() );
+-        authenticatedUserDto.setUserRole( user.getUserRole() );
+-
+-        return authenticatedUserDto;
+-    }
+-
+-    @Override
+-    public User convertToUser(AuthenticatedUserDto authenticatedUserDto) {
+-        if ( authenticatedUserDto == null ) {
+-            return null;
+-        }
+-
+-        User.UserBuilder user = User.builder();
+-
+-        user.firstName( authenticatedUserDto.getFirstName() );
+-        user.username( authenticatedUserDto.getUsername() );
+-        user.password( authenticatedUserDto.getPassword() );
+-        user.userRole( authenticatedUserDto.getUserRole() );
+-
+-        return user.build();
+-    }
+-
+-    @Override
+-    public User convertToUser(EmployeeRequest request) {
+-        if ( request == null ) {
+-            return null;
+-        }
+-
+-        User.UserBuilder user = User.builder();
+-
+-        user.firstName( request.getFirstName() );
+-        user.lastName( request.getLastName() );
+-        user.username( request.getUsername() );
+-        user.password( request.getPassword() );
+-        user.email( request.getEmail() );
+-
+-        return user.build();
+-    }
+-}
+Index: src/main/java/zw/co/afrosoft/repository/EmployeeRepository.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/zw/co/afrosoft/repository/EmployeeRepository.java b/src/main/java/zw/co/afrosoft/repository/EmployeeRepository.java
+--- a/src/main/java/zw/co/afrosoft/repository/EmployeeRepository.java	
++++ b/src/main/java/zw/co/afrosoft/repository/EmployeeRepository.java	
+@@ -12,6 +12,7 @@
+ 
+ 
+     Page<Employee> findAll(Pageable pageable);
++    Optional<Employee> findEmployeeByUsername(String username);
+ 
+ //    Optional<Employee>
+ 
+Index: target/classes/application.yml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/target/classes/application.yml b/target/classes/application.yml
+--- a/target/classes/application.yml	
++++ b/target/classes/application.yml	
+@@ -2,9 +2,9 @@
+   port: 8080
+ spring:
+   datasource:
+-    url: jdbc:mysql://localhost:3306/employee
+-    username: root
+-    password: Perfect2001
++    url: jdbc:mysql://54.156.63.145:3306/employee
++    username: tafadzwa
++    password: tafadzwa25
+ 
+   jpa:
+ #    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+Index: src/main/java/zw/co/afrosoft/repository/UserRepository.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/zw/co/afrosoft/repository/UserRepository.java b/src/main/java/zw/co/afrosoft/repository/UserRepository.java
+--- a/src/main/java/zw/co/afrosoft/repository/UserRepository.java	
++++ b/src/main/java/zw/co/afrosoft/repository/UserRepository.java	
+@@ -1,5 +1,6 @@
+ package zw.co.afrosoft.repository;
+ 
++
+ import zw.co.afrosoft.model.User;
+ import org.springframework.data.jpa.repository.JpaRepository;
+ 
+@@ -11,4 +12,5 @@
+ 
+ 	boolean existsByUsername(String username);
+ 
++
+ }
+Index: .idea/dataSources.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/dataSources.xml b/.idea/dataSources.xml
+--- a/.idea/dataSources.xml	
++++ b/.idea/dataSources.xml	
+@@ -8,5 +8,12 @@
+       <jdbc-url>jdbc:mysql://localhost:3306/employee</jdbc-url>
+       <working-dir>$ProjectFileDir$</working-dir>
+     </data-source>
++    <data-source source="LOCAL" name="employee@54.156.63.145" uuid="c27e56b5-f057-42b5-95f2-47a585bfb625">
++      <driver-ref>mysql.8</driver-ref>
++      <synchronize>true</synchronize>
++      <jdbc-driver>com.mysql.cj.jdbc.Driver</jdbc-driver>
++      <jdbc-url>jdbc:mysql://54.156.63.145:3306/employee</jdbc-url>
++      <working-dir>$ProjectFileDir$</working-dir>
++    </data-source>
+   </component>
+ </project>
+\ No newline at end of file
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	
++++ b/.idea/workspace.xml	
+@@ -5,33 +5,72 @@
+   </component>
+   <component name="ChangeListManager">
+     <list default="true" id="6c46e9d2-4570-4e77-9cfe-aff4ff265af4" name="Changes" comment="">
+-      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/EmailRestController.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/EmailDetails.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/EmailService.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/EmailServiceImplementation.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/EmployeeRestController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/EmployeeRestController.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/Employee.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/Employee.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/Gender.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/Gender.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/mapper/UserMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/mapper/UserMapper.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/service/UserServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/service/UserServiceImpl.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/EmployeeRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/dto/EmployeeRequest.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/EmployeeService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/EmployeeService.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/SpringBootBoilerplateApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/HrSystem.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/EmployeeRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/EmployeeRepository.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/UserRepository.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/dto/LoginResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/dto/LoginResponse.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/jwt/JwtTokenManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/jwt/JwtTokenManager.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/jwt/JwtTokenService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/jwt/JwtTokenService.java" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/EmployeeServiceImplementation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/EmployeeServiceImplementation.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/UserValidationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/UserValidationService.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/controller/EmployeeRestController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/controller/EmployeeRestController.class" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/Employee$EmployeeBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/Employee$EmployeeBuilder.class" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/Employee.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/Employee.class" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/Gender.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/Gender.class" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/mapper/UserMapperImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/mapper/UserMapperImpl.class" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/service/UserServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/service/UserServiceImpl.class" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/EmployeeRequest$EmployeeRequestBuilder.class" beforeDir="false" />
+-      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/EmployeeRequest.class" beforeDir="false" />
+-      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/EmployeeServiceImplementation.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/EmployeeServiceImplementation.class" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/UserValidationService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/UserValidationService.class" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/target/generated-sources/annotations/zw/co/afrosoft/security/mapper/UserMapperImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/target/generated-sources/annotations/zw/co/afrosoft/security/mapper/UserMapperImpl.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveRequest.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveServiceImplementation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveServiceImplementation.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.yml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/META-INF/spring-configuration-metadata.json" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/SpringBootBoilerplateApplication.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/configuration/MessageConfiguration.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/configuration/SecurityConfiguration.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/configuration/SwaggerConfiguration.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/controller/EmployeeRestController.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/controller/LoginController.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/controller/RegistrationController.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/exceptions/ApiExceptionResponse.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/exceptions/LoginControllerAdvice.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/exceptions/RegistrationControllerAdvice.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/exceptions/RegistrationException.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/exceptions/ValidationAdvice.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/exceptions/ValidationErrorResponse.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/Employee$EmployeeBuilder.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/Employee.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/Gender.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/LeaveType.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/Status.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/User$UserBuilder.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/User.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/UserRole.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/repository/EmployeeRepository.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/repository/UserRepository.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/dto/AuthenticatedUserDto.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/dto/LoginRequest.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/dto/LoginResponse.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/dto/RegistrationRequest.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/dto/RegistrationResponse.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/jwt/JwtAuthenticationEntryPoint.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/jwt/JwtAuthenticationFilter.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/jwt/JwtProperties.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/jwt/JwtTokenManager.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/jwt/JwtTokenService.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/mapper/UserMapper.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/mapper/UserMapperImpl.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/service/UserDetailsServiceImpl.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/service/UserService.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/service/UserServiceImpl.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/utils/SecurityConstants.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/EmployeeService.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/EmployeeServiceImplementation.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/LeaveRequest$LeaveRequestBuilder.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/LeaveRequest.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/LeaveService.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/LeaveServiceImplementation.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/UserValidationService.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/utils/ExceptionMessageAccessor.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/utils/GeneralMessageAccessor.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/utils/ProjectConstants.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/generated-sources/annotations/varsi/dev/security/mapper/UserMapperImpl.java" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/generated-sources/annotations/zw/co/afrosoft/security/mapper/UserMapperImpl.java" beforeDir="false" />
+     </list>
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+@@ -42,8 +81,8 @@
+     <option name="RECENT_TEMPLATES">
+       <list>
+         <option value="Enum" />
+-        <option value="Interface" />
+         <option value="Class" />
++        <option value="Interface" />
+       </list>
+     </option>
+   </component>
+@@ -63,7 +102,7 @@
+     </favorite-branches>
+     <option name="RECENT_BRANCH_BY_REPOSITORY">
+       <map>
+-        <entry key="$PROJECT_DIR$" value="main" />
++        <entry key="$PROJECT_DIR$" value="approveLeave" />
+       </map>
+     </option>
+     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+@@ -89,44 +128,62 @@
+     <option name="hideEmptyMiddlePackages" value="true" />
+     <option name="showLibraryContents" value="true" />
+   </component>
+-  <component name="PropertiesComponent">{
+-  &quot;keyToString&quot;: {
+-    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+-    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+-    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+-    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+-    &quot;last_opened_file_path&quot;: &quot;C:/Users/princessm/Desktop/Mental Health/spring-boot-boilerplate&quot;,
+-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+-    &quot;settings.editor.selected.configurable&quot;: &quot;reference.projectsettings.compiler.annotationProcessors&quot;,
+-    &quot;spring.configuration.checksum&quot;: &quot;3eff7c1ae62db047315b484c8933e7ca&quot;
++  <component name="PropertiesComponent"><![CDATA[{
++  "keyToString": {
++    "RequestMappingsPanelOrder0": "0",
++    "RequestMappingsPanelOrder1": "1",
++    "RequestMappingsPanelWidth0": "75",
++    "RequestMappingsPanelWidth1": "75",
++    "RunOnceActivity.OpenProjectViewOnStart": "true",
++    "RunOnceActivity.ShowReadmeOnStart": "true",
++    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
++    "WebServerToolWindowFactoryState": "false",
++    "last_opened_file_path": "C:/Users/princessm/Desktop/Mental Health/spring-boot-boilerplate",
++    "node.js.detected.package.eslint": "true",
++    "node.js.detected.package.tslint": "true",
++    "node.js.selected.package.eslint": "(autodetect)",
++    "node.js.selected.package.tslint": "(autodetect)",
++    "nodejs_package_manager_path": "npm",
++    "project.structure.last.edited": "Modules",
++    "project.structure.proportion": "0.15",
++    "project.structure.side.proportion": "0.2",
++    "settings.editor.selected.configurable": "reference.projectsettings.compiler.annotationProcessors",
++    "spring.configuration.checksum": "3eff7c1ae62db047315b484c8933e7ca"
+   },
+-  &quot;keyToStringList&quot;: {
+-    &quot;DatabaseDriversLRU&quot;: [
+-      &quot;mysql&quot;
++  "keyToStringList": {
++    "DatabaseDriversLRU": [
++      "mysql"
+     ]
+   }
+-}</component>
++}]]></component>
+   <component name="RecentsManager">
+     <key name="CreateClassDialog.RecentsKey">
+       <recent name="zw.co.afrosoft.service" />
+     </key>
+   </component>
+-  <component name="RunManager">
++  <component name="RunManager" selected="Spring Boot.HrSystem">
++    <configuration name="HrSystem" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
++      <option name="ACTIVE_PROFILES" />
++      <option name="ALTERNATIVE_JRE_PATH" value="17" />
++      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
++      <module name="HrLeaveSystem" />
++      <option name="SPRING_BOOT_MAIN_CLASS" value="zw.co.afrosoft.HrSystem" />
++      <method v="2">
++        <option name="Make" enabled="true" />
++      </method>
++    </configuration>
+     <configuration name="SpringBootBoilerplateApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
++      <option name="ACTIVE_PROFILES" />
+       <module name="HrLeaveSystem" />
+-      <option name="SPRING_BOOT_MAIN_CLASS" value="zw.co.afrosoft.SpringBootBoilerplateApplication" />
++      <option name="SPRING_BOOT_MAIN_CLASS" value="zw.co.afrosoft.HrSystem" />
+       <method v="2">
+         <option name="Make" enabled="true" />
+       </method>
+     </configuration>
++    <list>
++      <item itemvalue="Spring Boot.HrSystem" />
++      <item itemvalue="Spring Boot.SpringBootBoilerplateApplication" />
++    </list>
+   </component>
+   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+   <component name="TaskManager">
+@@ -155,8 +212,8 @@
+       <workItem from="1676366761087" duration="57000" />
+       <workItem from="1676366847669" duration="385000" />
+       <workItem from="1676368625162" duration="18299000" />
+-      <workItem from="1676468273822" duration="4410000" />
+-      <workItem from="1676528879345" duration="12202000" />
++      <workItem from="1676468273822" duration="613000" />
++      <workItem from="1677046143939" duration="12167000" />
+     </task>
+     <task id="LOCAL-00001" summary="leave now working">
+       <created>1676293375930</created>
+@@ -172,14 +229,7 @@
+       <option name="project" value="LOCAL" />
+       <updated>1676365396703</updated>
+     </task>
+-    <task id="LOCAL-00003" summary="employeee can now login">
+-      <created>1676469375652</created>
+-      <option name="number" value="00003" />
+-      <option name="presentableId" value="LOCAL-00003" />
+-      <option name="project" value="LOCAL" />
+-      <updated>1676469375652</updated>
+-    </task>
+-    <option name="localTasksCounter" value="4" />
++    <option name="localTasksCounter" value="3" />
+     <servers />
+   </component>
+   <component name="TypeScriptGeneratedFilesManager">
+@@ -187,18 +237,11 @@
+   </component>
+   <component name="VcsManagerConfiguration">
+     <MESSAGE value="leave now working" />
+-    <MESSAGE value="employeee can now login" />
+-    <option name="LAST_COMMIT_MESSAGE" value="employeee can now login" />
++    <option name="LAST_COMMIT_MESSAGE" value="leave now working" />
+   </component>
+   <component name="XDebuggerManager">
+     <breakpoint-manager>
+       <breakpoints>
+-        <line-breakpoint type="java-line">
+-          <url>file://$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveServiceImplementation.java</url>
+-          <line>51</line>
+-          <option name="temporary" value="true" />
+-          <option name="timeStamp" value="1" />
+-        </line-breakpoint>
+         <line-breakpoint enabled="true" type="java-line">
+           <url>file://$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/EmailRestController.java</url>
+           <line>24</line>
+@@ -247,7 +290,7 @@
+         <line-breakpoint enabled="true" type="java-method">
+           <url>file://$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/LeaveController.java</url>
+           <line>18</line>
+-          <properties class="zw.co.afrosoft.controller.LeaveController" method="applyLeave">
++          <properties class="zw.co.afrosoft.controller.LeaveController">
+             <option name="EMULATED" value="true" />
+             <option name="WATCH_EXIT" value="false" />
+           </properties>
+Index: src/main/java/zw/co/afrosoft/SpringBootBoilerplateApplication.java
+===================================================================
+diff --git a/src/main/java/zw/co/afrosoft/SpringBootBoilerplateApplication.java b/src/main/java/zw/co/afrosoft/HrSystem.java
+rename from src/main/java/zw/co/afrosoft/SpringBootBoilerplateApplication.java
+rename to src/main/java/zw/co/afrosoft/HrSystem.java
+--- a/src/main/java/zw/co/afrosoft/SpringBootBoilerplateApplication.java	
++++ b/src/main/java/zw/co/afrosoft/HrSystem.java	
+@@ -3,7 +3,6 @@
+ import org.springframework.boot.SpringApplication;
+ import org.springframework.boot.autoconfigure.SpringBootApplication;
+ import org.springframework.context.annotation.Bean;
+-import org.springframework.context.annotation.ComponentScan;
+ import org.springframework.context.annotation.EnableAspectJAutoProxy;
+ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+@@ -15,11 +14,11 @@
+ @EnableJpaRepositories
+ @EnableAspectJAutoProxy
+ 
+-public class SpringBootBoilerplateApplication {
++public class HrSystem {
+ 
+ 	public static void main(String[] args) {
+ 
+-		SpringApplication.run(SpringBootBoilerplateApplication.class, args);
++		SpringApplication.run(HrSystem.class, args);
+ 	}
+ 
+ 	@Bean
+Index: .idea/dataSources.local.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/dataSources.local.xml b/.idea/dataSources.local.xml
+--- a/.idea/dataSources.local.xml	
++++ b/.idea/dataSources.local.xml	
+@@ -15,5 +15,19 @@
+         </introspection-scope>
+       </schema-mapping>
+     </data-source>
++    <data-source name="employee@54.156.63.145" uuid="c27e56b5-f057-42b5-95f2-47a585bfb625">
++      <database-info product="MySQL" version="5.5.5-10.6.11-MariaDB-0ubuntu0.22.04.1" jdbc-version="4.2" driver-name="MySQL Connector/J" driver-version="mysql-connector-java-8.0.25 (Revision: 08be9e9b4cba6aa115f9b27b215887af40b159e0)" dbms="MARIADB" exact-version="10.6.11" exact-driver-version="8.0">
++        <extra-name-characters>#@</extra-name-characters>
++        <identifier-quote-string>`</identifier-quote-string>
++      </database-info>
++      <case-sensitivity plain-identifiers="exact" quoted-identifiers="exact" />
++      <secret-storage>master_key</secret-storage>
++      <user-name>tafadzwa</user-name>
++      <schema-mapping>
++        <introspection-scope>
++          <node kind="schema" qname="@" />
++        </introspection-scope>
++      </schema-mapping>
++    </data-source>
+   </component>
+ </project>
+\ No newline at end of file
