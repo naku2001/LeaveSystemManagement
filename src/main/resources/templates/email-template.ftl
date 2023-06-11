@@ -69,7 +69,7 @@
         }
 
         .background {
-            background-color: #333333;
+            /*background-color: #333333;*/
         }
 
         table.background {
@@ -231,7 +231,7 @@
                                             <tr>
                                                 <td valign="top" style="padding-bottom:20px; background-color:#ffffff;">
 
-                                                    <b> Dear ${ user }</b>
+                                                    <b> DEAR ${ user }</b>
                                                 </td>
                                             </tr>
                                             <tr>
@@ -242,7 +242,7 @@
                                             <tr>
                                                 <td valign="top"
                                                     style=" text-align: center; padding-bottom:20px; background-color:#ffffff;">
-                                                    <a style=" background-color: #9000FF;
+                                                    <a style=" background-color: #29235a;
   border: none;
 
   color: white;

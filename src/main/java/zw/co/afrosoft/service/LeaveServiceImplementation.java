@@ -72,26 +72,20 @@ public class LeaveServiceImplementation implements LeaveService{
         leave.setStatus(status);
         try {
             SimpleMailMessage mailMessage = new SimpleMailMessage();
-            String sender = "perfect.makuwerere@students.uz.zw";
+            String sender = "perfect.makuwerere@students.uz.ac.zw";
             SimpleMailMessage mail = new SimpleMailMessage();
-
-            String user1 = employee.get().getFirstName().toUpperCase() + " " + employee
-                    .get().getLastName().toUpperCase();
-
-
-
-
-            String textEmail = "Dear "+ " "+ employee.get().getFirstName().toUpperCase() + " " + employee.get()
-                    .getLastName().toUpperCase()+"\n\n Your Leave Management System account " +
-                    "has been created"
-                    + "\n Use the details below to login into the system"
-
-                    +"\n\n Click the link below to the login page"
-                    +"\n ";
+            String emailContent =
+                     "This is to inform you that  " + employee.get().getFirstName() +
+                    "  " + employee.get().getLastName() + " has applied for " + leave.getLeaveType() + " from "
+                    + leave.getFromDate() + " to " + leave.getToDate()+
+                    ". Please take the necessary actions and approve/reject the leave request.<br><br>"
+                    + "Thank You.<br>"
+                    + "Best Regards, <br><br>"
+                    + employee.get().getLastName().toUpperCase();
             Map model = new HashMap();
-            model.put("user", user1);
-            model.put("link", "wattie");
-            model.put("message", textEmail);
+            model.put("user", "Manager");
+            model.put("link", "http://localhost:4200//leave/getPendingLeaves");
+            model.put("message",emailContent);
             model.put("year", "2023");
             MimeMessage message = javaMailSender.createMimeMessage();
 
@@ -99,41 +93,25 @@ public class LeaveServiceImplementation implements LeaveService{
                     MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
                     StandardCharsets.UTF_8.name());
             mail.setFrom(sender);
-            mail.setTo(employee.get().getEmail());
+            mail.setTo("perfect.makuwerere@students.uz.ac.zw");
             mail.setSentDate(new Date());
-            mail.setSubject("AFROTECH LEAVE BOARD SYSTEM LOGIN DETAILS");
+            mail.setSubject("LEAVE APPLICATION");
             Template t = freemarkerConfig.getTemplate("email-template.ftl");
-//            if (notification.getUserAccount().getUserType().equals(UserType.MEMBER.name())) {
-//                t = freemarkerConfig.getTemplate("response-email-template.ftl");
-//                model.remove("message");
-//                model.put("message", notification.getContent().concat(" ").concat(notification.getMessageLink()));
-//            }
             String html = FreeMarkerTemplateUtils.processTemplateIntoString(t, model);
-            helper.setTo(employee.get().getEmail());
+            helper.setTo("perfect.makuwerere@students.uz.ac.zw");
             helper.setText(html, true);
             helper.setSubject(mail.getSubject());
             helper.setFrom(mail.getFrom());
 
             javaMailSender.send(message);
-//            notification.setIsEmail(true);
-//            notification.setStatus(Status.COMPLETED);
-//            notificationRepository.save(notification);
+
         } catch (MailException e) {
-            //catch error
-//            log.error("Error while sending out email..{}", e.getMessage());
 
         } catch (Exception e) {
-            //catch error
-
-//            log.error("Error while sending out email..{}", e.getMessage());
-//            log.error("stack trace..{}", e.getStackTrace());
-//            log.error("throwable..{}", e.getCause());
-//            log.error("Erro localised..{}", e.getLocalizedMessage());
-//            log.error("exceptionl..{}", e);
 
         }
-
         return ResponseEntity.ok().body(leaveRepository.save(leave));
+
     }
 
     @Override
@@ -159,6 +137,45 @@ public class LeaveServiceImplementation implements LeaveService{
         leave1.setDuration(leave1.getDuration());
         leave1.setEmployee(leave1.getEmployee());
         leave1.setStatus(Status.APPROVED);
+        try {
+            SimpleMailMessage mailMessage = new SimpleMailMessage();
+            String sender = "perfect.makuwerere@students.uz.ac.zw";
+            SimpleMailMessage mail = new SimpleMailMessage();
+            String emailContent = "Congratulations! Your leave request for " + leave1.getLeaveType() + " from " + leave1.getFromDate() + " to " + leave1.getToDate() + " has been approved.<br><br>"
+                    + "Please make sure to plan your work accordingly and inform your team members about your absence.<br><br>"
+                    + "If you have any questions or need further assistance, feel free to reach out to your manager or the HR department.<br><br>"
+                    + "Best regards,<br>"
+                    + "Afrosoft Holdings";
+            Map model = new HashMap();
+            model.put("user", leave1.getEmployee().getFirstName() + " " +  leave1.getEmployee().getFirstName());
+            model.put("link", "http://localhost:4200/");
+            model.put("message",emailContent);
+            model.put("year", "2023");
+            MimeMessage message = javaMailSender.createMimeMessage();
+
+            MimeMessageHelper helper = new MimeMessageHelper(message,
+                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                    StandardCharsets.UTF_8.name());
+            mail.setFrom(sender);
+            mail.setTo(leave1.getEmployee().getEmail());
+            mail.setSentDate(new Date());
+            mail.setSubject("LEAVE APPLICATION");
+            Template t = freemarkerConfig.getTemplate("email-template.ftl");
+            String html = FreeMarkerTemplateUtils.processTemplateIntoString(t, model);
+            helper.setTo(leave1.getEmployee().getEmail());
+            helper.setText(html, true);
+            helper.setSubject(mail.getSubject());
+            helper.setFrom(mail.getFrom());
+
+            javaMailSender.send(message);
+
+        } catch (MailException e) {
+
+        } catch (Exception e) {
+
+        }
+
+
 
         return ResponseEntity.ok().body(leaveRepository.save(leave1));
     }
@@ -204,6 +221,43 @@ public class LeaveServiceImplementation implements LeaveService{
         leave1.setDuration(leave1.getDuration());
         leave1.setEmployee(leave1.getEmployee());
         leave1.setStatus(Status.REJECTED);
+        try {
+            SimpleMailMessage mailMessage = new SimpleMailMessage();
+            String sender = "perfect.makuwerere@students.uz.ac.zw";
+            SimpleMailMessage mail = new SimpleMailMessage();
+            String emailContent =  " Your leave request for " + leave1.getLeaveType() + " from " + leave1.getFromDate() + " to " + leave1.getToDate() + " has been rejected.<br><br>"
+
+                    + "If you have any questions or need further assistance, feel free to reach out to your manager or the HR department.<br><br>"
+                    + "Best regards,<br>"
+                    + "Afrosoft Holdings";
+            Map model = new HashMap();
+            model.put("user", leave1.getEmployee().getFirstName() + " " +  leave1.getEmployee().getFirstName());
+            model.put("link", "http://localhost:4200/");
+            model.put("message",emailContent);
+            model.put("year", "2023");
+            MimeMessage message = javaMailSender.createMimeMessage();
+
+            MimeMessageHelper helper = new MimeMessageHelper(message,
+                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                    StandardCharsets.UTF_8.name());
+            mail.setFrom(sender);
+            mail.setTo(leave1.getEmployee().getEmail());
+            mail.setSentDate(new Date());
+            mail.setSubject("LEAVE APPLICATION");
+            Template t = freemarkerConfig.getTemplate("email-template.ftl");
+            String html = FreeMarkerTemplateUtils.processTemplateIntoString(t, model);
+            helper.setTo(leave1.getEmployee().getEmail());
+            helper.setText(html, true);
+            helper.setSubject(mail.getSubject());
+            helper.setFrom(mail.getFrom());
+
+            javaMailSender.send(message);
+
+        } catch (MailException e) {
+
+        } catch (Exception e) {
+
+        }
 
         return ResponseEntity.ok().body(leaveRepository.save(leave1));
     }

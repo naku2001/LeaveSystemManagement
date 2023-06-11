@@ -76,33 +76,28 @@ public class EmployeeServiceImplementation implements EmployeeService {
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         user.setEmployee(employeeSaved);
         userRepository.save(user);
-
-
-
-
         try {
             SimpleMailMessage mailMessage = new SimpleMailMessage();
-                String sender = "perfect.makuwerere@students.uz.zw";
+                String sender = "perfect.makuwerere@students.uz.ac.zw";
             SimpleMailMessage mail = new SimpleMailMessage();
-
-           String user1 = employees.getFirstName().toUpperCase() + " " + employees
+            String user1 = employees.getFirstName().toUpperCase() + " " + employees
                    .getLastName().toUpperCase();
-
-
-
-
-            String textEmail = "Dear "+ " "+ employees.getFirstName().toUpperCase() + " " + employees
-                        .getLastName().toUpperCase()+"\n\n Your Leave Management System account " +
-                        "has been created"
-                        + "\n Use the details below to login into the system"
-                        +"\n\n Password:" + " " +request.getPassword()
-                        + "\n\n Username:" + " " + request.getUsername()
-                        +"\n\n Click the link below to the login page"
-                        +"\n ";
+            String emailContent = new StringBuilder()
+                    .append("<br>")
+                    .append("Your AfroTech Leave Board System account has been created.<br>")
+                    .append("Use the details below to log in to the system:<br><br>")
+                    .append("Password: ")
+                    .append(request.getPassword())
+                    .append("<br>")
+                    .append("Username: ")
+                    .append(request.getUsername())
+                    .append("<br><br>")
+                    .append("Click the link below to access the login page:<br>")
+                    .toString();
             Map model = new HashMap();
             model.put("user", user1);
-            model.put("link", "wattie");
-            model.put("message", textEmail);
+            model.put("link", "http://localhost:4200/");
+            model.put("message",emailContent);
             model.put("year", "2023");
             MimeMessage message = javaMailSender.createMimeMessage();
 
@@ -114,11 +109,6 @@ public class EmployeeServiceImplementation implements EmployeeService {
             mail.setSentDate(new Date());
             mail.setSubject("AFROTECH LEAVE BOARD SYSTEM LOGIN DETAILS");
             Template t = freemarkerConfig.getTemplate("email-template.ftl");
-//            if (notification.getUserAccount().getUserType().equals(UserType.MEMBER.name())) {
-//                t = freemarkerConfig.getTemplate("response-email-template.ftl");
-//                model.remove("message");
-//                model.put("message", notification.getContent().concat(" ").concat(notification.getMessageLink()));
-//            }
             String html = FreeMarkerTemplateUtils.processTemplateIntoString(t, model);
             helper.setTo(employees.getEmail());
             helper.setText(html, true);
@@ -126,27 +116,17 @@ public class EmployeeServiceImplementation implements EmployeeService {
             helper.setFrom(mail.getFrom());
 
             javaMailSender.send(message);
-//            notification.setIsEmail(true);
-//            notification.setStatus(Status.COMPLETED);
-//            notificationRepository.save(notification);
+
         } catch (MailException e) {
-            //catch error
-//            log.error("Error while sending out email..{}", e.getMessage());
 
         } catch (Exception e) {
-            //catch error
-
-//            log.error("Error while sending out email..{}", e.getMessage());
-//            log.error("stack trace..{}", e.getStackTrace());
-//            log.error("throwable..{}", e.getCause());
-//            log.error("Erro localised..{}", e.getLocalizedMessage());
-//            log.error("exceptionl..{}", e);
 
         }
 
-
         return null;
     }
+
+
     @Override
     public Page<Employee> getAll(Pageable pageable) {
         return  employeeRepository.findAll(pageable);
