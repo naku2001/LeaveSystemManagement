@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import zw.co.afrosoft.model.Employee;
+import zw.co.afrosoft.model.HodRequest;
 import zw.co.afrosoft.model.Status;
 import zw.co.afrosoft.security.dto.EmployeeRequest;
 
@@ -26,6 +27,8 @@ public interface EmployeeService {
     List<Map<String, Object>> leave();
 
     Employee updateEmployee(Long id, EmployeeRequest request);
+
+    ResponseEntity assignEmployeeAsHod(Long id, HodRequest request);
 
     ResponseEntity getEmployee(Long id);
 

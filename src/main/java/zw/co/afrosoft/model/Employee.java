@@ -24,26 +24,18 @@ public class Employee {
     private Long id;
     private String firstName;
     private String lastName;
-
-
-
-
     public Long getId() {
         return id;
     }
-
     private Gender gender;
     private String dateOfBirth;
-
     private String email;
     private String password;
     private String username;
+    private Departments departments;
 
     private int availableSickLeave;
     private int availableVacationLeave;
-
-
-
     private int availableUnpaidLeave;
     public Employee() {
         this.availableSickLeave = 10;

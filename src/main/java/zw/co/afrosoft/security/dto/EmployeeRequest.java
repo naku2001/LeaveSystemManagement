@@ -1,6 +1,7 @@
 package zw.co.afrosoft.security.dto;
 
 import lombok.*;
+import zw.co.afrosoft.model.Departments;
 import zw.co.afrosoft.model.Gender;
 
 import javax.validation.constraints.Email;
@@ -34,19 +35,13 @@ public class EmployeeRequest {
     @NotEmpty(message = "{username_not_empty}")
     private String username;
 
+    private Departments department;
+
     public String getFirstName() {
         return firstName;
     }
 
-    @Override
-    public String toString() {
-        return "EmployeeRequest{" +
-                "firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", gender=" + gender +
-                ", dateOfBirth='" + dateOfBirth + '\'' +
-                '}';
-    }
+
 
     public void setFirstName(String firstName) {
         this.firstName = firstName;

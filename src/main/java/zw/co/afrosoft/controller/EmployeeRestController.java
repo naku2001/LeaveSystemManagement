@@ -6,10 +6,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import zw.co.afrosoft.model.Departments;
 import zw.co.afrosoft.model.Employee;
 //import zw.co.afrosoft.service.EmailService;
-import zw.co.afrosoft.model.LeaveType;
-import zw.co.afrosoft.model.Status;
+import zw.co.afrosoft.model.HodRequest;
 import zw.co.afrosoft.security.dto.EmployeeRequest;
 import zw.co.afrosoft.service.EmployeeService;
 
@@ -28,6 +28,15 @@ public class EmployeeRestController {
   public ResponseEntity createEmployee(@RequestBody EmployeeRequest   request){
 
        return employeeService.createEmployee(request);
+    }
+    @PostMapping("/createHod/{id}")
+    public ResponseEntity createHod(@PathVariable Long id,@RequestBody HodRequest request){
+       return employeeService.assignEmployeeAsHod(id,request);
+    }
+    @GetMapping("get_departments")
+    public Departments[] getDepartments(){
+
+        return Departments.values();
     }
   @PutMapping("/update/{id}")
   Employee updateUser(@PathVariable Long id,@RequestBody EmployeeRequest request){
@@ -71,6 +80,7 @@ public class EmployeeRestController {
         report= "Leave";
         return employeeService.generateReport(dataSource,report);
     }
+
 
 
 }

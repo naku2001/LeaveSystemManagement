@@ -6,6 +6,7 @@ import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
@@ -18,6 +19,7 @@ import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import zw.co.afrosoft.model.*;
 import zw.co.afrosoft.repository.EmployeeRepository;
+import zw.co.afrosoft.repository.HeadOfDepartmentRepository;
 import zw.co.afrosoft.repository.LeaveRepository;
 import zw.co.afrosoft.repository.UserRepository;
 import zw.co.afrosoft.security.dto.EmployeeRequest;
@@ -44,9 +46,11 @@ public class EmployeeServiceImplementation implements EmployeeService {
     private final LeaveRepository leaveRepository;
 
     private final Configuration freemarkerConfig;
+    private final HeadOfDepartmentRepository headOfDepartmentRepository;
 
     public EmployeeServiceImplementation(EmployeeRepository employeeRepository, BCryptPasswordEncoder bCryptPasswordEncoder, UserRepository userRepository, JavaMailSender javaMailSender, UserValidationService userValidationService,
-                                         LeaveRepository leaveRepository, Configuration freemarkerConfig) {
+                                         LeaveRepository leaveRepository, Configuration freemarkerConfig,
+                                         HeadOfDepartmentRepository headOfDepartmentRepository) {
         this.employeeRepository = employeeRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.userRepository = userRepository;
@@ -54,6 +58,7 @@ public class EmployeeServiceImplementation implements EmployeeService {
         this.userValidationService = userValidationService;
         this.leaveRepository = leaveRepository;
         this.freemarkerConfig = freemarkerConfig;
+        this.headOfDepartmentRepository = headOfDepartmentRepository;
     }
 
 
@@ -66,6 +71,7 @@ public class EmployeeServiceImplementation implements EmployeeService {
         employees.setGender(request.getGender());
         employees.setEmail(request.getEmail());
         employees.setDateOfBirth(request.getDateOfBirth());
+        employees.setDepartments(request.getDepartment());
         employees.setLastName(request.getLastName());
         employees.setFirstName(request.getFirstName());
         employees.setPassword(bCryptPasswordEncoder.encode(request.getPassword()));
@@ -229,6 +235,21 @@ public class EmployeeServiceImplementation implements EmployeeService {
 
         return null;
     }
+
+    @Override
+    public ResponseEntity assignEmployeeAsHod(Long id,HodRequest request) {
+        Optional<Employee> employee = employeeRepository.findById(id);
+        if(employee.isPresent()){
+            HeadOfDepartment headOfDepartment = new HeadOfDepartment();
+            headOfDepartment.setEmployee(employee.get());
+            headOfDepartment.setDepartments(request.getDepartments());
+            headOfDepartmentRepository.save(headOfDepartment);
+            return ResponseEntity.ok().body(headOfDepartment);
+
+        }
+        return  ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Employee Not Found");
+    }
+
     @Override
     public ResponseEntity getEmployee(Long id) {
 
