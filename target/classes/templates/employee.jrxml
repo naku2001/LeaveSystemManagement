@@ -16,7 +16,7 @@
         <property name="com.jaspersoft.studio.field.name" value="lastname"/>
         <property name="com.jaspersoft.studio.field.label" value="lastname"/>
     </field>
-    <field name="gender" class="zw.co.afrosoft.model.Gender">
+    <field name="gender" class="zw.co.afrosoft.model.employee.Gender">
         <property name="com.jaspersoft.studio.field.name" value="gender"/>
         <property name="com.jaspersoft.studio.field.label" value="gender"/>
     </field>
