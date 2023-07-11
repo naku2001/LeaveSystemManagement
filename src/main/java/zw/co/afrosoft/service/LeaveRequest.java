@@ -21,6 +21,8 @@ public class LeaveRequest {
     private String reason;
     private Long employeeId;
     private LeaveType leaveType;
+    private String file;
+
 
 
 

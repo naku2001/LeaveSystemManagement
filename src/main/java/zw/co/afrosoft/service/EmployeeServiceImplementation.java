@@ -18,10 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import zw.co.afrosoft.model.*;
-import zw.co.afrosoft.repository.EmployeeRepository;
-import zw.co.afrosoft.repository.HeadOfDepartmentRepository;
-import zw.co.afrosoft.repository.LeaveRepository;
-import zw.co.afrosoft.repository.UserRepository;
+import zw.co.afrosoft.repository.*;
 import zw.co.afrosoft.security.dto.EmployeeRequest;
 import zw.co.afrosoft.security.mapper.UserMapper;
 
@@ -47,10 +44,12 @@ public class EmployeeServiceImplementation implements EmployeeService {
 
     private final Configuration freemarkerConfig;
     private final HeadOfDepartmentRepository headOfDepartmentRepository;
+    private final DepartmentRepository departmentRepository;
 
     public EmployeeServiceImplementation(EmployeeRepository employeeRepository, BCryptPasswordEncoder bCryptPasswordEncoder, UserRepository userRepository, JavaMailSender javaMailSender, UserValidationService userValidationService,
                                          LeaveRepository leaveRepository, Configuration freemarkerConfig,
-                                         HeadOfDepartmentRepository headOfDepartmentRepository) {
+                                         HeadOfDepartmentRepository headOfDepartmentRepository,
+                                         DepartmentRepository departmentRepository) {
         this.employeeRepository = employeeRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.userRepository = userRepository;
@@ -59,6 +58,7 @@ public class EmployeeServiceImplementation implements EmployeeService {
         this.leaveRepository = leaveRepository;
         this.freemarkerConfig = freemarkerConfig;
         this.headOfDepartmentRepository = headOfDepartmentRepository;
+        this.departmentRepository = departmentRepository;
     }
 
 
@@ -66,12 +66,15 @@ public class EmployeeServiceImplementation implements EmployeeService {
     public ResponseEntity createEmployee( EmployeeRequest request) {
 
         userValidationService.validateUser(request);
+        Optional<Department> department = departmentRepository.findById(request.getDepartmentId());
+        if(!department.isPresent())
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body("DEPARTMENT NOT FOUND");
 
         Employee employees = new Employee();
         employees.setGender(request.getGender());
         employees.setEmail(request.getEmail());
         employees.setDateOfBirth(request.getDateOfBirth());
-        employees.setDepartments(request.getDepartment());
+        employees.setDepartment(department.get());
         employees.setLastName(request.getLastName());
         employees.setFirstName(request.getFirstName());
         employees.setPassword(bCryptPasswordEncoder.encode(request.getPassword()));
@@ -82,6 +85,7 @@ public class EmployeeServiceImplementation implements EmployeeService {
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         user.setEmployee(employeeSaved);
         userRepository.save(user);
+
         try {
             SimpleMailMessage mailMessage = new SimpleMailMessage();
                 String sender = "perfect.makuwerere@students.uz.ac.zw";
@@ -129,7 +133,7 @@ public class EmployeeServiceImplementation implements EmployeeService {
 
         }
 
-        return null;
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(employeeSaved);
     }
 
 
@@ -241,9 +245,9 @@ public class EmployeeServiceImplementation implements EmployeeService {
         Optional<Employee> employee = employeeRepository.findById(id);
         if(employee.isPresent()){
             HeadOfDepartment headOfDepartment = new HeadOfDepartment();
-            headOfDepartment.setEmployee(employee.get());
-            headOfDepartment.setDepartments(request.getDepartments());
-            headOfDepartmentRepository.save(headOfDepartment);
+//            headOfDepartment.setEmployee(employee.get());
+//            headOfDepartment.setDepartments(request.getDepartments());
+//            headOfDepartmentRepository.save(headOfDepartment);
             return ResponseEntity.ok().body(headOfDepartment);
 
         }
@@ -267,7 +271,7 @@ public class EmployeeServiceImplementation implements EmployeeService {
         Optional<User> user1 = userRepository.findUserByEmployeeId(id);
         if (user.isPresent() ){
 
-//            employeeRepository.delete(user.get());
+            employeeRepository.delete(user.get());
             userRepository.delete(user1.get());
             return ResponseEntity.ok().body(user);
         }

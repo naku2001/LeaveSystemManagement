@@ -2,7 +2,6 @@ package zw.co.afrosoft.service;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -13,62 +12,52 @@ import zw.co.afrosoft.model.Email;
 
 import javax.mail.internet.MimeMessage;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
 @Service
 public class EmailSend implements EmailService{
-    @Autowired
-    private JavaMailSender javaMailSender;
-    @Autowired
-    Configuration configuration;
+    private final JavaMailSender javaMailSender;
+    private final Configuration freemarkerConfig;
+
+    public EmailSend(JavaMailSender javaMailSender, Configuration freemarkerConfig) {
+        this.javaMailSender = javaMailSender;
+        this.freemarkerConfig = freemarkerConfig;
+    }
+
     @Override
-    public void sendEmail(Email mail) {
-        SimpleMailMessage mails = new SimpleMailMessage();
-
+    public void sendEmail(String emailContent,String receiver,String subject) {
         try {
-            String surname;
-            String setToEmail;
-//            if(notification.getUserAccount().getUserType().equals(UserType.ADMIN.name())){
-//                surname = notification.getUserAccount().getSurname();
-//                setToEmail = notification.getUserAccount().getContactDetails().getEmail();
-//            }else{
-//                surname = notification.getUserAccount().getMember().getSurname();
-            setToEmail = "perfect.makuwerere@students.uz.ac.zw";
-//            }
-
+            SimpleMailMessage mailMessage = new SimpleMailMessage();
+            String sender = "perfect.makuwerere@students.uz.ac.zw";
+            SimpleMailMessage mail = new SimpleMailMessage();
             Map model = new HashMap();
-            model.put("user", "customer");
-            model.put("link", "@perfect");
-            model.put("message", "hie");
-            model.put("year", String.valueOf(LocalDate.now().getYear()));
+            model.put("user", "Manager");
+            model.put("link", "http://localhost:4200//leave/getPendingLeaves");
+            model.put("message",emailContent);
+            model.put("year", "2023");
             MimeMessage message = javaMailSender.createMimeMessage();
+
             MimeMessageHelper helper = new MimeMessageHelper(message,
                     MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
                     StandardCharsets.UTF_8.name());
-            mail.setFrom("perfect.makuwerere@students.uz.ac.zw");
-
-            mail.setSubject("test");
-            Template t = configuration.getTemplate("templates/email-template.ftl");
-
-            t = configuration.getTemplate("src/main/resources/email-template.flth");
-            model.remove("message");
-            model.put("message","testing emails");
-
+            mail.setFrom(sender);
+            mail.setTo(receiver);
+            mail.setSentDate(new Date());
+            mail.setSubject(subject);
+            Template t = freemarkerConfig.getTemplate("email-template.ftl");
             String html = FreeMarkerTemplateUtils.processTemplateIntoString(t, model);
-            helper.setTo("perfect.makuwerere@students.uz.ac.zw");
+            helper.setTo(receiver);
             helper.setText(html, true);
-            helper.setSubject("Dev Test");
-            helper.setFrom("perfect.makuwerere@students.uz.ac.zw");
+            helper.setSubject(mail.getSubject());
+            helper.setFrom(mail.getFrom());
 
             javaMailSender.send(message);
 
         } catch (MailException e) {
 
-
         } catch (Exception e) {
-
-
 
         }
 

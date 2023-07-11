@@ -35,7 +35,7 @@ public class EmployeeRequest {
     @NotEmpty(message = "{username_not_empty}")
     private String username;
 
-    private Departments department;
+    private Long departmentId;
 
     public String getFirstName() {
         return firstName;

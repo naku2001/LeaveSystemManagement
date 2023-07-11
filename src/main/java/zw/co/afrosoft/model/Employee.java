@@ -1,12 +1,17 @@
 package zw.co.afrosoft.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
+import zw.co.afrosoft.repository.EmployeeRepository;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.Timer;
@@ -32,18 +37,41 @@ public class Employee {
     private String email;
     private String password;
     private String username;
-    private Departments departments;
+    @ManyToOne
+    @JoinColumn(name = "department_id")
+    @JsonBackReference
+    private Department department;
+    private int availableMaternityLeave;
+    public int getAvailableMaternityLeave() {
+        if(gender == Gender.Female){
+            return availableMaternityLeave;
+        }
+        return 0;
 
-    private int availableSickLeave;
-    private int availableVacationLeave;
-    private int availableUnpaidLeave;
+    }
+    private int availableAnnualLeave;
+
+
     public Employee() {
-        this.availableSickLeave = 10;
-        this.availableVacationLeave = 22;
-        this.availableUnpaidLeave = 365;
+        this.availableMaternityLeave = 90;
+        this.availableAnnualLeave = 30;
+
+    }
+//    private final EmployeeRepository employeeRepository;
+//    @Scheduled(cron = "0 0 0 31 12 ?")
+//    public void resetLeaveDaysAtEndOfYear() {
+//        int currentYear = LocalDate.now().getYear();
+//
+//        List<Employee> employees = employeeRepository.getAllEmployees();
+//
+//        for (Employee employee : employees) {
+//            employee.setAvailableAnnualLeave(availableAnnualLeave);
+//            employee.setAvailableMaternityLeave(availableMaternityLeave);
+//            employeeRepository.save(employee);
+//        }
     }
 
 
 
 
-}
+

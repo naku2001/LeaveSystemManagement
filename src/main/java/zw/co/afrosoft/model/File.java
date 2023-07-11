@@ -5,21 +5,23 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 import javax.persistence.*;
 
+@Entity
+@Table(name = "`file`")
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Table(name = "head_of_depaertment")
-public class HeadOfDepartment {
+@Builder
+public class File {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
-    @OneToOne
-    private Employee employee;
-    @OneToOne
-    private Department department;
+    private String location;
+    @Column
+    private String name;
+
+
 }

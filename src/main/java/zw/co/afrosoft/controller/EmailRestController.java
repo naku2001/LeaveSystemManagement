@@ -13,16 +13,16 @@ import zw.co.afrosoft.service.EmailSend;
 @RequestMapping("/employee")
 public class EmailRestController {
 
-    private final EmailSend emailService;
-
-    public EmailRestController(EmailSend emailService) {
-        this.emailService = emailService;
-    }
-
-    // Sending a simple Email
-    @PostMapping("/sendMail")
-    public void sendMail(@RequestBody Email email)
-    {
-    emailService.sendEmail(email);
-    }
+//    private final EmailSend emailService;
+//
+//    public EmailRestController(EmailSend emailService) {
+//        this.emailService = emailService;
+//    }
+//
+//    // Sending a simple Email
+//    @PostMapping("/sendMail")
+//    public void sendMail(@RequestBody Email email)
+//    {
+//    emailService.sendEmail(email);
+//    }
 }

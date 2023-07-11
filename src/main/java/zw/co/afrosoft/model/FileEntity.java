@@ -7,19 +7,24 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
+@Entity
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Table(name = "head_of_depaertment")
-public class HeadOfDepartment {
+@Table(name = "files")
+public class FileEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Long id;
-    @OneToOne
-    private Employee employee;
-    @OneToOne
-    private Department department;
+
+    @Column(name = "filename")
+    private String fileName;
+
+    private  String location;
+
+
+
+    // Constructors, getters, and setters
 }

@@ -3,6 +3,8 @@ package zw.co.afrosoft.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import zw.co.afrosoft.model.Departments;
+import zw.co.afrosoft.model.LeaveType;
 import zw.co.afrosoft.model.LeaveUpdate;
 import zw.co.afrosoft.model.Status;
 import zw.co.afrosoft.service.EmailNotificationService;
@@ -81,6 +83,7 @@ public class LeaveController {
     public  ResponseEntity totalApproved(){
         return leaveService.totalApproved();
     }
+
     @GetMapping("/numberOfLeaves")
     public  ResponseEntity totalLeaves(){
         return leaveService.totalLeaves();
@@ -97,6 +100,11 @@ public class LeaveController {
     public  ResponseEntity send(){
         emailNotificationService.sendEmail();
         return null;
+    }
+    @GetMapping("get_leave_types")
+    public LeaveType[] getLeaveTypes(){
+
+        return LeaveType.values();
     }
 
 

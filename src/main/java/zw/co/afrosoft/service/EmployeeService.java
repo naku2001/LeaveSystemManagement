@@ -21,7 +21,8 @@ import java.util.Map;
 public interface EmployeeService {
 
 
-    ResponseEntity generateReports(JRBeanCollectionDataSource dataSource, String report) throws IOException, JRException;
+    ResponseEntity generateReports(JRBeanCollectionDataSource dataSource,
+                                   String report) throws IOException, JRException;
 
     List<Map<String, Object>> employees();
     List<Map<String, Object>> leave();
