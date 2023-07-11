@@ -42,7 +42,7 @@ public class SecurityConfiguration  {
 				.antMatchers("/register", "/file/**","/department/**","/headOfDepartment/**","/employee/**","/reset/**", "/login","/v3/api-docs/**","/leave/**","/Reports/**", "/swagger-ui/**", "/swagger-ui.html", "/actuator/**").permitAll()
 
 				.anyRequest().authenticated().and()
-				.exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
+				.exceptionHandling().authenticationEntryPoint(unauthorizedHandler). and()
 				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 				.and().build();
 	}
