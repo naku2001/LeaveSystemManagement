@@ -1,10 +1,10 @@
 package zw.co.afrosoft.security.service;
 
 import org.springframework.http.ResponseEntity;
-import zw.co.afrosoft.model.User;
-import zw.co.afrosoft.model.UserRole;
-import zw.co.afrosoft.repository.EmployeeRepository;
-import zw.co.afrosoft.repository.UserRepository;
+import zw.co.afrosoft.model.user.User;
+import zw.co.afrosoft.model.user.UserRole;
+import zw.co.afrosoft.repository.employee.EmployeeRepository;
+import zw.co.afrosoft.repository.user.UserRepository;
 import zw.co.afrosoft.security.dto.AuthenticatedUserDto;
 import zw.co.afrosoft.security.dto.RegistrationRequest;
 import zw.co.afrosoft.security.dto.RegistrationResponse;

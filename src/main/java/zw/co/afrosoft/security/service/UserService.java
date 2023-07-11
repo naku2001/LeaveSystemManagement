@@ -1,7 +1,7 @@
 package zw.co.afrosoft.security.service;
 
 import org.springframework.http.ResponseEntity;
-import zw.co.afrosoft.model.User;
+import zw.co.afrosoft.model.user.User;
 import zw.co.afrosoft.security.dto.AuthenticatedUserDto;
 import zw.co.afrosoft.security.dto.RegistrationRequest;
 import zw.co.afrosoft.security.dto.RegistrationResponse;

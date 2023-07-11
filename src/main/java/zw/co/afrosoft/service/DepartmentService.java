@@ -1,10 +1,8 @@
 package zw.co.afrosoft.service;
 
 import org.springframework.http.ResponseEntity;
-import zw.co.afrosoft.model.Department;
-import zw.co.afrosoft.model.DepartmentRequest;
-import zw.co.afrosoft.model.Departments;
-import zw.co.afrosoft.security.dto.EmployeeRequest;
+import zw.co.afrosoft.model.department.Department;
+import zw.co.afrosoft.model.department.DepartmentRequest;
 
 public interface DepartmentService {
 

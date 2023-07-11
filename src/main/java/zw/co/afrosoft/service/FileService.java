@@ -5,7 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
-import zw.co.afrosoft.model.File;
+import zw.co.afrosoft.model.file.File;
 
 
 import java.io.UnsupportedEncodingException;

@@ -7,9 +7,9 @@
 //import org.springframework.stereotype.Service;
 //import org.springframework.web.multipart.MultipartFile;
 //
-//import zw.co.afrosoft.model.File;
+//import zw.co.afrosoft.model.file.File;
 //import zw.co.afrosoft.model.SystemConstants;
-//import zw.co.afrosoft.repository.FileRepository;
+//import zw.co.afrosoft.repository.file.FileRepository;
 //
 //import java.io.BufferedOutputStream;
 //import java.io.FileOutputStream;

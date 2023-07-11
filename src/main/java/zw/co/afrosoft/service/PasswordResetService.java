@@ -9,14 +9,13 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import zw.co.afrosoft.model.EmailRequest;
-import zw.co.afrosoft.model.PassWordResetCode;
-import zw.co.afrosoft.model.PasswordResetRequest;
-import zw.co.afrosoft.model.User;
-import zw.co.afrosoft.repository.PasswordResetRepository;
-import zw.co.afrosoft.repository.UserRepository;
+import zw.co.afrosoft.model.passwordReset.PassWordResetCode;
+import zw.co.afrosoft.model.passwordReset.PasswordResetRequest;
+import zw.co.afrosoft.model.user.User;
+import zw.co.afrosoft.repository.passwordReset.PasswordResetRepository;
+import zw.co.afrosoft.repository.user.UserRepository;
 
 import java.time.LocalTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 

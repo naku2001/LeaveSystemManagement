@@ -1,19 +1,6 @@
 package zw.co.afrosoft.service;
 
-import net.sf.jasperreports.engine.*;
-import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
-import org.springframework.http.ResponseEntity;
-import zw.co.afrosoft.model.Employee;
-import zw.co.afrosoft.repository.EmployeeRepository;
-
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import zw.co.afrosoft.repository.employee.EmployeeRepository;
 
 public class EmployeeReportServiceImpl implements  EmployeeReportService{
 

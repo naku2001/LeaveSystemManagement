@@ -3,10 +3,10 @@ package zw.co.afrosoft.service;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import zw.co.afrosoft.model.Department;
-import zw.co.afrosoft.model.DepartmentRequest;
-import zw.co.afrosoft.model.Employee;
-import zw.co.afrosoft.repository.DepartmentRepository;
+import zw.co.afrosoft.model.department.Department;
+import zw.co.afrosoft.model.department.DepartmentRequest;
+import zw.co.afrosoft.model.employee.Employee;
+import zw.co.afrosoft.repository.department.DepartmentRepository;
 
 import java.util.List;
 import java.util.Optional;

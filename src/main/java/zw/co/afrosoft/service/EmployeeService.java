@@ -6,13 +6,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import zw.co.afrosoft.model.Employee;
-import zw.co.afrosoft.model.HodRequest;
-import zw.co.afrosoft.model.Status;
+import zw.co.afrosoft.model.employee.Employee;
+import zw.co.afrosoft.model.headOfDepartment.HodRequest;
 import zw.co.afrosoft.security.dto.EmployeeRequest;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 

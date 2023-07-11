@@ -4,16 +4,13 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import zw.co.afrosoft.model.Employee;
-import zw.co.afrosoft.model.User;
-import zw.co.afrosoft.model.UserRole;
+import zw.co.afrosoft.model.employee.Employee;
+import zw.co.afrosoft.model.user.User;
+import zw.co.afrosoft.model.user.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 
 
 @Component

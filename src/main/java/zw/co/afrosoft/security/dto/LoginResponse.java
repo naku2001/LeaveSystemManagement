@@ -3,7 +3,7 @@ package zw.co.afrosoft.security.dto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import zw.co.afrosoft.model.User;
+import zw.co.afrosoft.model.user.User;
 
 @Getter
 @Setter

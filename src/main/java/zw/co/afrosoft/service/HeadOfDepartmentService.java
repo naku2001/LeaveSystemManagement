@@ -2,8 +2,8 @@ package zw.co.afrosoft.service;
 
 import org.springframework.http.ResponseEntity;
 
-import zw.co.afrosoft.model.HeadOfDepartment;
-import zw.co.afrosoft.model.HeadOfDepartmentRequest;
+import zw.co.afrosoft.model.headOfDepartment.HeadOfDepartment;
+import zw.co.afrosoft.model.headOfDepartment.HeadOfDepartmentRequest;
 
 public interface HeadOfDepartmentService {
 

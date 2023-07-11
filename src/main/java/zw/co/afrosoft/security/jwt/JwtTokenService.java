@@ -1,6 +1,6 @@
 package zw.co.afrosoft.security.jwt;
 
-import zw.co.afrosoft.model.User;
+import zw.co.afrosoft.model.user.User;
 import zw.co.afrosoft.security.dto.AuthenticatedUserDto;
 import zw.co.afrosoft.security.dto.LoginRequest;
 import zw.co.afrosoft.security.dto.LoginResponse;

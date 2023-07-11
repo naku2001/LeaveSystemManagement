@@ -1,7 +1,7 @@
 package zw.co.afrosoft.service;
 
-import zw.co.afrosoft.exceptions.RegistrationException;
-import zw.co.afrosoft.repository.UserRepository;
+import zw.co.afrosoft.exceptions.registration.RegistrationException;
+import zw.co.afrosoft.repository.user.UserRepository;
 import zw.co.afrosoft.security.dto.EmployeeRequest;
 import zw.co.afrosoft.security.dto.RegistrationRequest;
 import zw.co.afrosoft.utils.ExceptionMessageAccessor;

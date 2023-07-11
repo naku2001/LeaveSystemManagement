@@ -6,7 +6,6 @@ import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
@@ -18,7 +17,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import zw.co.afrosoft.model.*;
-import zw.co.afrosoft.repository.*;
+import zw.co.afrosoft.model.department.Department;
+import zw.co.afrosoft.model.employee.Employee;
+import zw.co.afrosoft.model.headOfDepartment.HeadOfDepartment;
+import zw.co.afrosoft.model.headOfDepartment.HodRequest;
+import zw.co.afrosoft.model.leave.Leave;
+import zw.co.afrosoft.model.user.User;
+import zw.co.afrosoft.model.user.UserRole;
+import zw.co.afrosoft.repository.department.DepartmentRepository;
+import zw.co.afrosoft.repository.employee.EmployeeRepository;
+import zw.co.afrosoft.repository.headOfDepartment.HeadOfDepartmentRepository;
+import zw.co.afrosoft.repository.leave.LeaveRepository;
+import zw.co.afrosoft.repository.user.UserRepository;
 import zw.co.afrosoft.security.dto.EmployeeRequest;
 import zw.co.afrosoft.security.mapper.UserMapper;
 
@@ -159,9 +169,8 @@ public class EmployeeServiceImplementation implements EmployeeService {
     @Override
     public ResponseEntity totalEmployee() {
         List<Employee> employees = employeeRepository.findAll();
-        DashboardTotal dashboardTotal = DashboardTotal.builder()
-                .total(employees.size()).build();
-        return ResponseEntity.ok().body(dashboardTotal);
+        Long count = employees.stream().count();
+        return ResponseEntity.ok().body(count);
     }
         @Override
     public ResponseEntity generateReports(JRBeanCollectionDataSource dataSource, String report) throws IOException, JRException {
@@ -241,7 +250,7 @@ public class EmployeeServiceImplementation implements EmployeeService {
     }
 
     @Override
-    public ResponseEntity assignEmployeeAsHod(Long id,HodRequest request) {
+    public ResponseEntity assignEmployeeAsHod(Long id, HodRequest request) {
         Optional<Employee> employee = employeeRepository.findById(id);
         if(employee.isPresent()){
             HeadOfDepartment headOfDepartment = new HeadOfDepartment();

@@ -1,21 +1,20 @@
 package zw.co.afrosoft.service;
-
 import freemarker.template.Configuration;
-import freemarker.template.Template;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.MailException;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
+import zw.co.afrosoft.exceptions.leave.LeaveException;
 import zw.co.afrosoft.model.*;
-import zw.co.afrosoft.repository.EmployeeRepository;
-import zw.co.afrosoft.repository.LeaveRepository;
-
-import javax.mail.internet.MimeMessage;
-import java.nio.charset.StandardCharsets;
+import zw.co.afrosoft.model.calendar.CalendarInfo;
+import zw.co.afrosoft.model.employee.Employee;
+import zw.co.afrosoft.model.leave.Leave;
+import zw.co.afrosoft.model.leave.LeaveType;
+import zw.co.afrosoft.model.leave.LeaveUpdate;
+import zw.co.afrosoft.model.leave.Status;
+import zw.co.afrosoft.repository.employee.EmployeeRepository;
+import zw.co.afrosoft.repository.leave.LeaveRepository;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.Period;
@@ -23,22 +22,14 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-
+@RequiredArgsConstructor
 public class LeaveServiceImplementation implements LeaveService{
     private final EmployeeRepository employeeRepository;
     private final LeaveRepository leaveRepository;
     private final JavaMailSender javaMailSender;
     private final Configuration freemarkerConfig;
-
     private  final EmailService emailService;
 
-    public LeaveServiceImplementation(EmployeeRepository employeeRepository, LeaveRepository leaveRepository, JavaMailSender javaMailSender, Configuration freemarkerConfig, EmailService emailService) {
-        this.employeeRepository = employeeRepository;
-        this.leaveRepository = leaveRepository;
-        this.javaMailSender = javaMailSender;
-        this.freemarkerConfig = freemarkerConfig;
-        this.emailService = emailService;
-    }
 
     @Override
     public ResponseEntity applyLeave(LeaveRequest request) {
@@ -99,18 +90,17 @@ public class LeaveServiceImplementation implements LeaveService{
     @Override
     public ResponseEntity approveLeave(Long id) {
         Optional<Leave> leave = leaveRepository.findById(id);
-        Leave leave1 = leave.get();
-
-        leave1.setReason(leave1.getReason());
-        leave1.setLeaveType(leave1.getLeaveType());
-        leave1.setToDate(leave1.getToDate());
-        leave1.setFromDate(leave1.getFromDate());
-        leave1.setDuration(leave1.getDuration());
-        leave1.setEmployee(leave1.getEmployee());
-        leave1.setStatus(Status.APPROVED);
+        Leave leaveApprove = leave.get();
+        leaveApprove.setReason(leaveApprove.getReason());
+        leaveApprove.setLeaveType(leaveApprove.getLeaveType());
+        leaveApprove.setToDate(leaveApprove.getToDate());
+        leaveApprove.setFromDate(leaveApprove.getFromDate());
+        leaveApprove.setDuration(leaveApprove.getDuration());
+        leaveApprove.setEmployee(leaveApprove.getEmployee());
+        leaveApprove.setStatus(Status.APPROVED);
         String emailContent = "Congratulations! Your leave request for "
-                    + leave1.getLeaveType() + " from " + leave1.getFromDate() + " to "
-                    + leave1.getToDate() + " has been approved.<br><br>"
+                    + leaveApprove.getLeaveType() + " from " + leaveApprove.getFromDate() + " to "
+                    + leaveApprove.getToDate() + " has been approved.<br><br>"
                     + "Please make sure to plan your work accordingly and inform your " +
                     "team members about your absence.<br><br>"
                     + "If you have any questions or need further assistance, feel free to " +
@@ -118,67 +108,62 @@ public class LeaveServiceImplementation implements LeaveService{
                     + "Best regards,<br>"
                     + "Afrosoft Holdings";
           emailService.sendEmail(emailContent,"j","ju");
-
-        return ResponseEntity.ok().body(leaveRepository.save(leave1));
+          return ResponseEntity.ok().body(leaveRepository.save(leaveApprove));
     }
 
     @Override
     public ResponseEntity getAll() {
-        List<Leave> leaveList = leaveRepository.findAll();
-        List<Leave> filteredLeave = leaveList.stream()
-                .filter(leave ->leave.getStatus().
-                        equals(Status.PENDING)).collect(Collectors.toList());
-        return ResponseEntity.ok().body(filteredLeave) ;
+        List<Leave> leaveList = leaveRepository.findAll().stream().
+                filter(leave ->leave.getStatus().
+                equals(Status.PENDING)).collect(Collectors.toList());
+        return ResponseEntity.ok().body(leaveList) ;
     }
-
     @Override
     public ResponseEntity getAllApproved() {
-        List<Leave> leaveList = leaveRepository.findAll();
-        List<Leave> filteredLeave = leaveList.stream()
-                .filter(leave ->leave.getStatus().
-                        equals(Status.APPROVED)).collect(Collectors.toList());
-        return ResponseEntity.ok().body(filteredLeave) ;
+        List<Leave> leaveList = leaveRepository.findAll().stream().
+                filter(leave ->leave.getStatus().
+                        equals(Status.APPROVED)).
+                collect(Collectors.toList());
+        return ResponseEntity.ok().body(leaveList) ;
 
     }
     @Override
     public ResponseEntity getAllRejected() {
-        List<Leave> leaveList = leaveRepository.findAll();
-        List<Leave> filteredLeave = leaveList.stream()
+        List<Leave> leaveList = leaveRepository.findAll().stream()
                 .filter(leave ->leave.getStatus().
-                        equals(Status.REJECTED)).collect(Collectors.toList());
-        return ResponseEntity.ok().body(filteredLeave) ;
+                        equals(Status.REJECTED)).collect(Collectors.toList());;
+        return ResponseEntity.ok().body(leaveList);
 
     }
 
 
     @Override
     public ResponseEntity rejectLeave(Long id) {
-
         Optional<Leave> leave = leaveRepository.findById(id);
-        Leave leave1 = leave.get();
-        leave1.setReason(leave1.getReason());
-        leave1.setLeaveType(leave1.getLeaveType());
-        leave1.setToDate(leave1.getToDate());
-        leave1.setFromDate(leave1.getFromDate());
-        leave1.setDuration(leave1.getDuration());
-        leave1.setEmployee(leave1.getEmployee());
-        leave1.setStatus(Status.REJECTED);
-        String emailContent =  " Your leave request for " + leave1.getLeaveType()
-                + " from " + leave1.getFromDate() + " to " + leave1.getToDate() +
-                " has been rejected.<br><br>" + "If you have any questions or need further assistance, " +
+        Leave leaveReject = leave.get();
+        leaveReject.setReason(leaveReject.getReason());
+        leaveReject.setLeaveType(leaveReject.getLeaveType());
+        leaveReject.setToDate(leaveReject.getToDate());
+        leaveReject.setFromDate(leaveReject.getFromDate());
+        leaveReject.setDuration(leaveReject.getDuration());
+        leaveReject.setEmployee(leaveReject.getEmployee());
+        leaveReject.setStatus(Status.REJECTED);
+        String emailContent =  " Your leave request for " + leaveReject.getLeaveType()
+                + " from " + leaveReject.getFromDate() + " to " + leaveReject.getToDate() +
+                " has been rejected.<br><br>" + "If you have any questions or need" +
+                " further assistance, " +
                 "feel free to reach out to " +
                 "your manager or the HR department.<br><br>"
                     + "Best regards,<br>"
                     + "Afrosoft Holdings";
             Map model = new HashMap();
-            model.put("user", leave1.getEmployee().getFirstName() + " " +
-                    leave1.getEmployee().getFirstName());
+            model.put("user", leaveReject.getEmployee().getFirstName() + " " +
+                    leaveReject.getEmployee().getFirstName());
             model.put("link", "http://localhost:4200/");
             model.put("message",emailContent);
             model.put("year", "2023");
-
-        emailService.sendEmail(emailContent,"pee","leave");
-        return ResponseEntity.ok().body(leaveRepository.save(leave1));
+            emailService.sendEmail(emailContent,"pee","leave");
+        return ResponseEntity.ok().body(leaveRepository.save(leaveReject));
     }
 
     @Override
@@ -190,61 +175,50 @@ public class LeaveServiceImplementation implements LeaveService{
     @Override
     public ResponseEntity totalRejected() {
         List<Leave> leaveList = leaveRepository.findAllByStatus(Status.REJECTED);
-        DashboardTotal dashboardTotal = DashboardTotal.builder()
-                .total(leaveList.size()).build();
-        return  ResponseEntity.ok().body(dashboardTotal);
+        Long count = leaveList.stream().count();
+        return  ResponseEntity.ok().body(count);
     }
 
     @Override
     public ResponseEntity totalPending() {
         List<Leave> leaveList = leaveRepository.findAllByStatus(Status.PENDING);
-        DashboardTotal dashboardTotal = DashboardTotal.builder()
-                .total(leaveList.size()).build();
-        return  ResponseEntity.ok().body(dashboardTotal);
+        Long count = leaveList.stream().count();
+        return  ResponseEntity.ok().body(count);
     }
 
     @Override
     public ResponseEntity totalApproved() {
         List<Leave> leaveList = leaveRepository.findAllByStatus(Status.APPROVED);
-        DashboardTotal dashboardTotal = DashboardTotal.builder()
-                .total(leaveList.size()).build();
-        return  ResponseEntity.ok().body(dashboardTotal);
+        Long count =  leaveList.stream().count();
+        return  ResponseEntity.ok().body(count);
     }
     @Override
     public ResponseEntity leaveByStatus(Status status) {
         List<Leave> leaveList = leaveRepository.findAllByStatus(status);
-
         return  ResponseEntity.ok().body(leaveList);
     }
-
     @Override
     public ResponseEntity totalLeaves() {
         List<Leave> leaveList = leaveRepository.findAll();
-        DashboardTotal dashboardTotal = DashboardTotal.builder()
-                .total(leaveList.size()).build();
-
-        return ResponseEntity.ok().body(dashboardTotal);
+        Long  count = leaveList.stream().count();
+       return ResponseEntity.ok().body(count);
     }
-
     @Override
     public ResponseEntity calenda() {
-
         List<Leave> leaveList = leaveRepository.findAllByStatus(Status.APPROVED);
-        List<CalendarInfo> calendarInfos =new ArrayList<>();
-        for(Leave leave : leaveList){
-            CalendarInfo calendarInfo = new CalendarInfo();
-
-            calendarInfo.setStart(leave.getFromDate().toString());
-            calendarInfo.setEnd(leave.getToDate().toString());
-            calendarInfo.setLeaveType(leave.getLeaveType().toString());
-            calendarInfo.setTitle(leave.getEmployee().getFirstName()+ " " +
-                    leave.getEmployee().getLastName());
-            calendarInfos.add(calendarInfo);
-        }
-
+        List<CalendarInfo> calendarInfos = leaveList.stream()
+                .map(leave -> {
+                    CalendarInfo calendarInfo = new CalendarInfo();
+                    calendarInfo.setStart(leave.getFromDate().toString());
+                    calendarInfo.setEnd(leave.getToDate().toString());
+                    calendarInfo.setLeaveType(leave.getLeaveType().toString());
+                    calendarInfo.setTitle(leave.getEmployee().getFirstName() + " " +
+                            leave.getEmployee().getLastName());
+                    return calendarInfo;
+                })
+                .collect(Collectors.toList());
         return ResponseEntity.ok().body(calendarInfos);
     }
-
     @Override
     public ResponseEntity myleaves(Long id) {
         List<Leave> leaveList = leaveRepository.findAllByEmployeeId(id);
@@ -281,7 +255,7 @@ public class LeaveServiceImplementation implements LeaveService{
     }
 
     @Override
-    public ResponseEntity updateLeave(Long leaveId, Long employeeId,LeaveUpdate leaveRequestUpdate){
+    public ResponseEntity updateLeave(Long leaveId, Long employeeId, LeaveUpdate leaveRequestUpdate){
         Optional<Employee> employee = employeeRepository.findById(employeeId);
         Optional<Leave> leave = leaveRepository.findById(leaveId);
         if(employee.isPresent()){
@@ -301,8 +275,7 @@ public class LeaveServiceImplementation implements LeaveService{
                 }
             }
         }
-
-        return ResponseEntity.ok().body("Employee or Leave not found");
+        throw new LeaveException("Employee not found");
     }
 
 

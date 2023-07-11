@@ -1,7 +1,7 @@
 package zw.co.afrosoft.security.dto;
 
-import zw.co.afrosoft.model.Employee;
-import zw.co.afrosoft.model.UserRole;
+import zw.co.afrosoft.model.employee.Employee;
+import zw.co.afrosoft.model.user.UserRole;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

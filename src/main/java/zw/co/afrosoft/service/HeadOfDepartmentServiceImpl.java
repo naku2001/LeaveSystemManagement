@@ -3,10 +3,15 @@ package zw.co.afrosoft.service;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import zw.co.afrosoft.model.*;
-import zw.co.afrosoft.repository.DepartmentRepository;
-import zw.co.afrosoft.repository.EmployeeRepository;
-import zw.co.afrosoft.repository.HeadOfDepartmentRepository;
+import zw.co.afrosoft.exceptions.headOfDepartment.HeadOfDepartmentException;
+import zw.co.afrosoft.model.department.Department;
+import zw.co.afrosoft.model.employee.Employee;
+import zw.co.afrosoft.model.headOfDepartment.HeadOfDepartment;
+import zw.co.afrosoft.model.headOfDepartment.HeadOfDepartmentRequest;
+import zw.co.afrosoft.model.headOfDepartment.HeadOfDepartmentResponse;
+import zw.co.afrosoft.repository.department.DepartmentRepository;
+import zw.co.afrosoft.repository.employee.EmployeeRepository;
+import zw.co.afrosoft.repository.headOfDepartment.HeadOfDepartmentRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +44,9 @@ public class HeadOfDepartmentServiceImpl implements HeadOfDepartmentService {
                 return  ResponseEntity.ok().body(headOfDepartment1);
             }
         }
-        return null;
+        final String fail = " Employee or department not found";
+        throw new HeadOfDepartmentException(fail);
+
     }
 
     @Override
@@ -81,9 +88,9 @@ public class HeadOfDepartmentServiceImpl implements HeadOfDepartmentService {
     @Override
     public ResponseEntity delete(Long id) {
         Optional<HeadOfDepartment> headOfDepartment = headOfDepartmentRepository.findById(id);
+        final String fail = "Head of department not found";
         if(!headOfDepartment.isPresent())
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("head of department not found");
-
+            throw new HeadOfDepartmentException(fail);
         headOfDepartmentRepository.delete(headOfDepartment.get());
         return ResponseEntity.ok().body(headOfDepartment);
     }

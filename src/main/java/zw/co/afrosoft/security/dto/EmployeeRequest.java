@@ -1,8 +1,7 @@
 package zw.co.afrosoft.security.dto;
 
 import lombok.*;
-import zw.co.afrosoft.model.Departments;
-import zw.co.afrosoft.model.Gender;
+import zw.co.afrosoft.model.employee.Gender;
 
 import javax.validation.constraints.Email;
 

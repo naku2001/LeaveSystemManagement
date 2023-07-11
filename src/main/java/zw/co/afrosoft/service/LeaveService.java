@@ -1,8 +1,8 @@
 package zw.co.afrosoft.service;
 
 import org.springframework.http.ResponseEntity;
-import zw.co.afrosoft.model.LeaveUpdate;
-import zw.co.afrosoft.model.Status;
+import zw.co.afrosoft.model.leave.LeaveUpdate;
+import zw.co.afrosoft.model.leave.Status;
 
 public interface LeaveService {
 
