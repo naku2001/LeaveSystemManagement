@@ -1,13 +1,14 @@
 package zw.co.afrosoft.security.mapper;
 
 import javax.annotation.processing.Generated;
-import zw.co.afrosoft.model.User;
+import zw.co.afrosoft.model.user.User;
 import zw.co.afrosoft.security.dto.AuthenticatedUserDto;
+import zw.co.afrosoft.security.dto.EmployeeRequest;
 import zw.co.afrosoft.security.dto.RegistrationRequest;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2023-02-07T09:35:08+0200",
+    date = "2023-07-11T16:50:44+0200",
     comments = "version: 1.5.2.Final, compiler: javac, environment: Java 17.0.5 (Amazon.com Inc.)"
 )
 public class UserMapperImpl implements UserMapper {
@@ -20,8 +21,7 @@ public class UserMapperImpl implements UserMapper {
 
         User.UserBuilder user = User.builder();
 
-        user.companyName( registrationRequest.getCompanyName() );
-        user.name( registrationRequest.getName() );
+        user.firstName( registrationRequest.getFirstName() );
         user.lastName( registrationRequest.getLastName() );
         user.username( registrationRequest.getUsername() );
         user.password( registrationRequest.getPassword() );
@@ -38,7 +38,11 @@ public class UserMapperImpl implements UserMapper {
 
         AuthenticatedUserDto authenticatedUserDto = new AuthenticatedUserDto();
 
-        authenticatedUserDto.setName( user.getName() );
+        authenticatedUserDto.setFirstName( user.getFirstName() );
+        authenticatedUserDto.setLastName( user.getLastName() );
+        authenticatedUserDto.setEmployee( user.getEmployee() );
+        authenticatedUserDto.setEmail( user.getEmail() );
+        authenticatedUserDto.setId( user.getId() );
         authenticatedUserDto.setUsername( user.getUsername() );
         authenticatedUserDto.setPassword( user.getPassword() );
         authenticatedUserDto.setUserRole( user.getUserRole() );
@@ -54,10 +58,31 @@ public class UserMapperImpl implements UserMapper {
 
         User.UserBuilder user = User.builder();
 
-        user.name( authenticatedUserDto.getName() );
+        user.id( authenticatedUserDto.getId() );
+        user.firstName( authenticatedUserDto.getFirstName() );
+        user.lastName( authenticatedUserDto.getLastName() );
         user.username( authenticatedUserDto.getUsername() );
         user.password( authenticatedUserDto.getPassword() );
+        user.email( authenticatedUserDto.getEmail() );
+        user.employee( authenticatedUserDto.getEmployee() );
         user.userRole( authenticatedUserDto.getUserRole() );
+
+        return user.build();
+    }
+
+    @Override
+    public User convertToUser(EmployeeRequest request) {
+        if ( request == null ) {
+            return null;
+        }
+
+        User.UserBuilder user = User.builder();
+
+        user.firstName( request.getFirstName() );
+        user.lastName( request.getLastName() );
+        user.username( request.getUsername() );
+        user.password( request.getPassword() );
+        user.email( request.getEmail() );
 
         return user.build();
     }

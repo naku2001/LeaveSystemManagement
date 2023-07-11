@@ -1,5 +1,8 @@
 package zw.co.afrosoft.configuration;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import zw.co.afrosoft.security.jwt.JwtAuthenticationEntryPoint;
 import zw.co.afrosoft.security.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +21,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @RequiredArgsConstructor
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-public class SecurityConfiguration {
+public class SecurityConfiguration  {
 
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
@@ -29,14 +32,17 @@ public class SecurityConfiguration {
 		return authenticationConfiguration.getAuthenticationManager();
 	}
 
+
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		return http.cors().and().csrf().disable()
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 				.authorizeRequests()
-				.antMatchers("/register","/employee/**", "/login","/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/actuator/**").permitAll()
+
+				.antMatchers("/register", "/file/**","/department/**","/headOfDepartment/**","/employee/**","/reset/**", "/login","/v3/api-docs/**","/leave/**","/Reports/**", "/swagger-ui/**", "/swagger-ui.html", "/actuator/**").permitAll()
+
 				.anyRequest().authenticated().and()
-				.exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
+				.exceptionHandling().authenticationEntryPoint(unauthorizedHandler). and()
 				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 				.and().build();
 	}

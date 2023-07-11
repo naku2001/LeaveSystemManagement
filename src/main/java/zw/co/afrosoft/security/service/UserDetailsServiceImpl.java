@@ -1,6 +1,6 @@
 package zw.co.afrosoft.security.service;
 
-import zw.co.afrosoft.model.UserRole;
+import zw.co.afrosoft.model.user.UserRole;
 import zw.co.afrosoft.security.dto.AuthenticatedUserDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

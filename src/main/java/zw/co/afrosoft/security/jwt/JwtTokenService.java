@@ -1,6 +1,6 @@
 package zw.co.afrosoft.security.jwt;
 
-import zw.co.afrosoft.model.User;
+import zw.co.afrosoft.model.user.User;
 import zw.co.afrosoft.security.dto.AuthenticatedUserDto;
 import zw.co.afrosoft.security.dto.LoginRequest;
 import zw.co.afrosoft.security.dto.LoginResponse;
@@ -40,7 +40,7 @@ public class JwtTokenService {
 
 		log.info("{} has successfully logged in!", user.getUsername());
 
-		return new LoginResponse(token);
+		return new LoginResponse(token,user);
 	}
 
 }

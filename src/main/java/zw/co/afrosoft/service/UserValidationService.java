@@ -1,7 +1,8 @@
 package zw.co.afrosoft.service;
 
-import zw.co.afrosoft.exceptions.RegistrationException;
-import zw.co.afrosoft.repository.UserRepository;
+import zw.co.afrosoft.exceptions.registration.RegistrationException;
+import zw.co.afrosoft.repository.user.UserRepository;
+import zw.co.afrosoft.security.dto.EmployeeRequest;
 import zw.co.afrosoft.security.dto.RegistrationRequest;
 import zw.co.afrosoft.utils.ExceptionMessageAccessor;
 import lombok.RequiredArgsConstructor;
@@ -13,9 +14,9 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserValidationService {
 
-	private static final String EMAIL_ALREADY_EXISTS = "email_already_exists";
+	private static final String EMAIL_ALREADY_EXISTS = "Email Already Exists";
 
-	private static final String USERNAME_ALREADY_EXISTS = "username_already_exists";
+	private static final String USERNAME_ALREADY_EXISTS = "username Already Exists";
 
 	private final UserRepository userRepository;
 
@@ -38,7 +39,7 @@ public class UserValidationService {
 
 			log.warn("{} is already being used!", username);
 
-			final String existsUsername = exceptionMessageAccessor.getMessage(null, USERNAME_ALREADY_EXISTS);
+			final String existsUsername = USERNAME_ALREADY_EXISTS;
 			throw new RegistrationException(existsUsername);
 		}
 
@@ -52,9 +53,16 @@ public class UserValidationService {
 
 			log.warn("{} is already being used!", email);
 
-			final String existsEmail = exceptionMessageAccessor.getMessage(null, EMAIL_ALREADY_EXISTS);
+			final String existsEmail =  EMAIL_ALREADY_EXISTS;
 			throw new RegistrationException(existsEmail);
 		}
 	}
 
+	public void validateUser(EmployeeRequest request) {
+		final String email = request.getEmail();
+		final String username = request.getUsername();
+
+		checkEmail(email);
+		checkUsername(username);
+	}
 }

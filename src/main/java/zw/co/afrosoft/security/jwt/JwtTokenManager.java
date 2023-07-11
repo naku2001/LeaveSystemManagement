@@ -4,8 +4,9 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import zw.co.afrosoft.model.User;
-import zw.co.afrosoft.model.UserRole;
+import zw.co.afrosoft.model.employee.Employee;
+import zw.co.afrosoft.model.user.User;
+import zw.co.afrosoft.model.user.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -22,12 +23,22 @@ public class JwtTokenManager {
 
 		final String username = user.getUsername();
 		final UserRole userRole = user.getUserRole();
+		final Long user1 = user.getId();
+
+
+		final Employee employee = user.getEmployee();
+
+
+
+
 
 		//@formatter:off
 		return JWT.create()
 				.withSubject(username)
 				.withIssuer(jwtProperties.getIssuer())
 				.withClaim("role", userRole.name())
+				.withClaim("userId",user1)
+//				.withClaim("authorities",)
 				.withIssuedAt(new Date())
 				.withExpiresAt(new Date(System.currentTimeMillis() + jwtProperties.getExpirationMinute() * 60 * 1000))
 				.sign(Algorithm.HMAC256(jwtProperties.getSecretKey().getBytes()));
@@ -66,7 +77,8 @@ public class JwtTokenManager {
 
 	private DecodedJWT getDecodedJWT(String token) {
 
-		final JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(jwtProperties.getSecretKey().getBytes())).build();
+		final JWTVerifier jwtVerifier = JWT.require
+				(Algorithm.HMAC256(jwtProperties.getSecretKey().getBytes())).build();
 
 		return jwtVerifier.verify(token);
 	}

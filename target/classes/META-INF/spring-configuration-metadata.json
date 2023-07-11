@@ -15,8 +15,7 @@
     {
       "name": "jwt.expiration-minute",
       "type": "java.lang.Long",
-      "sourceType": "zw.co.afrosoft.security.jwt.JwtProperties",
-      "defaultValue": 0
+      "sourceType": "zw.co.afrosoft.security.jwt.JwtProperties"
     },
     {
       "name": "jwt.issuer",

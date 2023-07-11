@@ -27,9 +27,9 @@
     </developers>
 
     <properties>
-        <java.version>11</java.version>
+        <java.version>17</java.version>
         <jwt.version>4.0.0</jwt.version>
-        <lombok.version>1.18.12</lombok.version>
+        <lombok.version>1.18.24</lombok.version>
         <mapstruct.version>1.5.2.Final</mapstruct.version>
         <apache-commons.version>3.12.0</apache-commons.version>
         <openapi-swagger.version>1.6.11</openapi-swagger.version>
@@ -42,8 +42,19 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.24</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
 
         <dependency>
@@ -87,6 +98,26 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jdbc</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.google.api-client</groupId>
+            <artifactId>google-api-client</artifactId>
+
+        </dependency>
+
+        <!-- Google OAuth 2.0 client -->
+        <dependency>
+            <groupId>com.google.oauth-client</groupId>
+            <artifactId>google-oauth-client</artifactId>
+
+        </dependency>
+
+
+
+        <!-- Google OAuth 2.0 client (for Spring Boot) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-client</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.mapstruct</groupId>
@@ -116,6 +147,15 @@
             <artifactId>springdoc-openapi-ui</artifactId>
             <version>${openapi-swagger.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-freemarker</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.jasperreports</groupId>
+            <artifactId>jasperreports</artifactId>
+            <version>6.18.1</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -127,6 +167,10 @@
                     <artifactId>junit-vintage-engine</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
     </dependencies>

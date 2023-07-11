@@ -1,8 +1,10 @@
 package zw.co.afrosoft.security.service;
 
-import zw.co.afrosoft.model.User;
-import zw.co.afrosoft.model.UserRole;
-import zw.co.afrosoft.repository.UserRepository;
+import org.springframework.http.ResponseEntity;
+import zw.co.afrosoft.model.user.User;
+import zw.co.afrosoft.model.user.UserRole;
+import zw.co.afrosoft.repository.employee.EmployeeRepository;
+import zw.co.afrosoft.repository.user.UserRepository;
 import zw.co.afrosoft.security.dto.AuthenticatedUserDto;
 import zw.co.afrosoft.security.dto.RegistrationRequest;
 import zw.co.afrosoft.security.dto.RegistrationResponse;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+	private final EmployeeRepository employeeRepository;
 
 	private static final String REGISTRATION_SUCCESSFUL = "registration_successful";
 
@@ -38,13 +41,17 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public RegistrationResponse registration(RegistrationRequest registrationRequest) {
 
-		userValidationService.validateUser(registrationRequest);
+        userValidationService.validateUser(registrationRequest);
+
 
 		final User user = UserMapper.INSTANCE.convertToUser(registrationRequest);
 		user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-		user.setUserRole(UserRole.USER);
+		user.setUserRole(UserRole.ADMIN);
+
+
 
 		userRepository.save(user);
+
 
 		final String username = registrationRequest.getUsername();
 
@@ -61,5 +68,10 @@ public class UserServiceImpl implements UserService {
 		final User user = findByUsername(username);
 
 		return UserMapper.INSTANCE.convertToAuthenticatedUserDto(user);
+	}
+
+	@Override
+	public ResponseEntity findAll() {
+		return ResponseEntity.ok().body(userRepository.findAll());
 	}
 }
