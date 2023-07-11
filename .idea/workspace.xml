@@ -4,69 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6c46e9d2-4570-4e77-9cfe-aff4ff265af4" name="Changes" comment="PATHVARIABLE">
-      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/DepartmentController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/FileController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/FileService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/Department.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/DepartmentRequest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/File.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/FileEntity.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/FileUploadController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/HeadOfDepartmentRequest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/HeadOfDepartmentResponse.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/SystemConstants.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/DepartmentRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/FileRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/DepartmentService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/DepartmentServiceImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/FileRequest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/FileService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/FileServiceImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/HeadOfDepartmentService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/HeadOfDepartmentServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/SpringBootBoilerplateApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/SpringBootBoilerplateApplication.java" afterDir="false" />
+    <list default="true" id="6c46e9d2-4570-4e77-9cfe-aff4ff265af4" name="Changes" comment="added DepartmentService">
       <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/configuration/SecurityConfiguration.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/configuration/SecurityConfiguration.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/EmailRestController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/EmailRestController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/EmployeeRestController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/EmployeeRestController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/HeadOfDepartmentController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/HeadOfDepartmentController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/LeaveController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/LeaveController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/Email.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/Email.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/Employee.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/Employee.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/HeadOfDepartment.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/HeadOfDepartment.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/Leave.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/Leave.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/LeaveType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/LeaveType.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/dto/EmployeeRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/dto/EmployeeRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/EmailSend.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/EmailSend.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/EmailService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/EmailService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/EmployeeService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/EmployeeService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/EmployeeServiceImplementation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/EmployeeServiceImplementation.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveServiceImplementation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveServiceImplementation.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/application.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/SpringBootBoilerplateApplication.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/SpringBootBoilerplateApplication.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/configuration/SecurityConfiguration.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/configuration/SecurityConfiguration.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/controller/EmailRestController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/controller/EmailRestController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/controller/EmployeeRestController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/controller/EmployeeRestController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/controller/LeaveController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/controller/LeaveController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/Email.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/Email.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/Employee$EmployeeBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/Employee$EmployeeBuilder.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/Employee.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/Employee.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/Leave$LeaveBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/Leave$LeaveBuilder.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/Leave.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/Leave.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/LeaveType.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/LeaveType.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/dto/EmployeeRequest$EmployeeRequestBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/dto/EmployeeRequest$EmployeeRequestBuilder.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/dto/EmployeeRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/dto/EmployeeRequest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/EmailService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/EmailService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/EmployeeServiceImplementation.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/EmployeeServiceImplementation.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/LeaveRequest$LeaveRequestBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/LeaveRequest$LeaveRequestBuilder.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/LeaveRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/LeaveRequest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/LeaveServiceImplementation.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/LeaveServiceImplementation.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/generated-sources/annotations/zw/co/afrosoft/security/mapper/UserMapperImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/target/generated-sources/annotations/zw/co/afrosoft/security/mapper/UserMapperImpl.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -263,7 +202,7 @@
       <workItem from="1688453281022" duration="28734000" />
       <workItem from="1688634109773" duration="2786000" />
       <workItem from="1688712282718" duration="7573000" />
-      <workItem from="1689078110968" duration="621000" />
+      <workItem from="1689078110968" duration="1039000" />
     </task>
     <task id="LOCAL-00001" summary="leave now working">
       <created>1676293375930</created>
@@ -384,7 +323,14 @@
       <option name="project" value="LOCAL" />
       <updated>1687524189946</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="added DepartmentService">
+      <created>1689079512104</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1689079512104</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -408,7 +354,8 @@
     <MESSAGE value="java version t0 1.8" />
     <MESSAGE value="returning user details when logged in" />
     <MESSAGE value="PATHVARIABLE" />
-    <option name="LAST_COMMIT_MESSAGE" value="PATHVARIABLE" />
+    <MESSAGE value="added DepartmentService" />
+    <option name="LAST_COMMIT_MESSAGE" value="added DepartmentService" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
