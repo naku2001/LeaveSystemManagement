@@ -3,9 +3,9 @@ package zw.co.afrosoft.controller.passwordReset;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import zw.co.afrosoft.model.EmailRequest;
+import zw.co.afrosoft.model.email.EmailRequest;
 import zw.co.afrosoft.model.passwordReset.PasswordResetRequest;
-import zw.co.afrosoft.service.PasswordResetService;
+import zw.co.afrosoft.service.passwordReset.PasswordResetService;
 
 @CrossOrigin
 @RestController
