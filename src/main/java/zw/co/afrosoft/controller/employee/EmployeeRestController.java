@@ -8,10 +8,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import zw.co.afrosoft.model.department.Departments;
 import zw.co.afrosoft.model.employee.Employee;
-//import zw.co.afrosoft.service.EmailService;
+//import zw.co.afrosoft.service.email.EmailService;
 import zw.co.afrosoft.model.headOfDepartment.HodRequest;
 import zw.co.afrosoft.security.dto.EmployeeRequest;
-import zw.co.afrosoft.service.EmployeeService;
+import zw.co.afrosoft.service.employee.EmployeeService;
 
 import javax.servlet.http.HttpServletResponse;
 

@@ -1,5 +1,6 @@
 package zw.co.afrosoft.security.mapper;
 
+import zw.co.afrosoft.model.employee.Employee;
 import zw.co.afrosoft.model.user.User;
 import zw.co.afrosoft.security.dto.AuthenticatedUserDto;
 import zw.co.afrosoft.security.dto.RegistrationRequest;
@@ -14,6 +15,8 @@ public interface UserMapper {
 	UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
 	User convertToUser(RegistrationRequest registrationRequest);
+
+
 
 	AuthenticatedUserDto convertToAuthenticatedUserDto(User user);
 

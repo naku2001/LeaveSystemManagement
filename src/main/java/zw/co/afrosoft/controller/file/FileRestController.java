@@ -1,5 +1,6 @@
 package zw.co.afrosoft.controller.file;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -9,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import zw.co.afrosoft.controller.FileService;
 import zw.co.afrosoft.model.file.File;
-import zw.co.afrosoft.model.SystemConstants;
+import zw.co.afrosoft.model.system.SystemConstants;
 import zw.co.afrosoft.repository.file.FileRepository;
 
 import java.io.BufferedOutputStream;
@@ -22,27 +23,30 @@ import java.util.Objects;
 @RequestMapping("/file")
 @RequiredArgsConstructor
 public class FileRestController {
-
     private final FileService fileService;
     private final FileRepository fileRepository;
 
-
-    public String generateRandomString(int length) {
-
-        String chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijk"
-                + "lmnopqrstuvwxyz";
-        SecureRandom rnd = new SecureRandom();
-        StringBuilder sb = new StringBuilder(length);
-        for (int i = 0; i < length; i++)
-            sb.append(chars.charAt(rnd.nextInt(chars.length())));
-        return sb.toString();
-
+    @GetMapping("getById{id}")
+    @Operation(summary = "Find file")
+    private ResponseEntity findFile(@PathVariable Long id){
+        return fileService.findFile(id);
     }
 
+    @Operation(summary = "Delete file")
+    @DeleteMapping("delete{id}")
+    private ResponseEntity deleteFile(@PathVariable Long id){
+        return fileService.deleteFile(id);
+    }
+
+    @Operation(summary = "Get file")
+    @GetMapping("/get")
+    private ResponseEntity getAll(){
+        return fileService.findFiles();
+    }
 
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ApiResponse(responseCode = "200", description = "File uploaded successfully")
-
+    @Operation(summary = "Upload file")
     public ResponseEntity uploadFile(@RequestParam("file") MultipartFile file) {
         String uploadRootPath = new java.io.File(SystemConstants.pictureFolderUrl).getAbsolutePath();
         java.io.File uploadRootDir = new java.io.File(uploadRootPath);
@@ -58,7 +62,8 @@ public class FileRestController {
                         .replace("-", "");
                 String filename = generateRandomString(10).concat(nm);
                 String tempUrl = SystemConstants.pictureFolderUrl.concat(filename);
-                java.io.File serverFile = new java.io.File(uploadRootDir.getPath() + java.io.File.separator + filename);
+                java.io.File serverFile = new java.io.File(uploadRootDir.getPath() +
+                        java.io.File.separator + filename);
                 BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(serverFile));
                 stream.write(file.getBytes());
                 stream.close();
@@ -75,20 +80,16 @@ public class FileRestController {
         return ResponseEntity.ok().body(savedFile);
 
     }
+    public String generateRandomString(int length) {
 
-    @GetMapping("getById{id}")
-    private ResponseEntity findFile(@PathVariable Long id){
-        return fileService.findFile(id);
-    }
+        String chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijk"
+                + "lmnopqrstuvwxyz";
+        SecureRandom rnd = new SecureRandom();
+        StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++)
+            sb.append(chars.charAt(rnd.nextInt(chars.length())));
+        return sb.toString();
 
-    @DeleteMapping("delete{id}")
-    private ResponseEntity deleteFile(@PathVariable Long id){
-        return fileService.deleteFile(id);
-    }
-
-    @GetMapping("/get")
-    private ResponseEntity getAll(){
-        return fileService.findFiles();
     }
 
 }

@@ -3,8 +3,7 @@ package zw.co.afrosoft.controller.HeadOfDepartment;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import zw.co.afrosoft.security.dto.EmployeeRequest;
-import zw.co.afrosoft.service.HeadOfDepartmentService;
+import zw.co.afrosoft.service.headOfDepartment.HeadOfDepartmentService;
 
 @CrossOrigin
 @RestController
