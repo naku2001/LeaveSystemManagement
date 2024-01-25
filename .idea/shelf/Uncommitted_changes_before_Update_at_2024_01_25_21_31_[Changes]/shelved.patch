@@ -1,0 +1,825 @@
+Index: src/main/java/zw/co/afrosoft/service/EmployeeServiceImplementation.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package zw.co.afrosoft.service;\r\n\r\nimport freemarker.template.Template;\r\nimport net.sf.jasperreports.engine.*;\r\nimport net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;\r\nimport org.springframework.data.domain.Page;\r\nimport org.springframework.data.domain.PageRequest;\r\nimport org.springframework.data.domain.Pageable;\r\nimport org.springframework.http.HttpStatus;\r\nimport org.springframework.http.ResponseEntity;\r\nimport org.springframework.mail.MailException;\r\nimport org.springframework.mail.SimpleMailMessage;\r\nimport org.springframework.mail.javamail.JavaMailSender;\r\nimport org.springframework.mail.javamail.MimeMessageHelper;\r\nimport org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;\r\nimport org.springframework.stereotype.Service;\r\nimport org.springframework.ui.freemarker.FreeMarkerTemplateUtils;\r\nimport org.springframework.web.bind.annotation.RequestBody;\r\nimport zw.co.afrosoft.model.*;\r\nimport zw.co.afrosoft.model.department.Department;\r\nimport zw.co.afrosoft.model.employee.Employee;\r\nimport zw.co.afrosoft.model.headOfDepartment.HeadOfDepartment;\r\nimport zw.co.afrosoft.model.headOfDepartment.HodRequest;\r\nimport zw.co.afrosoft.model.leave.Leave;\r\nimport zw.co.afrosoft.model.user.User;\r\nimport zw.co.afrosoft.model.user.UserRole;\r\nimport zw.co.afrosoft.repository.department.DepartmentRepository;\r\nimport zw.co.afrosoft.repository.employee.EmployeeRepository;\r\nimport zw.co.afrosoft.repository.headOfDepartment.HeadOfDepartmentRepository;\r\nimport zw.co.afrosoft.repository.leave.LeaveRepository;\r\nimport zw.co.afrosoft.repository.user.UserRepository;\r\nimport zw.co.afrosoft.security.dto.EmployeeRequest;\r\nimport zw.co.afrosoft.security.mapper.UserMapper;\r\n\r\nimport freemarker.template.Configuration;\r\n\r\n\r\nimport javax.mail.internet.MimeMessage;\r\nimport java.io.IOException;\r\nimport java.io.InputStream;\r\nimport java.nio.charset.StandardCharsets;\r\nimport java.util.*;\r\n\r\n\r\n\r\n@Service\r\npublic class EmployeeServiceImplementation implements EmployeeService {\r\n    private final EmployeeRepository employeeRepository;\r\n    private final BCryptPasswordEncoder bCryptPasswordEncoder;\r\n    private final UserRepository userRepository;\r\n    private final JavaMailSender javaMailSender;\r\n    private final UserValidationService userValidationService;\r\n    private final LeaveRepository leaveRepository;\r\n\r\n    private final Configuration freemarkerConfig;\r\n    private final HeadOfDepartmentRepository headOfDepartmentRepository;\r\n    private final DepartmentRepository departmentRepository;\r\n\r\n    public EmployeeServiceImplementation(EmployeeRepository employeeRepository, BCryptPasswordEncoder bCryptPasswordEncoder, UserRepository userRepository, JavaMailSender javaMailSender, UserValidationService userValidationService,\r\n                                         LeaveRepository leaveRepository, Configuration freemarkerConfig,\r\n                                         HeadOfDepartmentRepository headOfDepartmentRepository,\r\n                                         DepartmentRepository departmentRepository) {\r\n        this.employeeRepository = employeeRepository;\r\n        this.bCryptPasswordEncoder = bCryptPasswordEncoder;\r\n        this.userRepository = userRepository;\r\n        this.javaMailSender = javaMailSender;\r\n        this.userValidationService = userValidationService;\r\n        this.leaveRepository = leaveRepository;\r\n        this.freemarkerConfig = freemarkerConfig;\r\n        this.headOfDepartmentRepository = headOfDepartmentRepository;\r\n        this.departmentRepository = departmentRepository;\r\n    }\r\n\r\n\r\n    @Override\r\n    public ResponseEntity createEmployee( EmployeeRequest request) {\r\n\r\n        userValidationService.validateUser(request);\r\n        Optional<Department> department = departmentRepository.findById(request.getDepartmentId());\r\n        if(!department.isPresent())\r\n            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(\"DEPARTMENT NOT FOUND\");\r\n\r\n        Employee employees = new Employee();\r\n        employees.setGender(request.getGender());\r\n        employees.setEmail(request.getEmail());\r\n        employees.setDateOfBirth(request.getDateOfBirth());\r\n        employees.setDepartment(department.get());\r\n        employees.setLastName(request.getLastName());\r\n        employees.setFirstName(request.getFirstName());\r\n        employees.setPassword(bCryptPasswordEncoder.encode(request.getPassword()));\r\n        employees.setUsername(request.getUsername());\r\n        Employee employeeSaved = employeeRepository.save(employees);\r\n        final User user = UserMapper.INSTANCE.convertToUser(request);\r\n        user.setUserRole(UserRole.USER);\r\n        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));\r\n        user.setEmployee(employeeSaved);\r\n        userRepository.save(user);\r\n\r\n        try {\r\n            SimpleMailMessage mailMessage = new SimpleMailMessage();\r\n                String sender = \"perfect.makuwerere@students.uz.ac.zw\";\r\n            SimpleMailMessage mail = new SimpleMailMessage();\r\n            String user1 = employees.getFirstName().toUpperCase() + \" \" + employees\r\n                   .getLastName().toUpperCase();\r\n            String emailContent = new StringBuilder()\r\n                    .append(\"<br>\")\r\n                    .append(\"Your AfroTech Leave Board System account has been created.<br>\")\r\n                    .append(\"Use the details below to log in to the system:<br><br>\")\r\n                    .append(\"Password: \")\r\n                    .append(request.getPassword())\r\n                    .append(\"<br>\")\r\n                    .append(\"Username: \")\r\n                    .append(request.getUsername())\r\n                    .append(\"<br><br>\")\r\n                    .append(\"Click the link below to access the login page:<br>\")\r\n                    .toString();\r\n            Map model = new HashMap();\r\n            model.put(\"user\", user1);\r\n            model.put(\"link\", \"http://localhost:4200/\");\r\n            model.put(\"message\",emailContent);\r\n            model.put(\"year\", \"2023\");\r\n            MimeMessage message = javaMailSender.createMimeMessage();\r\n\r\n            MimeMessageHelper helper = new MimeMessageHelper(message,\r\n                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,\r\n                    StandardCharsets.UTF_8.name());\r\n            mail.setFrom(sender);\r\n            mail.setTo(employees.getEmail());\r\n            mail.setSentDate(new Date());\r\n            mail.setSubject(\"AFROTECH LEAVE BOARD SYSTEM LOGIN DETAILS\");\r\n            Template t = freemarkerConfig.getTemplate(\"email-template.ftl\");\r\n            String html = FreeMarkerTemplateUtils.processTemplateIntoString(t, model);\r\n            helper.setTo(employees.getEmail());\r\n            helper.setText(html, true);\r\n            helper.setSubject(mail.getSubject());\r\n            helper.setFrom(mail.getFrom());\r\n\r\n            javaMailSender.send(message);\r\n\r\n        } catch (MailException e) {\r\n\r\n        } catch (Exception e) {\r\n\r\n        }\r\n\r\n        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(employeeSaved);\r\n    }\r\n\r\n\r\n    @Override\r\n    public Page<Employee> getAll(Pageable pageable) {\r\n        return  employeeRepository.findAll(pageable);\r\n    }\r\n    @Override\r\n    public Page getAll(int offset, int size) {\r\n        return employeeRepository.findAll(PageRequest.of(offset, size));\r\n    }\r\n\r\n    @Override\r\n    public ResponseEntity getEmployeeByName(String username) {\r\n        List<Employee> employee = employeeRepository.findByUsername(username);\r\n//        List<Employee> employees = new ArrayList<>();\r\n//        employees.add(employee);\r\n        if(!employee.isEmpty())\r\n            return ResponseEntity.ok().body(employee);\r\n        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(\"employee not found\");\r\n    }\r\n\r\n    @Override\r\n    public ResponseEntity totalEmployee() {\r\n        List<Employee> employees = employeeRepository.findAll();\r\n        Long count = employees.stream().count();\r\n        return ResponseEntity.ok().body(count);\r\n    }\r\n        @Override\r\n    public ResponseEntity generateReports(JRBeanCollectionDataSource dataSource, String report) throws IOException, JRException {\r\n        Map<String, Object> params = new HashMap<>();\r\n        byte[] bytes;\r\n//        BufferedImage logo = ImageIO.read(this.getClass().getResource(\"/templates/logo.png\"));\r\n//        params.put(\"logo\", logo);\r\n        report = \"employee\";\r\n        InputStream inputStream = this.getClass().getResourceAsStream(\"/templates/\" + report + \".jrxml\");\r\n        JasperReport jasperReport = JasperCompileManager.compileReport(inputStream);\r\n        JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport,params, dataSource );\r\n        bytes = JasperExportManager.exportReportToPdf(jasperPrint);\r\n        return ResponseEntity.ok().header(\"Content-Type\", \"application/pdf; charset=UTF-8\")\r\n                .header(\"Content-Disposition\", \"inline; filename=\\\"\" + report + \".pdf\\\"\")\r\n                .body(bytes);\r\n    }\r\n        @Override\r\n    public List<Map<String, Object>> employees() {\r\n        List<Map<String, Object>> results = new ArrayList<Map<String, Object>>();\r\n        List<Employee> employeeList = employeeRepository.findAll();\r\n\r\n        for (Employee employee : employeeList) {\r\n\r\n            Map<String, Object> item = new HashMap<String, Object>();\r\n\r\n            item.put(\"firstname\", employee.getFirstName());\r\n            item.put(\"lastname\",employee.getLastName() );\r\n            item.put(\"dob\",employee.getDateOfBirth() );\r\n            item.put(\"gender\",employee.getGender());\r\n            item.put(\"email\", employee.getEmail());\r\n\r\n            results.add(item);\r\n\r\n\r\n        }\r\n        return results;\r\n    }\r\n\r\n    @Override\r\n    public List<Map<String, Object>> leave() {\r\n        List<Map<String, Object>> results = new ArrayList<Map<String, Object>>();\r\n        List<Leave> leaveList = leaveRepository.findAll();\r\n\r\n        for (Leave leave : leaveList) {\r\n\r\n            Map<String, Object> item = new HashMap<String, Object>();\r\n//            item.put(\"name\", leave.getEmployee().getFirstName() + \" \" + leave.getEmployee().getLastName());\r\n            item.put(\"stat\",leave.getStatus());\r\n            item.put(\"duration\",leave.getDuration() );\r\n            item.put(\"to\",leave.getToDate());\r\n            item.put(\"from\", leave.getFromDate());\r\n            item.put(\"type\", leave.getLeaveType());\r\n            results.add(item);\r\n        }\r\n        return results;\r\n    }\r\n\r\n    @Override\r\n    public Employee updateEmployee(Long id, @RequestBody EmployeeRequest employeeRequest) {\r\n        Optional<Employee> user = employeeRepository.findById(id);\r\n        String response = \"Employee not found\";\r\n        if(user.isPresent()){\r\n            Employee updatedEmployee = user.get();\r\n\r\n            updatedEmployee.setGender(employeeRequest.getGender());\r\n            updatedEmployee.setEmail(employeeRequest.getEmail());\r\n            updatedEmployee.setDateOfBirth(employeeRequest.getDateOfBirth());\r\n            updatedEmployee.setLastName(employeeRequest.getLastName());\r\n            updatedEmployee.setFirstName(employeeRequest.getFirstName());\r\n//          updatedEmployee.setNumberOfLeaveDays(employeeRequest.getNumberOfLeaveDays());\r\n            employeeRepository.save(updatedEmployee);\r\n\r\n            return  employeeRepository.save(updatedEmployee);\r\n        }\r\n\r\n        return null;\r\n    }\r\n\r\n    @Override\r\n    public ResponseEntity assignEmployeeAsHod(Long id, HodRequest request) {\r\n        Optional<Employee> employee = employeeRepository.findById(id);\r\n        if(employee.isPresent()){\r\n            HeadOfDepartment headOfDepartment = new HeadOfDepartment();\r\n//            headOfDepartment.setEmployee(employee.get());\r\n//            headOfDepartment.setDepartments(request.getDepartments());\r\n//            headOfDepartmentRepository.save(headOfDepartment);\r\n            return ResponseEntity.ok().body(headOfDepartment);\r\n\r\n        }\r\n        return  ResponseEntity.status(HttpStatus.BAD_REQUEST).body(\"Employee Not Found\");\r\n    }\r\n\r\n    @Override\r\n    public ResponseEntity getEmployee(Long id) {\r\n\r\n        Optional<Employee> user = employeeRepository.findById(id);\r\n        if (user.isPresent())\r\n        {\r\n            return ResponseEntity.ok().body(user);\r\n        }\r\n        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(\"Employee Not Found\");\r\n    }\r\n    @Override\r\n    public ResponseEntity deleteEmployee(Long id) {\r\n        Optional<Employee> user = employeeRepository.findById(id);\r\n        List<User> users = userRepository.findAll();\r\n        Optional<User> user1 = userRepository.findUserByEmployeeId(id);\r\n        if (user.isPresent() ){\r\n\r\n            employeeRepository.delete(user.get());\r\n            userRepository.delete(user1.get());\r\n            return ResponseEntity.ok().body(user);\r\n        }\r\n        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(\"Employee Not Found\");\r\n    }\r\n    @Override\r\n    public ResponseEntity generateReport(JRBeanCollectionDataSource dataSource, String report) throws IOException, JRException {\r\n        Map<String, Object> params = new HashMap<>();\r\n        byte[] bytes;\r\n//        BufferedImage logo = ImageIO.read(this.getClass().getResource(\"/templates/logo.png\"));\r\n//        params.put(\"logo\", logo);\r\n        report = \"leave\";\r\n        InputStream inputStream = this.getClass().getResourceAsStream(\"/templates/\" + report + \".jrxml\");\r\n        JasperReport jasperReport = JasperCompileManager.compileReport(inputStream);\r\n        JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport,params, dataSource );\r\n        bytes = JasperExportManager.exportReportToPdf(jasperPrint);\r\n        return ResponseEntity.ok().header(\"Content-Type\", \"application/pdf; charset=UTF-8\")\r\n                .header(\"Content-Disposition\", \"inline; filename=\\\"\" + report + \".pdf\\\"\")\r\n                .body(bytes);\r\n    }\r\n\r\n\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/zw/co/afrosoft/service/EmployeeServiceImplementation.java b/src/main/java/zw/co/afrosoft/service/EmployeeServiceImplementation.java
+--- a/src/main/java/zw/co/afrosoft/service/EmployeeServiceImplementation.java	(revision ab60c0797c15c31918f73d278f0b556786b9ffc7)
++++ b/src/main/java/zw/co/afrosoft/service/EmployeeServiceImplementation.java	(date 1706027493052)
+@@ -143,7 +143,9 @@
+ 
+         }
+ 
+-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(employeeSaved);
++        return ResponseEntity.ok().body(employeeSaved);
++
++//        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(employeeSaved);
+     }
+ 
+ 
+Index: target/classes/local.yml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>server:\r\n  port: 8080\r\nspring:\r\n  datasource:\r\n    url: jdbc:mysql://localhost:3306/employee\r\n    username: root\r\n    password: Perfect2001\r\n\r\n  jpa:\r\n    #    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect\r\n    hibernate:\r\n      ddl-auto: create\r\n      show-sql: true\r\n      format-sql: true\r\n      type: info\r\n      use-sql-comments: true\r\n      properties:\r\n        hibernate.use_sql_comments: true\r\n        hibernate.format_sql: true\r\n\r\nspringdoc:\r\n  show-actuator: true\r\n  paths-to-match: /**\r\n  packages-to-scan: zw.co.afrosoft\r\n\r\nmanagement:\r\n  endpoint:\r\n    health:\r\n      show-details: ALWAYS\r\n    endpoints:\r\n      web:\r\n        exposure:\r\n          include: \"*\"\r\n\r\nlogging:\r\n  level:\r\n    org.springframework: INFO\r\n    design.boilerplate.springboot: INFO\r\n\r\n## FIXME : Customize JWT token and Swagger information for your application\r\n\r\njwt:\r\n  secretKey: secret\r\n  issuer: afrosoft.co.zw\r\n  expirationMinute: 10\r\n\r\nswagger:\r\n  contact-name: Perfect Makuwerere\r\n  contact-mail: perfect.makuwerere@afrosoft.co.zw\r\n  contact-url:\r\n  app-name: Hr Leave System\r\n  app-description: \"Spring Boot\"\r\n  app-version: 2.0.0\r\n  app-license-url: https://www.apache.org/licenses/LICENSE-2.0.html\r\n  app-license: Apache 2.0\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/target/classes/local.yml b/target/classes/local.yml
+--- a/target/classes/local.yml	(revision ab60c0797c15c31918f73d278f0b556786b9ffc7)
++++ b/target/classes/local.yml	(date 1705181458639)
+@@ -4,7 +4,7 @@
+   datasource:
+     url: jdbc:mysql://localhost:3306/employee
+     username: root
+-    password: Perfect2001
++    password: perfect2001
+ 
+   jpa:
+     #    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+Index: target/classes/application.properties
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>spring.mail.host=smtp.gmail.com\r\nspring.mail.port=587\r\nspring.mail.username=perfect.makuwerere@students.uz.ac.zw\r\nspring.mail.password = uvyg limi eksh jnvh\r\nspring.mail.properties.mail.smtp.auth=true\r\nspring.mail.properties.mail.smtp.starttls.enable=true\r\nfile.upload.directory=\"src/main/resources/templates\"\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>ISO-8859-1
+===================================================================
+diff --git a/target/classes/application.properties b/target/classes/application.properties
+--- a/target/classes/application.properties	(revision ab60c0797c15c31918f73d278f0b556786b9ffc7)
++++ b/target/classes/application.properties	(date 1705181247771)
+@@ -4,4 +4,4 @@
+ spring.mail.password = uvyg limi eksh jnvh
+ spring.mail.properties.mail.smtp.auth=true
+ spring.mail.properties.mail.smtp.starttls.enable=true
+-file.upload.directory="src/main/resources/templates"
++
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"AutoImportSettings\">\r\n    <option name=\"autoReloadType\" value=\"SELECTIVE\" />\r\n  </component>\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"6c46e9d2-4570-4e77-9cfe-aff4ff265af4\" name=\"Changes\" comment=\"\">\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/exceptions/headOfDepartment/HeadOfDepartmentControllerAdvice.java\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/exceptions/headOfDepartment/HeadOfDepartmentException.java\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/exceptions/leave/LeaveControllerAdvice.java\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/exceptions/leave/LeaveException.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_23_2_2023_11_26__Changes_.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_23_2_2023_11_26__Changes_.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_23_2_2023_14_25__Changes_.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_23_2_2023_14_25__Changes_.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/SpringBootBoilerplateApplication.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/SpringBootBoilerplateApplication.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/DepartmentController.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/department/DepartmentRestController.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/EmailRestController.java\" beforeDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/EmployeeRestController.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/employee/EmployeeRestController.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/FileController.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/file/FileRestController.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/FileService.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/FileService.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/HeadOfDepartmentController.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/HeadOfDepartment/HeadOfDepartmentRestController.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/LeaveController.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/leave/LeaveRestController.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/LoginController.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/login/LoginRestController.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/PasswordReset.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/passwordReset/PasswordResetRestController.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/RegistrationController.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/registration/RegistrationRestController.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/ReportsController.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/reports/ReportsController.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/RoleController.java\" beforeDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/exceptions/LoginControllerAdvice.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/exceptions/login/LoginControllerAdvice.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/exceptions/RegistrationControllerAdvice.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/exceptions/registration/RegistrationControllerAdvice.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/exceptions/RegistrationException.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/exceptions/registration/RegistrationException.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/exceptions/ValidationAdvice.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/exceptions/validation/ValidationAdvice.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/exceptions/ValidationErrorResponse.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/exceptions/validation/ValidationErrorResponse.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/Authorities.java\" beforeDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/CalendarInfo.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/calendar/CalendarInfo.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/DashboardTotal.java\" beforeDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/Department.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/department/Department.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/DepartmentRequest.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/department/DepartmentRequest.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/Departments.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/department/Departments.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/Employee.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/employee/Employee.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/File.java\" beforeDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/FileEntity.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/file/File.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/FileUploadController.java\" beforeDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/Gender.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/employee/Gender.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/HeadOfDepartment.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/headOfDepartment/HeadOfDepartment.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/HeadOfDepartmentRequest.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/headOfDepartment/HeadOfDepartmentRequest.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/HeadOfDepartmentResponse.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/headOfDepartment/HeadOfDepartmentResponse.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/HodRequest.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/headOfDepartment/HodRequest.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/Leave.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/leave/Leave.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/LeaveType.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/leave/LeaveType.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/LeaveUpdate.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/leave/LeaveUpdate.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/PassWordResetCode.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/passwordReset/PassWordResetCode.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/PasswordResetRequest.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/passwordReset/PasswordResetRequest.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/ReportFilter.java\" beforeDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/Role.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/Role.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/RoleRequest.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/RoleRequest.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/Status.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/leave/Status.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/User.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/user/User.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/UserRole.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/user/UserRole.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/DepartmentRepository.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/department/DepartmentRepository.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/EmployeeRepository.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/employee/EmployeeRepository.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/FileRepository.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/file/FileRepository.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/HeadOfDepartmentRepository.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/headOfDepartment/HeadOfDepartmentRepository.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/LeaveRepository.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/leave/LeaveRepository.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/PasswordResetRepository.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/passwordReset/PasswordResetRepository.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/RoleRepo.java\" beforeDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/UserRepository.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/user/UserRepository.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/dto/AuthenticatedUserDto.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/dto/AuthenticatedUserDto.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/dto/EmployeeRequest.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/dto/EmployeeRequest.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/dto/LoginResponse.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/dto/LoginResponse.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/jwt/JwtTokenManager.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/jwt/JwtTokenManager.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/jwt/JwtTokenService.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/jwt/JwtTokenService.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/mapper/UserMapper.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/mapper/UserMapper.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/service/UserDetailsServiceImpl.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/service/UserDetailsServiceImpl.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/service/UserService.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/service/UserService.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/service/UserServiceImpl.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/service/UserServiceImpl.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/DepartmentService.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/DepartmentService.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/DepartmentServiceImpl.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/DepartmentServiceImpl.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/EmployeeReportServiceImpl.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/EmployeeReportServiceImpl.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/EmployeeService.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/EmployeeService.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/EmployeeServiceImplementation.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/EmployeeServiceImplementation.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/FileService.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/FileService.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/FileServiceImpl.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/FileServiceImpl.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/HeadOfDepartmentService.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/HeadOfDepartmentService.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/HeadOfDepartmentServiceImpl.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/HeadOfDepartmentServiceImpl.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveRequest.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveRequest.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveService.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveService.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveServiceImplementation.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveServiceImplementation.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/PasswordResetService.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/PasswordResetService.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/RoleService.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/RoleService.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/RoleServiceImpl.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/RoleServiceImpl.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/UserValidationService.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/UserValidationService.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/resources/application.properties\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/resources/application.properties\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/resources/templates/Leave.jrxml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/resources/templates/Leave.jrxml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/resources/templates/employee.jrxml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/resources/templates/employee.jrxml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/target/generated-sources/annotations/zw/co/afrosoft/security/mapper/UserMapperImpl.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/target/generated-sources/annotations/zw/co/afrosoft/security/mapper/UserMapperImpl.java\" afterDir=\"false\" />\r\n    </list>\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"FileTemplateManagerImpl\">\r\n    <option name=\"RECENT_TEMPLATES\">\r\n      <list>\r\n        <option value=\"Enum\" />\r\n        <option value=\"com.haulmont.jpb.JpaRepository\" />\r\n        <option value=\"Interface\" />\r\n        <option value=\"Class\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <favorite-branches>\r\n      <branch-storage>\r\n        <map>\r\n          <entry type=\"LOCAL\">\r\n            <value>\r\n              <list>\r\n                <branch-info repo=\"$PROJECT_DIR$\" source=\"approveLeave\" />\r\n              </list>\r\n            </value>\r\n          </entry>\r\n        </map>\r\n      </branch-storage>\r\n    </favorite-branches>\r\n    <option name=\"RECENT_BRANCH_BY_REPOSITORY\">\r\n      <map>\r\n        <entry key=\"$PROJECT_DIR$\" value=\"crown\" />\r\n      </map>\r\n    </option>\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\r\n  </component>\r\n  <component name=\"JpbToolWindowState\">\r\n    <option name=\"isToolWindowVisible\" value=\"false\" />\r\n  </component>\r\n  <component name=\"MarkdownSettingsMigration\">\r\n    <option name=\"stateVersion\" value=\"1\" />\r\n  </component>\r\n  <component name=\"MavenImportPreferences\">\r\n    <option name=\"generalSettings\">\r\n      <MavenGeneralSettings>\r\n        <option name=\"useMavenConfig\" value=\"true\" />\r\n      </MavenGeneralSettings>\r\n    </option>\r\n  </component>\r\n  <component name=\"ProjectId\" id=\"2L2UbEgzyArn6urWTLl0R1int5k\" />\r\n  <component name=\"ProjectLevelVcsManager\">\r\n    <ConfirmationsSetting value=\"2\" id=\"Add\" />\r\n  </component>\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\"><![CDATA[{\r\n  \"keyToString\": {\r\n    \"RequestMappingsPanelOrder0\": \"0\",\r\n    \"RequestMappingsPanelOrder1\": \"1\",\r\n    \"RequestMappingsPanelWidth0\": \"75\",\r\n    \"RequestMappingsPanelWidth1\": \"75\",\r\n    \"RunOnceActivity.OpenProjectViewOnStart\": \"true\",\r\n    \"RunOnceActivity.ShowReadmeOnStart\": \"true\",\r\n    \"SHARE_PROJECT_CONFIGURATION_FILES\": \"true\",\r\n    \"WebServerToolWindowFactoryState\": \"false\",\r\n    \"dart.analysis.tool.window.visible\": \"false\",\r\n    \"extract.method.default.visibility\": \"private\",\r\n    \"last_opened_file_path\": \"C:/Users/princessm/Desktop/ATTACHMENT PROJECTS/spring-boot-boilerplate\",\r\n    \"node.js.detected.package.eslint\": \"true\",\r\n    \"node.js.detected.package.tslint\": \"true\",\r\n    \"node.js.selected.package.eslint\": \"(autodetect)\",\r\n    \"node.js.selected.package.tslint\": \"(autodetect)\",\r\n    \"nodejs_package_manager_path\": \"npm\",\r\n    \"run.code.analysis.last.selected.profile\": \"pProject Default\",\r\n    \"settings.editor.selected.configurable\": \"preferences.pluginManager\",\r\n    \"show.migrate.to.gradle.popup\": \"false\",\r\n    \"spring.configuration.checksum\": \"3eff7c1ae62db047315b484c8933e7ca\"\r\n  },\r\n  \"keyToStringList\": {\r\n    \"DatabaseDriversLRU\": [\r\n      \"mysql\"\r\n    ]\r\n  }\r\n}]]></component>\r\n  <component name=\"RecentsManager\">\r\n    <key name=\"CreateClassDialog.RecentsKey\">\r\n      <recent name=\"zw.co.afrosoft.service\" />\r\n    </key>\r\n    <key name=\"CopyFile.RECENT_KEYS\">\r\n      <recent name=\"C:\\Users\\princessm\\Desktop\\ATTACHMENT PROJECTS\\spring-boot-boilerplate\\src\\main\\java\\zw\\co\\afrosoft\\service\" />\r\n      <recent name=\"C:\\Users\\princessm\\Desktop\\ATTACHMENT PROJECTS\\spring-boot-boilerplate\\src\\main\\resources\" />\r\n      <recent name=\"C:\\Users\\princessm\\Desktop\\ATTACHMENT PROJECTS\\spring-boot-boilerplate\\src\\main\\resources\\templates\" />\r\n    </key>\r\n    <key name=\"MoveFile.RECENT_KEYS\">\r\n      <recent name=\"C:\\Users\\princessm\\Desktop\\ATTACHMENT PROJECTS\\spring-boot-boilerplate\\src\\main\\java\\zw\\co\\afrosoft\\controller\\reports\" />\r\n      <recent name=\"C:\\Users\\princessm\\Desktop\\ATTACHMENT PROJECTS\\spring-boot-boilerplate\\src\\main\\resources\\templates\" />\r\n    </key>\r\n    <key name=\"CopyClassDialog.RECENTS_KEY\">\r\n      <recent name=\"zw.co.afrosoft.exceptions\" />\r\n      <recent name=\"zw.co.afrosoft.controller\" />\r\n      <recent name=\"zw.co.afrosoft.repository\" />\r\n    </key>\r\n  </component>\r\n  <component name=\"RunManager\">\r\n    <configuration name=\"SpringBootBoilerplateApplication\" type=\"SpringBootApplicationConfigurationType\" factoryName=\"Spring Boot\">\r\n      <option name=\"ACTIVE_PROFILES\" value=\"local\" />\r\n      <option name=\"ALTERNATIVE_JRE_PATH\" value=\"17\" />\r\n      <option name=\"ALTERNATIVE_JRE_PATH_ENABLED\" value=\"true\" />\r\n      <module name=\"HrLeaveSystem\" />\r\n      <option name=\"SPRING_BOOT_MAIN_CLASS\" value=\"zw.co.afrosoft.SpringBootBoilerplateApplication\" />\r\n      <method v=\"2\">\r\n        <option name=\"Make\" enabled=\"true\" />\r\n      </method>\r\n    </configuration>\r\n  </component>\r\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"6c46e9d2-4570-4e77-9cfe-aff4ff265af4\" name=\"Changes\" comment=\"\" />\r\n      <created>1675068754213</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1675068754213</updated>\r\n      <workItem from=\"1675068798896\" duration=\"17264000\" />\r\n      <workItem from=\"1675145921073\" duration=\"1583000\" />\r\n      <workItem from=\"1675149616217\" duration=\"409000\" />\r\n      <workItem from=\"1675151090602\" duration=\"6830000\" />\r\n      <workItem from=\"1675160020411\" duration=\"80614000\" />\r\n      <workItem from=\"1675665945543\" duration=\"4421000\" />\r\n      <workItem from=\"1675686286601\" duration=\"5489000\" />\r\n      <workItem from=\"1675750421498\" duration=\"11829000\" />\r\n      <workItem from=\"1675836416545\" duration=\"24509000\" />\r\n      <workItem from=\"1675865028141\" duration=\"608000\" />\r\n      <workItem from=\"1675925952674\" duration=\"1563000\" />\r\n      <workItem from=\"1676010495137\" duration=\"1150000\" />\r\n      <workItem from=\"1676268791033\" duration=\"8978000\" />\r\n      <workItem from=\"1676355776245\" duration=\"5208000\" />\r\n      <workItem from=\"1676365542220\" duration=\"480000\" />\r\n      <workItem from=\"1676366036163\" duration=\"709000\" />\r\n      <workItem from=\"1676366761087\" duration=\"57000\" />\r\n      <workItem from=\"1676366847669\" duration=\"385000\" />\r\n      <workItem from=\"1676368625162\" duration=\"18299000\" />\r\n      <workItem from=\"1676468273822\" duration=\"4410000\" />\r\n      <workItem from=\"1676528879345\" duration=\"12202000\" />\r\n      <workItem from=\"1677156703719\" duration=\"3077000\" />\r\n      <workItem from=\"1677480003561\" duration=\"13394000\" />\r\n      <workItem from=\"1677506175850\" duration=\"3648000\" />\r\n      <workItem from=\"1677564719558\" duration=\"935000\" />\r\n      <workItem from=\"1677565928546\" duration=\"6823000\" />\r\n      <workItem from=\"1677577096707\" duration=\"10824000\" />\r\n      <workItem from=\"1677650978917\" duration=\"11768000\" />\r\n      <workItem from=\"1677739571164\" duration=\"14545000\" />\r\n      <workItem from=\"1677850292390\" duration=\"578000\" />\r\n      <workItem from=\"1678084657144\" duration=\"6784000\" />\r\n      <workItem from=\"1678105304536\" duration=\"3126000\" />\r\n      <workItem from=\"1678170135035\" duration=\"12897000\" />\r\n      <workItem from=\"1678257827808\" duration=\"2407000\" />\r\n      <workItem from=\"1678267498777\" duration=\"2928000\" />\r\n      <workItem from=\"1678281651014\" duration=\"1826000\" />\r\n      <workItem from=\"1679318411944\" duration=\"844000\" />\r\n      <workItem from=\"1679583154536\" duration=\"584000\" />\r\n      <workItem from=\"1679646622269\" duration=\"562000\" />\r\n      <workItem from=\"1679928192902\" duration=\"694000\" />\r\n      <workItem from=\"1679987359104\" duration=\"666000\" />\r\n      <workItem from=\"1681459893410\" duration=\"845000\" />\r\n      <workItem from=\"1681464606175\" duration=\"3188000\" />\r\n      <workItem from=\"1681548570521\" duration=\"3416000\" />\r\n      <workItem from=\"1681726630869\" duration=\"639000\" />\r\n      <workItem from=\"1681727575273\" duration=\"549000\" />\r\n      <workItem from=\"1681908267487\" duration=\"3341000\" />\r\n      <workItem from=\"1684228941020\" duration=\"1862000\" />\r\n      <workItem from=\"1684762070366\" duration=\"3225000\" />\r\n      <workItem from=\"1684826358448\" duration=\"5276000\" />\r\n      <workItem from=\"1684907248116\" duration=\"4319000\" />\r\n      <workItem from=\"1684926369860\" duration=\"14138000\" />\r\n      <workItem from=\"1685003682988\" duration=\"12703000\" />\r\n      <workItem from=\"1685082176442\" duration=\"8698000\" />\r\n      <workItem from=\"1685341152963\" duration=\"8808000\" />\r\n      <workItem from=\"1685354184655\" duration=\"3955000\" />\r\n      <workItem from=\"1685366290263\" duration=\"3408000\" />\r\n      <workItem from=\"1685428918506\" duration=\"9625000\" />\r\n      <workItem from=\"1685456445372\" duration=\"1919000\" />\r\n      <workItem from=\"1685513953020\" duration=\"36753000\" />\r\n      <workItem from=\"1686133709900\" duration=\"6907000\" />\r\n      <workItem from=\"1686232234804\" duration=\"1906000\" />\r\n      <workItem from=\"1686386780344\" duration=\"31753000\" />\r\n      <workItem from=\"1686643555223\" duration=\"3246000\" />\r\n      <workItem from=\"1687420479296\" duration=\"1280000\" />\r\n      <workItem from=\"1687510738803\" duration=\"8699000\" />\r\n      <workItem from=\"1687761212747\" duration=\"18840000\" />\r\n      <workItem from=\"1687858464121\" duration=\"18389000\" />\r\n      <workItem from=\"1688110670402\" duration=\"1857000\" />\r\n      <workItem from=\"1688114466036\" duration=\"1612000\" />\r\n      <workItem from=\"1688453281022\" duration=\"28734000\" />\r\n      <workItem from=\"1688634109773\" duration=\"2786000\" />\r\n      <workItem from=\"1688712282718\" duration=\"7573000\" />\r\n      <workItem from=\"1689078110968\" duration=\"1354000\" />\r\n    </task>\r\n    <task id=\"LOCAL-00001\" summary=\"leave now working\">\r\n      <created>1676293375930</created>\r\n      <option name=\"number\" value=\"00001\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00001\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1676293375930</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00002\" summary=\"leave now working\">\r\n      <created>1676365396703</created>\r\n      <option name=\"number\" value=\"00002\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00002\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1676365396703</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00003\" summary=\"employeee can now login\">\r\n      <created>1676469375652</created>\r\n      <option name=\"number\" value=\"00003\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00003\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1676469375652</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00004\" summary=\"EVERYTHING IN PLACE\">\r\n      <created>1677156237506</created>\r\n      <option name=\"number\" value=\"00004\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00004\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1677156237506</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00005\" summary=\"EVERYTHING IN PLACE\">\r\n      <created>1677478905320</created>\r\n      <option name=\"number\" value=\"00005\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00005\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1677478905372</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00006\" summary=\"java version t0 1.8\">\r\n      <created>1677480345815</created>\r\n      <option name=\"number\" value=\"00006\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00006\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1677480345815</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00007\" summary=\"java version t0 1.8\">\r\n      <created>1677485265908</created>\r\n      <option name=\"number\" value=\"00007\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00007\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1677485265908</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00008\" summary=\"java version t0 1.8\">\r\n      <created>1677487064666</created>\r\n      <option name=\"number\" value=\"00008\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00008\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1677487064667</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00009\" summary=\"returning user details when logged in\">\r\n      <created>1677583724987</created>\r\n      <option name=\"number\" value=\"00009\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00009\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1677583724987</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00010\" summary=\"PATHVARIABLE\">\r\n      <created>1677662497032</created>\r\n      <option name=\"number\" value=\"00010\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00010\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1677662497032</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00011\" summary=\"PATHVARIABLE\">\r\n      <created>1684827256583</created>\r\n      <option name=\"number\" value=\"00011\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00011\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1684827256583</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00012\" summary=\"PATHVARIABLE\">\r\n      <created>1684926687206</created>\r\n      <option name=\"number\" value=\"00012\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00012\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1684926687206</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00013\" summary=\"PATHVARIABLE\">\r\n      <created>1685094986877</created>\r\n      <option name=\"number\" value=\"00013\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00013\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1685094986877</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00014\" summary=\"PATHVARIABLE\">\r\n      <created>1685459171216</created>\r\n      <option name=\"number\" value=\"00014\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00014\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1685459171216</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00015\" summary=\"PATHVARIABLE\">\r\n      <created>1686410500396</created>\r\n      <option name=\"number\" value=\"00015\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00015\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1686410500418</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00016\" summary=\"PATHVARIABLE\">\r\n      <created>1686410546149</created>\r\n      <option name=\"number\" value=\"00016\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00016\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1686410546149</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00017\" summary=\"PATHVARIABLE\">\r\n      <created>1687524189946</created>\r\n      <option name=\"number\" value=\"00017\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00017\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1687524189946</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00018\" summary=\"added DepartmentService\">\r\n      <created>1689079512104</created>\r\n      <option name=\"number\" value=\"00018\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00018\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1689079512104</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00019\" summary=\"added DepartmentService\">\r\n      <created>1689079784498</created>\r\n      <option name=\"number\" value=\"00019\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00019\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1689079784498</updated>\r\n    </task>\r\n    <option name=\"localTasksCounter\" value=\"20\" />\r\n    <servers />\r\n  </component>\r\n  <component name=\"TypeScriptGeneratedFilesManager\">\r\n    <option name=\"version\" value=\"3\" />\r\n  </component>\r\n  <component name=\"Vcs.Log.Tabs.Properties\">\r\n    <option name=\"TAB_STATES\">\r\n      <map>\r\n        <entry key=\"MAIN\">\r\n          <value>\r\n            <State>\r\n              <option name=\"FILTERS\">\r\n                <map>\r\n                  <entry key=\"user\">\r\n                    <value>\r\n                      <list>\r\n                        <option value=\"*\" />\r\n                      </list>\r\n                    </value>\r\n                  </entry>\r\n                </map>\r\n              </option>\r\n            </State>\r\n          </value>\r\n        </entry>\r\n      </map>\r\n    </option>\r\n    <option name=\"RECENT_FILTERS\">\r\n      <map>\r\n        <entry key=\"User\">\r\n          <value>\r\n            <list>\r\n              <RecentGroup>\r\n                <option name=\"FILTER_VALUES\">\r\n                  <option value=\"*\" />\r\n                </option>\r\n              </RecentGroup>\r\n            </list>\r\n          </value>\r\n        </entry>\r\n      </map>\r\n    </option>\r\n  </component>\r\n  <component name=\"VcsManagerConfiguration\">\r\n    <MESSAGE value=\"leave now working\" />\r\n    <MESSAGE value=\"employeee can now login\" />\r\n    <MESSAGE value=\"EVERYTHING IN PLACE\" />\r\n    <MESSAGE value=\"java version t0 1.8\" />\r\n    <MESSAGE value=\"returning user details when logged in\" />\r\n    <MESSAGE value=\"PATHVARIABLE\" />\r\n    <MESSAGE value=\"added DepartmentService\" />\r\n    <option name=\"LAST_COMMIT_MESSAGE\" value=\"added DepartmentService\" />\r\n  </component>\r\n  <component name=\"XDebuggerManager\">\r\n    <breakpoint-manager>\r\n      <breakpoints>\r\n        <line-breakpoint enabled=\"true\" type=\"java-method\">\r\n          <url>file://$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/passwordReset/PasswordResetRepository.java</url>\r\n          <line>12</line>\r\n          <properties class=\"zw.co.afrosoft.repository.PasswordResetRepository\" method=\"findPassWordResetCodeByCode\">\r\n            <option name=\"WATCH_EXIT\" value=\"false\" />\r\n          </properties>\r\n          <option name=\"timeStamp\" value=\"32\" />\r\n        </line-breakpoint>\r\n        <line-breakpoint enabled=\"true\" type=\"java-method\">\r\n          <url>file://$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/employee/EmployeeRestController.java</url>\r\n          <line>31</line>\r\n          <properties class=\"zw.co.afrosoft.controller.EmployeeRestController\" method=\"createHod\">\r\n            <option name=\"EMULATED\" value=\"true\" />\r\n            <option name=\"WATCH_EXIT\" value=\"false\" />\r\n          </properties>\r\n          <option name=\"timeStamp\" value=\"58\" />\r\n        </line-breakpoint>\r\n      </breakpoints>\r\n    </breakpoint-manager>\r\n  </component>\r\n  <component name=\"XSLT-Support.FileAssociations.UIState\">\r\n    <expand />\r\n    <select />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision ab60c0797c15c31918f73d278f0b556786b9ffc7)
++++ b/.idea/workspace.xml	(date 1706176775112)
+@@ -4,94 +4,94 @@
+     <option name="autoReloadType" value="SELECTIVE" />
+   </component>
+   <component name="ChangeListManager">
+-    <list default="true" id="6c46e9d2-4570-4e77-9cfe-aff4ff265af4" name="Changes" comment="">
+-      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/exceptions/headOfDepartment/HeadOfDepartmentControllerAdvice.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/exceptions/headOfDepartment/HeadOfDepartmentException.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/exceptions/leave/LeaveControllerAdvice.java" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/exceptions/leave/LeaveException.java" afterDir="false" />
++    <list default="true" id="6c46e9d2-4570-4e77-9cfe-aff4ff265af4" name="Changes" comment="added DepartmentService">
++      <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/payslips/PayslipController.java" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/payslips/Payslip.java" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/payslips/PayslipRequest.java" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/payslip/PaySlipRepo.java" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/payslips/PayslipService.java" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/payslips/PayslipServiceImpl.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_23_2_2023_11_26__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_23_2_2023_11_26__Changes_.xml" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_23_2_2023_14_25__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_23_2_2023_14_25__Changes_.xml" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/SpringBootBoilerplateApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/SpringBootBoilerplateApplication.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/DepartmentController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/department/DepartmentRestController.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/EmailRestController.java" beforeDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/EmployeeRestController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/employee/EmployeeRestController.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/FileController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/file/FileRestController.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/FileService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/FileService.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/HeadOfDepartmentController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/HeadOfDepartment/HeadOfDepartmentRestController.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/LeaveController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/leave/LeaveRestController.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/LoginController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/login/LoginRestController.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/PasswordReset.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/passwordReset/PasswordResetRestController.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/RegistrationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/registration/RegistrationRestController.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/ReportsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/reports/ReportsController.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/RoleController.java" beforeDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/exceptions/LoginControllerAdvice.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/exceptions/login/LoginControllerAdvice.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/exceptions/RegistrationControllerAdvice.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/exceptions/registration/RegistrationControllerAdvice.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/exceptions/RegistrationException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/exceptions/registration/RegistrationException.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/exceptions/ValidationAdvice.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/exceptions/validation/ValidationAdvice.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/exceptions/ValidationErrorResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/exceptions/validation/ValidationErrorResponse.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/Authorities.java" beforeDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/CalendarInfo.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/calendar/CalendarInfo.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/DashboardTotal.java" beforeDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/Department.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/department/Department.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/DepartmentRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/department/DepartmentRequest.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/Departments.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/department/Departments.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/Employee.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/employee/Employee.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/File.java" beforeDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/FileEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/file/File.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/FileUploadController.java" beforeDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/Gender.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/employee/Gender.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/HeadOfDepartment.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/headOfDepartment/HeadOfDepartment.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/HeadOfDepartmentRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/headOfDepartment/HeadOfDepartmentRequest.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/HeadOfDepartmentResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/headOfDepartment/HeadOfDepartmentResponse.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/HodRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/headOfDepartment/HodRequest.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/Leave.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/leave/Leave.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/LeaveType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/leave/LeaveType.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/LeaveUpdate.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/leave/LeaveUpdate.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/PassWordResetCode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/passwordReset/PassWordResetCode.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/PasswordResetRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/passwordReset/PasswordResetRequest.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/ReportFilter.java" beforeDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/Role.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/Role.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/RoleRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/RoleRequest.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/Status.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/leave/Status.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/user/User.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/UserRole.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/user/UserRole.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/DepartmentRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/department/DepartmentRepository.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/EmployeeRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/employee/EmployeeRepository.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/FileRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/file/FileRepository.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/HeadOfDepartmentRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/headOfDepartment/HeadOfDepartmentRepository.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/LeaveRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/leave/LeaveRepository.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/PasswordResetRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/passwordReset/PasswordResetRepository.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/RoleRepo.java" beforeDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/user/UserRepository.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/dto/AuthenticatedUserDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/dto/AuthenticatedUserDto.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/dto/EmployeeRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/dto/EmployeeRequest.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/dto/LoginResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/dto/LoginResponse.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/jwt/JwtTokenManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/jwt/JwtTokenManager.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/jwt/JwtTokenService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/jwt/JwtTokenService.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/mapper/UserMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/mapper/UserMapper.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/service/UserDetailsServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/service/UserDetailsServiceImpl.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/service/UserService.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/service/UserServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/service/UserServiceImpl.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/DepartmentService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/DepartmentService.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/DepartmentServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/DepartmentServiceImpl.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/EmployeeReportServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/EmployeeReportServiceImpl.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/EmployeeService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/EmployeeService.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/configuration/SecurityConfiguration.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/configuration/SecurityConfiguration.java" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/EmployeeServiceImplementation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/EmployeeServiceImplementation.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/FileService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/FileService.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/FileServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/FileServiceImpl.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/HeadOfDepartmentService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/HeadOfDepartmentService.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/HeadOfDepartmentServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/HeadOfDepartmentServiceImpl.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveRequest.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveService.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveServiceImplementation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/LeaveServiceImplementation.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/PasswordResetService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/PasswordResetService.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/RoleService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/RoleService.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/RoleServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/RoleServiceImpl.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/UserValidationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/UserValidationService.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/Leave.jrxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/Leave.jrxml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/employee.jrxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/employee.jrxml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.yml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/main/resources/local.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/local.yml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/META-INF/spring-configuration-metadata.json" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/META-INF/spring-configuration-metadata.json" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/application.properties" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/application.yml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/local.yml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/local.yml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/templates/Leave.jrxml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/templates/Leave.jrxml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/templates/employee.jrxml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/templates/employee.jrxml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/SpringBootBoilerplateApplication.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/SpringBootBoilerplateApplication.class" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/configuration/SecurityConfiguration.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/configuration/SecurityConfiguration.class" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/controller/EmailRestController.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/controller/EmployeeRestController.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/controller/LeaveController.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/controller/LoginController.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/controller/PasswordReset.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/controller/RegistrationController.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/controller/RoleController.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/exceptions/LoginControllerAdvice.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/exceptions/RegistrationControllerAdvice.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/exceptions/RegistrationException.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/exceptions/ValidationAdvice.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/exceptions/ValidationErrorResponse.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/Authorities.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/CalendarInfo$CalendarInfoBuilder.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/CalendarInfo.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/DashboardTotal$DashboardTotalBuilder.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/DashboardTotal.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/Employee$EmployeeBuilder.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/Employee.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/Gender.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/Leave$LeaveBuilder.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/Leave.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/LeaveType.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/LeaveUpdate$LeaveUpdateBuilder.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/LeaveUpdate.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/PassWordResetCode.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/PasswordResetRequest$PasswordResetRequestBuilder.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/PasswordResetRequest.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/Role$RoleBuilder.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/Role.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/RoleRequest$RoleRequestBuilder.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/RoleRequest.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/Status.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/User$UserBuilder.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/User.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/UserRole.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/repository/EmployeeRepository.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/repository/LeaveRepository.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/repository/PasswordResetRepository.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/repository/RoleRepo.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/repository/UserRepository.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/dto/AuthenticatedUserDto.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/dto/AuthenticatedUserDto.class" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/dto/EmployeeRequest$EmployeeRequestBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/dto/EmployeeRequest$EmployeeRequestBuilder.class" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/dto/EmployeeRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/dto/EmployeeRequest.class" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/dto/LoginResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/dto/LoginResponse.class" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/jwt/JwtTokenManager.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/jwt/JwtTokenManager.class" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/jwt/JwtTokenService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/jwt/JwtTokenService.class" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/mapper/UserMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/mapper/UserMapper.class" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/mapper/UserMapperImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/mapper/UserMapperImpl.class" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/service/UserDetailsServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/service/UserDetailsServiceImpl.class" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/service/UserService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/service/UserService.class" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/service/UserServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/service/UserServiceImpl.class" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/EmployeeReportServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/EmployeeReportServiceImpl.class" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/EmployeeService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/EmployeeService.class" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/EmployeeServiceImplementation.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/EmployeeServiceImplementation.class" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/LeaveRequest$LeaveRequestBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/LeaveRequest$LeaveRequestBuilder.class" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/LeaveRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/LeaveRequest.class" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/LeaveService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/LeaveService.class" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/LeaveServiceImplementation.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/LeaveServiceImplementation.class" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/PasswordResetService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/PasswordResetService.class" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/RoleService.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/RoleServiceImpl.class" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/UserValidationService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/UserValidationService.class" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/target/generated-sources/annotations/zw/co/afrosoft/security/mapper/UserMapperImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/target/generated-sources/annotations/zw/co/afrosoft/security/mapper/UserMapperImpl.java" afterDir="false" />
+     </list>
+     <option name="SHOW_DIALOG" value="false" />
+@@ -104,8 +104,8 @@
+       <list>
+         <option value="Enum" />
+         <option value="com.haulmont.jpb.JpaRepository" />
+-        <option value="Interface" />
+         <option value="Class" />
++        <option value="Interface" />
+       </list>
+     </option>
+   </component>
+@@ -131,7 +131,20 @@
+     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+   </component>
+   <component name="JpbToolWindowState">
+-    <option name="isToolWindowVisible" value="false" />
++    <option name="myId2FirstActivated">
++      <map>
++        <entry key="com.haulmont.jpb.jpaInspector" value="true" />
++        <entry key="com.haulmont.jpb.jpaPalette" value="true" />
++        <entry key="com.haulmont.jpb.jpaStructure" value="true" />
++      </map>
++    </option>
++    <option name="myId2Visible">
++      <map>
++        <entry key="com.haulmont.jpb.jpaInspector" value="false" />
++        <entry key="com.haulmont.jpb.jpaPalette" value="false" />
++        <entry key="com.haulmont.jpb.jpaStructure" value="false" />
++      </map>
++    </option>
+   </component>
+   <component name="MarkdownSettingsMigration">
+     <option name="stateVersion" value="1" />
+@@ -151,37 +164,40 @@
+     <option name="hideEmptyMiddlePackages" value="true" />
+     <option name="showLibraryContents" value="true" />
+   </component>
+-  <component name="PropertiesComponent"><![CDATA[{
+-  "keyToString": {
+-    "RequestMappingsPanelOrder0": "0",
+-    "RequestMappingsPanelOrder1": "1",
+-    "RequestMappingsPanelWidth0": "75",
+-    "RequestMappingsPanelWidth1": "75",
+-    "RunOnceActivity.OpenProjectViewOnStart": "true",
+-    "RunOnceActivity.ShowReadmeOnStart": "true",
+-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+-    "WebServerToolWindowFactoryState": "false",
+-    "dart.analysis.tool.window.visible": "false",
+-    "extract.method.default.visibility": "private",
+-    "last_opened_file_path": "C:/Users/princessm/Desktop/ATTACHMENT PROJECTS/spring-boot-boilerplate",
+-    "node.js.detected.package.eslint": "true",
+-    "node.js.detected.package.tslint": "true",
+-    "node.js.selected.package.eslint": "(autodetect)",
+-    "node.js.selected.package.tslint": "(autodetect)",
+-    "nodejs_package_manager_path": "npm",
+-    "run.code.analysis.last.selected.profile": "pProject Default",
+-    "settings.editor.selected.configurable": "preferences.pluginManager",
+-    "show.migrate.to.gradle.popup": "false",
+-    "spring.configuration.checksum": "3eff7c1ae62db047315b484c8933e7ca"
++  <component name="PropertiesComponent">{
++  &quot;keyToString&quot;: {
++    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
++    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
++    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
++    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
++    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
++    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
++    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
++    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
++    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
++    &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
++    &quot;extract.method.default.visibility&quot;: &quot;private&quot;,
++    &quot;last_opened_file_path&quot;: &quot;C:/Users/princessm/Desktop/ATTACHMENT PROJECTS/spring-boot-boilerplate&quot;,
++    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
++    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
++    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
++    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
++    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
++    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
++    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
++    &quot;show.migrate.to.gradle.popup&quot;: &quot;false&quot;,
++    &quot;spring.configuration.checksum&quot;: &quot;91f1f487c7fb768642b3eb98f683bf5e&quot;
+   },
+-  "keyToStringList": {
+-    "DatabaseDriversLRU": [
+-      "mysql"
++  &quot;keyToStringList&quot;: {
++    &quot;DatabaseDriversLRU&quot;: [
++      &quot;mysql&quot;
+     ]
+   }
+-}]]></component>
++}</component>
+   <component name="RecentsManager">
+     <key name="CreateClassDialog.RecentsKey">
++      <recent name="zw.co.afrosoft.model.payslips" />
++      <recent name="zw.co.afrosoft.service.payslips" />
+       <recent name="zw.co.afrosoft.service" />
+     </key>
+     <key name="CopyFile.RECENT_KEYS">
+@@ -204,7 +220,7 @@
+       <option name="ACTIVE_PROFILES" value="local" />
+       <option name="ALTERNATIVE_JRE_PATH" value="17" />
+       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+-      <module name="HrLeaveSystem" />
++      <module name="spring-boot" />
+       <option name="SPRING_BOOT_MAIN_CLASS" value="zw.co.afrosoft.SpringBootBoilerplateApplication" />
+       <method v="2">
+         <option name="Make" enabled="true" />
+@@ -293,6 +309,13 @@
+       <workItem from="1688634109773" duration="2786000" />
+       <workItem from="1688712282718" duration="7573000" />
+       <workItem from="1689078110968" duration="1354000" />
++      <workItem from="1705148406243" duration="2689000" />
++      <workItem from="1705181131212" duration="974000" />
++      <workItem from="1705857205861" duration="3669000" />
++      <workItem from="1705998711371" duration="3512000" />
++      <workItem from="1706027301611" duration="2635000" />
++      <workItem from="1706098037410" duration="1543000" />
++      <workItem from="1706174653839" duration="1931000" />
+     </task>
+     <task id="LOCAL-00001" summary="leave now working">
+       <created>1676293375930</created>
+@@ -472,6 +495,7 @@
+     </option>
+   </component>
+   <component name="VcsManagerConfiguration">
++    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+     <MESSAGE value="leave now working" />
+     <MESSAGE value="employeee can now login" />
+     <MESSAGE value="EVERYTHING IN PLACE" />
+@@ -487,7 +511,7 @@
+         <line-breakpoint enabled="true" type="java-method">
+           <url>file://$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/passwordReset/PasswordResetRepository.java</url>
+           <line>12</line>
+-          <properties class="zw.co.afrosoft.repository.PasswordResetRepository" method="findPassWordResetCodeByCode">
++          <properties class="zw.co.afrosoft.repository.passwordReset.PasswordResetRepository" method="findPassWordResetCodeByCode">
+             <option name="WATCH_EXIT" value="false" />
+           </properties>
+           <option name="timeStamp" value="32" />
+@@ -495,7 +519,7 @@
+         <line-breakpoint enabled="true" type="java-method">
+           <url>file://$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/employee/EmployeeRestController.java</url>
+           <line>31</line>
+-          <properties class="zw.co.afrosoft.controller.EmployeeRestController" method="createHod">
++          <properties class="zw.co.afrosoft.controller.employee.EmployeeRestController" method="createHod">
+             <option name="EMULATED" value="true" />
+             <option name="WATCH_EXIT" value="false" />
+           </properties>
+Index: target/classes/templates/employee.jrxml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<!-- Created with Jaspersoft Studio version 6.20.0.final using JasperReports Library version 6.20.0-2bc7ab61c56f459e8176eb05c7705e145cd400ad  -->\r\n<jasperReport xmlns=\"http://jasperreports.sourceforge.net/jasperreports\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd\" name=\"cooperativeFullKyc\" pageWidth=\"595\" pageHeight=\"842\" whenNoDataType=\"AllSectionsNoDetail\" columnWidth=\"555\" leftMargin=\"20\" rightMargin=\"20\" topMargin=\"20\" bottomMargin=\"20\" uuid=\"b82e3d3c-cc21-424b-bdce-bc4d65f2ea79\">\r\n    <property name=\"com.jaspersoft.studio.data.defaultdataadapter\" value=\"CBS\"/>\r\n    <property name=\"com.jaspersoft.studio.data.sql.tables\" value=\"\"/>\r\n    <parameter name=\"username\" class=\"java.lang.String\"/>\r\n    <parameter name=\"logo\" class=\"java.lang.Object\"/>\r\n    <queryString language=\"SQL\">\r\n        <![CDATA[SELECT * FROM events ;]]>\r\n    </queryString>\r\n    <field name=\"firstname\" class=\"java.lang.String\">\r\n        <property name=\"com.jaspersoft.studio.field.name\" value=\"firstname\"/>\r\n        <property name=\"com.jaspersoft.studio.field.label\" value=\"firstname\"/>\r\n    </field>\r\n    <field name=\"lastname\" class=\"java.lang.String\">\r\n        <property name=\"com.jaspersoft.studio.field.name\" value=\"lastname\"/>\r\n        <property name=\"com.jaspersoft.studio.field.label\" value=\"lastname\"/>\r\n    </field>\r\n    <field name=\"gender\" class=\"zw.co.afrosoft.model.Gender\">\r\n        <property name=\"com.jaspersoft.studio.field.name\" value=\"gender\"/>\r\n        <property name=\"com.jaspersoft.studio.field.label\" value=\"gender\"/>\r\n    </field>\r\n    <field name=\"dob\" class=\"java.lang.String\">\r\n        <property name=\"com.jaspersoft.studio.field.name\" value=\"dob\"/>\r\n        <property name=\"com.jaspersoft.studio.field.label\" value=\"dob\"/>\r\n    </field>\r\n    <field name=\"email\" class=\"java.lang.String\">\r\n        <property name=\"com.jaspersoft.studio.field.name\" value=\"email\"/>\r\n        <property name=\"com.jaspersoft.studio.field.label\" value=\"email\"/>\r\n    </field>\r\n    <background>\r\n        <band height=\"84\" splitType=\"Stretch\"/>\r\n    </background>\r\n    <pageHeader>\r\n        <band height=\"140\" splitType=\"Stretch\">\r\n            <staticText>\r\n                <reportElement x=\"399\" y=\"58\" width=\"175\" height=\"20\" uuid=\"5afa1ac3-e0ae-4000-b169-712fbb4fe12b\"/>\r\n                <textElement textAlignment=\"Left\">\r\n                    <font fontName=\"SansSerif\" size=\"10\" isBold=\"true\"/>\r\n                </textElement>\r\n                <text><![CDATA[Employee Report]]></text>\r\n            </staticText>\r\n            <textField pattern=\" dd-MMM-yyyy h:mm:ss\">\r\n                <reportElement x=\"445\" y=\"97\" width=\"132\" height=\"18\" uuid=\"d2680c28-f155-42d1-a257-b1ead3f6c54f\"/>\r\n                <textElement>\r\n                    <font fontName=\"SansSerif\" size=\"10\"/>\r\n                </textElement>\r\n                <textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>\r\n            </textField>\r\n            <staticText>\r\n                <reportElement x=\"398\" y=\"97\" width=\"44\" height=\"18\" uuid=\"fa5bf524-f72f-433a-a7cd-fc14484bc0f0\"/>\r\n                <textElement>\r\n                    <font fontName=\"SansSerif\" size=\"10\" isBold=\"true\"/>\r\n                </textElement>\r\n                <text><![CDATA[Run On:]]></text>\r\n            </staticText>\r\n            <image>\r\n                <reportElement x=\"10\" y=\"9\" width=\"173\" height=\"131\" uuid=\"9f130438-f039-4d98-b68a-6e2c27d2ecb6\"/>\r\n                <imageExpression><![CDATA[\"C:/Users/princessm/Desktop/ATTACHMENT PROJECTS/spring-boot-boilerplate/src/main/resources/templates/logo.png\"]]></imageExpression>\r\n            </image>\r\n        </band>\r\n    </pageHeader>\r\n    <columnHeader>\r\n        <band height=\"63\" splitType=\"Stretch\">\r\n            <line>\r\n                <reportElement x=\"-21\" y=\"23\" width=\"596\" height=\"1\" uuid=\"5bcec5da-38f6-4c92-8143-d5968ce41918\">\r\n                    <property name=\"com.jaspersoft.studio.unit.height\" value=\"px\"/>\r\n                </reportElement>\r\n            </line>\r\n            <textField>\r\n                <reportElement mode=\"Opaque\" x=\"-20\" y=\"-1\" width=\"597\" height=\"24\" forecolor=\"#FFFFFF\" backcolor=\"#29235A\" uuid=\"ac682eff-2cc0-40fa-bc03-d3071872a911\">\r\n                    <property name=\"com.jaspersoft.studio.unit.height\" value=\"px\"/>\r\n                </reportElement>\r\n                <textElement textAlignment=\"Center\" verticalAlignment=\"Middle\" markup=\"html\"/>\r\n                <textFieldExpression><![CDATA[\"\"]]></textFieldExpression>\r\n            </textField>\r\n            <staticText>\r\n                <reportElement x=\"0\" y=\"5\" width=\"133\" height=\"18\" forecolor=\"#FFFFFF\" uuid=\"35ecf4bd-3c9e-4707-8c78-de5a09d42418\">\r\n                    <property name=\"com.jaspersoft.studio.spreadsheet.connectionID\" value=\"4697d721-b905-4105-ad0c-a8e92a922ddb\"/>\r\n                </reportElement>\r\n                <textElement>\r\n                    <font fontName=\"SansSerif\" size=\"8\" isBold=\"true\"/>\r\n                </textElement>\r\n                <text><![CDATA[ Firstname]]></text>\r\n            </staticText>\r\n            <staticText>\r\n                <reportElement x=\"100\" y=\"5\" width=\"120\" height=\"18\" forecolor=\"#FFFFFF\" uuid=\"35ecf4bd-3c9e-4707-8c78-de5a09d42418\">\r\n                    <property name=\"com.jaspersoft.studio.spreadsheet.connectionID\" value=\"4697d721-b905-4105-ad0c-a8e92a922ddb\"/>\r\n                </reportElement>\r\n                <textElement>\r\n                    <font fontName=\"SansSerif\" size=\"8\" isBold=\"true\"/>\r\n                </textElement>\r\n                <text><![CDATA[    Lastname]]></text>\r\n            </staticText>\r\n            <staticText>\r\n                <reportElement x=\"207\" y=\"5\" width=\"120\" height=\"18\" forecolor=\"#FFFFFF\" uuid=\"62c2d44a-be74-41b3-b55b-1fec46648031\">\r\n                    <property name=\"com.jaspersoft.studio.spreadsheet.connectionID\" value=\"e29f1483-5e0c-4660-a250-6dbc347161a8\"/>\r\n                </reportElement>\r\n                <textElement>\r\n                    <font fontName=\"SansSerif\" size=\"8\" isBold=\"true\"/>\r\n                </textElement>\r\n                <text><![CDATA[      Gender]]></text>\r\n            </staticText>\r\n            <staticText>\r\n                <reportElement x=\"460\" y=\"5\" width=\"110\" height=\"18\" forecolor=\"#FFFFFF\" uuid=\"06c68a6b-586c-47a5-8771-305a730d9563\">\r\n                    <property name=\"com.jaspersoft.studio.spreadsheet.connectionID\" value=\"df3910e2-aaf8-407c-a264-e6a19df9094e\"/>\r\n                </reportElement>\r\n                <textElement>\r\n                    <font fontName=\"SansSerif\" size=\"8\" isBold=\"true\"/>\r\n                </textElement>\r\n                <text><![CDATA[     DOB]]></text>\r\n            </staticText>\r\n            <staticText>\r\n                <reportElement x=\"309\" y=\"6\" width=\"151\" height=\"18\" forecolor=\"#FFFFFF\" uuid=\"a2ae2ca9-b133-47ba-8b06-f5654a90be7b\">\r\n                    <property name=\"com.jaspersoft.studio.spreadsheet.connectionID\" value=\"cd6fea81-41d9-478c-9431-34310b4816b3\"/>\r\n                </reportElement>\r\n                <textElement textAlignment=\"Left\">\r\n                    <font fontName=\"SansSerif\" size=\"8\" isBold=\"true\"/>\r\n                </textElement>\r\n                <text><![CDATA[         Email]]></text>\r\n            </staticText>\r\n            <textField>\r\n                <reportElement x=\"0\" y=\"40\" width=\"68\" height=\"18\" uuid=\"03b2cd02-df8f-4f8e-8bca-9e41cac5d1c2\">\r\n                    <property name=\"com.jaspersoft.studio.spreadsheet.connectionID\" value=\"e29f1483-5e0c-4660-a250-6dbc347161a8\"/>\r\n                </reportElement>\r\n                <textElement>\r\n                    <font fontName=\"SansSerif\" size=\"8\"/>\r\n                </textElement>\r\n                <textFieldExpression><![CDATA[$F{firstname}]]></textFieldExpression>\r\n            </textField>\r\n            <textField>\r\n                <reportElement x=\"212\" y=\"40\" width=\"70\" height=\"18\" uuid=\"ff14796a-4351-44c0-a328-b1f3c96a1955\">\r\n                    <property name=\"com.jaspersoft.studio.spreadsheet.connectionID\" value=\"df3910e2-aaf8-407c-a264-e6a19df9094e\"/>\r\n                </reportElement>\r\n                <textElement>\r\n                    <font fontName=\"SansSerif\" size=\"8\"/>\r\n                </textElement>\r\n                <textFieldExpression><![CDATA[$F{gender}]]></textFieldExpression>\r\n            </textField>\r\n            <textField>\r\n                <reportElement x=\"100\" y=\"40\" width=\"86\" height=\"18\" uuid=\"ff14796a-4351-44c0-a328-b1f3c96a1955\">\r\n                    <property name=\"com.jaspersoft.studio.spreadsheet.connectionID\" value=\"df3910e2-aaf8-407c-a264-e6a19df9094e\"/>\r\n                </reportElement>\r\n                <textElement>\r\n                    <font fontName=\"SansSerif\" size=\"8\"/>\r\n                </textElement>\r\n                <textFieldExpression><![CDATA[$F{lastname}]]></textFieldExpression>\r\n            </textField>\r\n            <textField>\r\n                <reportElement x=\"320\" y=\"40\" width=\"125\" height=\"18\" uuid=\"d79b4c9e-d4ff-44a8-8cd0-8623cd9583cf\">\r\n                    <property name=\"com.jaspersoft.studio.spreadsheet.connectionID\" value=\"294fc540-ef5e-4bf2-b44f-502001746d39\"/>\r\n                </reportElement>\r\n                <textElement>\r\n                    <font fontName=\"SansSerif\" size=\"8\"/>\r\n                </textElement>\r\n                <textFieldExpression><![CDATA[$F{email}]]></textFieldExpression>\r\n            </textField>\r\n            <textField>\r\n                <reportElement x=\"460\" y=\"40\" width=\"70\" height=\"18\" uuid=\"7e99ff59-2a32-460e-b2ad-b6a6f11e5859\">\r\n                    <property name=\"com.jaspersoft.studio.spreadsheet.connectionID\" value=\"4697d721-b905-4105-ad0c-a8e92a922ddb\"/>\r\n                </reportElement>\r\n                <textElement>\r\n                    <font fontName=\"SansSerif\" size=\"8\"/>\r\n                </textElement>\r\n                <textFieldExpression><![CDATA[$F{dob}]]></textFieldExpression>\r\n            </textField>\r\n        </band>\r\n    </columnHeader>\r\n    <detail>\r\n        <band height=\"28\">\r\n            <property name=\"com.jaspersoft.studio.unit.height\" value=\"px\"/>\r\n        </band>\r\n    </detail>\r\n    <pageFooter>\r\n        <band height=\"33\" splitType=\"Stretch\">\r\n            <textField>\r\n                <reportElement x=\"183\" y=\"2\" width=\"100\" height=\"18\" uuid=\"15c4cf24-fef3-4f75-8085-f64fe73869cf\"/>\r\n                <textElement textAlignment=\"Right\">\r\n                    <font fontName=\"SansSerif\" size=\"8\"/>\r\n                </textElement>\r\n                <textFieldExpression><![CDATA[\"Page \" + $V{PAGE_NUMBER}]]></textFieldExpression>\r\n            </textField>\r\n            <textField evaluationTime=\"Report\">\r\n                <reportElement x=\"282\" y=\"2\" width=\"100\" height=\"18\" uuid=\"8c291e17-7c8b-4f78-a92c-bdf4c15f4885\"/>\r\n                <textElement textAlignment=\"Left\">\r\n                    <font fontName=\"SansSerif\" size=\"8\"/>\r\n                </textElement>\r\n                <textFieldExpression><![CDATA[\" of \" + $V{PAGE_NUMBER}]]></textFieldExpression>\r\n            </textField>\r\n            <line>\r\n                <reportElement x=\"-21\" y=\"1\" width=\"596\" height=\"1\" uuid=\"11047447-8ba6-4048-95ba-2a06ac9d7a72\">\r\n                    <property name=\"com.jaspersoft.studio.unit.height\" value=\"px\"/>\r\n                </reportElement>\r\n            </line>\r\n        </band>\r\n    </pageFooter>\r\n</jasperReport>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/target/classes/templates/employee.jrxml b/target/classes/templates/employee.jrxml
+--- a/target/classes/templates/employee.jrxml	(revision ab60c0797c15c31918f73d278f0b556786b9ffc7)
++++ b/target/classes/templates/employee.jrxml	(date 1705148395141)
+@@ -16,7 +16,7 @@
+         <property name="com.jaspersoft.studio.field.name" value="lastname"/>
+         <property name="com.jaspersoft.studio.field.label" value="lastname"/>
+     </field>
+-    <field name="gender" class="zw.co.afrosoft.model.Gender">
++    <field name="gender" class="zw.co.afrosoft.model.employee.Gender">
+         <property name="com.jaspersoft.studio.field.name" value="gender"/>
+         <property name="com.jaspersoft.studio.field.label" value="gender"/>
+     </field>
+Index: .idea/compiler.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"CompilerConfiguration\">\r\n    <annotationProcessing>\r\n      <profile default=\"true\" name=\"Default\" enabled=\"true\" />\r\n      <profile name=\"Maven default annotation processors profile\" enabled=\"true\">\r\n        <sourceOutputDir name=\"target/generated-sources/annotations\" />\r\n        <sourceTestOutputDir name=\"target/generated-test-sources/test-annotations\" />\r\n        <outputRelativeToContentRoot value=\"true\" />\r\n        <module name=\"HrLeaveSystem\" />\r\n      </profile>\r\n    </annotationProcessing>\r\n  </component>\r\n  <component name=\"JavacSettings\">\r\n    <option name=\"ADDITIONAL_OPTIONS_OVERRIDE\">\r\n      <module name=\"HrLeaveSystem\" options=\"-parameters\" />\r\n    </option>\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/compiler.xml b/.idea/compiler.xml
+--- a/.idea/compiler.xml	(revision ab60c0797c15c31918f73d278f0b556786b9ffc7)
++++ b/.idea/compiler.xml	(date 1706211020132)
+@@ -7,6 +7,7 @@
+         <sourceOutputDir name="target/generated-sources/annotations" />
+         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+         <outputRelativeToContentRoot value="true" />
++        <module name="spring-boot" />
+         <module name="HrLeaveSystem" />
+       </profile>
+     </annotationProcessing>
+@@ -14,6 +15,7 @@
+   <component name="JavacSettings">
+     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+       <module name="HrLeaveSystem" options="-parameters" />
++      <module name="spring-boot" options="-parameters" />
+     </option>
+   </component>
+ </project>
+\ No newline at end of file
+Index: src/main/java/zw/co/afrosoft/service/payslips/PayslipService.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/zw/co/afrosoft/service/payslips/PayslipService.java b/src/main/java/zw/co/afrosoft/service/payslips/PayslipService.java
+new file mode 100644
+--- /dev/null	(date 1705860812273)
++++ b/src/main/java/zw/co/afrosoft/service/payslips/PayslipService.java	(date 1705860812273)
+@@ -0,0 +1,12 @@
++package zw.co.afrosoft.service.payslips;
++
++import org.springframework.http.ResponseEntity;
++import zw.co.afrosoft.model.department.Department;
++import zw.co.afrosoft.model.department.DepartmentRequest;
++import zw.co.afrosoft.model.payslips.Payslip;
++import zw.co.afrosoft.model.payslips.PayslipRequest;
++
++public interface PayslipService {
++
++    ResponseEntity<Payslip> create(PayslipRequest payslipRequest);
++}
+Index: src/main/java/zw/co/afrosoft/controller/payslips/PayslipController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/zw/co/afrosoft/controller/payslips/PayslipController.java b/src/main/java/zw/co/afrosoft/controller/payslips/PayslipController.java
+new file mode 100644
+--- /dev/null	(date 1706001624957)
++++ b/src/main/java/zw/co/afrosoft/controller/payslips/PayslipController.java	(date 1706001624957)
+@@ -0,0 +1,28 @@
++package zw.co.afrosoft.controller.payslips;
++
++
++import lombok.RequiredArgsConstructor;
++import org.springframework.http.ResponseEntity;
++import org.springframework.web.bind.annotation.*;
++import zw.co.afrosoft.model.employee.Employee;
++import zw.co.afrosoft.model.payslips.PayslipRequest;
++import zw.co.afrosoft.security.dto.EmployeeRequest;
++import zw.co.afrosoft.service.payslips.PayslipService;
++
++@CrossOrigin
++@RestController
++@RequiredArgsConstructor
++@RequestMapping("/payslips")
++public class PayslipController {
++
++
++    private final PayslipService payslipService;
++
++    @PostMapping("create")
++    public ResponseEntity create(@RequestBody PayslipRequest payslipRequest){
++        return payslipService.create(payslipRequest);
++    }
++
++
++
++}
+Index: target/generated-sources/annotations/zw/co/afrosoft/security/mapper/UserMapperImpl.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package zw.co.afrosoft.security.mapper;\r\n\r\nimport javax.annotation.processing.Generated;\r\nimport zw.co.afrosoft.model.user.User;\r\nimport zw.co.afrosoft.security.dto.AuthenticatedUserDto;\r\nimport zw.co.afrosoft.security.dto.EmployeeRequest;\r\nimport zw.co.afrosoft.security.dto.RegistrationRequest;\r\n\r\n@Generated(\r\n    value = \"org.mapstruct.ap.MappingProcessor\",\r\n    date = \"2023-07-11T16:50:44+0200\",\r\n    comments = \"version: 1.5.2.Final, compiler: javac, environment: Java 17.0.5 (Amazon.com Inc.)\"\r\n)\r\npublic class UserMapperImpl implements UserMapper {\r\n\r\n    @Override\r\n    public User convertToUser(RegistrationRequest registrationRequest) {\r\n        if ( registrationRequest == null ) {\r\n            return null;\r\n        }\r\n\r\n        User.UserBuilder user = User.builder();\r\n\r\n        user.firstName( registrationRequest.getFirstName() );\r\n        user.lastName( registrationRequest.getLastName() );\r\n        user.username( registrationRequest.getUsername() );\r\n        user.password( registrationRequest.getPassword() );\r\n        user.email( registrationRequest.getEmail() );\r\n\r\n        return user.build();\r\n    }\r\n\r\n    @Override\r\n    public AuthenticatedUserDto convertToAuthenticatedUserDto(User user) {\r\n        if ( user == null ) {\r\n            return null;\r\n        }\r\n\r\n        AuthenticatedUserDto authenticatedUserDto = new AuthenticatedUserDto();\r\n\r\n        authenticatedUserDto.setFirstName( user.getFirstName() );\r\n        authenticatedUserDto.setLastName( user.getLastName() );\r\n        authenticatedUserDto.setEmployee( user.getEmployee() );\r\n        authenticatedUserDto.setEmail( user.getEmail() );\r\n        authenticatedUserDto.setId( user.getId() );\r\n        authenticatedUserDto.setUsername( user.getUsername() );\r\n        authenticatedUserDto.setPassword( user.getPassword() );\r\n        authenticatedUserDto.setUserRole( user.getUserRole() );\r\n\r\n        return authenticatedUserDto;\r\n    }\r\n\r\n    @Override\r\n    public User convertToUser(AuthenticatedUserDto authenticatedUserDto) {\r\n        if ( authenticatedUserDto == null ) {\r\n            return null;\r\n        }\r\n\r\n        User.UserBuilder user = User.builder();\r\n\r\n        user.id( authenticatedUserDto.getId() );\r\n        user.firstName( authenticatedUserDto.getFirstName() );\r\n        user.lastName( authenticatedUserDto.getLastName() );\r\n        user.username( authenticatedUserDto.getUsername() );\r\n        user.password( authenticatedUserDto.getPassword() );\r\n        user.email( authenticatedUserDto.getEmail() );\r\n        user.employee( authenticatedUserDto.getEmployee() );\r\n        user.userRole( authenticatedUserDto.getUserRole() );\r\n\r\n        return user.build();\r\n    }\r\n\r\n    @Override\r\n    public User convertToUser(EmployeeRequest request) {\r\n        if ( request == null ) {\r\n            return null;\r\n        }\r\n\r\n        User.UserBuilder user = User.builder();\r\n\r\n        user.firstName( request.getFirstName() );\r\n        user.lastName( request.getLastName() );\r\n        user.username( request.getUsername() );\r\n        user.password( request.getPassword() );\r\n        user.email( request.getEmail() );\r\n\r\n        return user.build();\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/target/generated-sources/annotations/zw/co/afrosoft/security/mapper/UserMapperImpl.java b/target/generated-sources/annotations/zw/co/afrosoft/security/mapper/UserMapperImpl.java
+--- a/target/generated-sources/annotations/zw/co/afrosoft/security/mapper/UserMapperImpl.java	(revision ab60c0797c15c31918f73d278f0b556786b9ffc7)
++++ b/target/generated-sources/annotations/zw/co/afrosoft/security/mapper/UserMapperImpl.java	(date 1705181253973)
+@@ -8,8 +8,8 @@
+ 
+ @Generated(
+     value = "org.mapstruct.ap.MappingProcessor",
+-    date = "2023-07-11T16:50:44+0200",
+-    comments = "version: 1.5.2.Final, compiler: javac, environment: Java 17.0.5 (Amazon.com Inc.)"
++    date = "2024-01-13T23:27:33+0200",
++    comments = "version: 1.5.2.Final, compiler: javac, environment: Java 17.0.9 (OpenLogic)"
+ )
+ public class UserMapperImpl implements UserMapper {
+ 
+Index: .idea/.gitignore
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/.gitignore b/.idea/.gitignore
+new file mode 100644
+--- /dev/null	(date 1705148414492)
++++ b/.idea/.gitignore	(date 1705148414492)
+@@ -0,0 +1,8 @@
++# Default ignored files
++/shelf/
++/workspace.xml
++# Editor-based HTTP Client requests
++/httpRequests/
++# Datasource local storage ignored files
++/dataSources/
++/dataSources.local.xml
+Index: .idea/dataSources.local.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"dataSourceStorageLocal\" created-in=\"IU-222.4459.4\">\r\n    <data-source name=\"employee@localhost\" uuid=\"e8c660d0-c711-4a73-86f3-173e39bfaddb\">\r\n      <database-info product=\"MySQL\" version=\"8.0.32\" jdbc-version=\"4.2\" driver-name=\"MySQL Connector/J\" driver-version=\"mysql-connector-java-8.0.25 (Revision: 08be9e9b4cba6aa115f9b27b215887af40b159e0)\" dbms=\"MYSQL\" exact-version=\"8.0.32\" exact-driver-version=\"8.0\">\r\n        <extra-name-characters>#@</extra-name-characters>\r\n        <identifier-quote-string>`</identifier-quote-string>\r\n      </database-info>\r\n      <case-sensitivity plain-identifiers=\"lower\" quoted-identifiers=\"lower\" />\r\n      <secret-storage>master_key</secret-storage>\r\n      <user-name>root</user-name>\r\n      <schema-mapping>\r\n        <introspection-scope>\r\n          <node kind=\"schema\" qname=\"@\" />\r\n        </introspection-scope>\r\n      </schema-mapping>\r\n    </data-source>\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/dataSources.local.xml b/.idea/dataSources.local.xml
+--- a/.idea/dataSources.local.xml	(revision ab60c0797c15c31918f73d278f0b556786b9ffc7)
++++ b/.idea/dataSources.local.xml	(date 1705149180239)
+@@ -1,6 +1,6 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+-  <component name="dataSourceStorageLocal" created-in="IU-222.4459.4">
++  <component name="dataSourceStorageLocal" created-in="IU-222.3739.54">
+     <data-source name="employee@localhost" uuid="e8c660d0-c711-4a73-86f3-173e39bfaddb">
+       <database-info product="MySQL" version="8.0.32" jdbc-version="4.2" driver-name="MySQL Connector/J" driver-version="mysql-connector-java-8.0.25 (Revision: 08be9e9b4cba6aa115f9b27b215887af40b159e0)" dbms="MYSQL" exact-version="8.0.32" exact-driver-version="8.0">
+         <extra-name-characters>#@</extra-name-characters>
+Index: src/main/resources/application.yml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>server:\r\n  port: 8085\r\nspring:\r\n  datasource:\r\n    url: jdbc:mysql://localhost:3306/employee2\r\n    username: root\r\n    password: Perfect2001\r\n\r\n  jpa:\r\n#    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect\r\n    hibernate:\r\n      ddl-auto: update\r\n      show-sql: true\r\n      format-sql: true\r\n      type: info\r\n      use-sql-comments: true\r\n      properties:\r\n        hibernate.use_sql_comments: true\r\n        hibernate.format_sql: true\r\n\r\nspringdoc:\r\n  show-actuator: true\r\n  paths-to-match: /**\r\n  packages-to-scan: zw.co.afrosoft\r\n\r\nmanagement:\r\n  endpoint:\r\n    health:\r\n      show-details: ALWAYS\r\n    endpoints:\r\n      web:\r\n        exposure:\r\n          include: \"*\"\r\n\r\nlogging:\r\n  level:\r\n    org.springframework: INFO\r\n    design.boilerplate.springboot: INFO\r\n\r\n## FIXME : Customize JWT token and Swagger information for your application\r\n\r\njwt:\r\n  secretKey: secret\r\n  issuer: afrosoft.co.zw\r\n  expirationMinute: 10\r\n\r\nswagger:\r\n  contact-name: Perfect Makuwerere\r\n  contact-mail: perfect.makuwerere@afrosoft.co.zw\r\n  contact-url:\r\n  app-name: INNOVATION\r\n  app-description: \"LETS INNOVATE\"\r\n  app-version: 2.0.0\r\n  app-license-url: https://www.apache.org/licenses/LICENSE-2.0.html\r\n  app-license: Apache 2.0\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/resources/application.yml b/src/main/resources/application.yml
+--- a/src/main/resources/application.yml	(revision ab60c0797c15c31918f73d278f0b556786b9ffc7)
++++ b/src/main/resources/application.yml	(date 1705181501022)
+@@ -2,9 +2,9 @@
+   port: 8085
+ spring:
+   datasource:
+-    url: jdbc:mysql://localhost:3306/employee2
++    url: jdbc:mysql://localhost:3306/employee
+     username: root
+-    password: Perfect2001
++    password: perfect2001
+ 
+   jpa:
+ #    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+Index: src/main/java/zw/co/afrosoft/repository/payslip/PaySlipRepo.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/zw/co/afrosoft/repository/payslip/PaySlipRepo.java b/src/main/java/zw/co/afrosoft/repository/payslip/PaySlipRepo.java
+new file mode 100644
+--- /dev/null	(date 1706001577099)
++++ b/src/main/java/zw/co/afrosoft/repository/payslip/PaySlipRepo.java	(date 1706001577099)
+@@ -0,0 +1,7 @@
++package zw.co.afrosoft.repository.payslip;
++
++import org.springframework.data.jpa.repository.JpaRepository;
++import zw.co.afrosoft.model.payslips.Payslip;
++
++public interface PaySlipRepo extends JpaRepository<Payslip,Long> {
++}
+Index: src/main/java/zw/co/afrosoft/service/payslips/PayslipServiceImpl.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/zw/co/afrosoft/service/payslips/PayslipServiceImpl.java b/src/main/java/zw/co/afrosoft/service/payslips/PayslipServiceImpl.java
+new file mode 100644
+--- /dev/null	(date 1706175279836)
++++ b/src/main/java/zw/co/afrosoft/service/payslips/PayslipServiceImpl.java	(date 1706175279836)
+@@ -0,0 +1,43 @@
++package zw.co.afrosoft.service.payslips;
++
++import org.springframework.http.ResponseEntity;
++import org.springframework.stereotype.Service;
++import zw.co.afrosoft.model.employee.Employee;
++import zw.co.afrosoft.model.payslips.Payslip;
++import zw.co.afrosoft.model.payslips.PayslipRequest;
++import zw.co.afrosoft.repository.employee.EmployeeRepository;
++import zw.co.afrosoft.repository.payslip.PaySlipRepo;
++
++import java.util.List;
++import java.util.Optional;
++@Service
++public class PayslipServiceImpl implements PayslipService{
++
++    private  final PaySlipRepo paySlipRepo;
++
++    private final EmployeeRepository employeeRepository;
++
++    public PayslipServiceImpl(PaySlipRepo paySlipRepo, EmployeeRepository employeeRepository) {
++        this.paySlipRepo = paySlipRepo;
++        this.employeeRepository = employeeRepository;
++    }
++
++    @Override
++    public ResponseEntity<Payslip> create(PayslipRequest payslipRequest) {
++        Optional<Employee> payslip_user = employeeRepository.findById(payslipRequest.getEmployeeId());
++        Payslip payslip = new Payslip();
++        payslip.setAllowances(payslipRequest.getAllowances());
++        payslip.setBasic_salary(payslipRequest.getBasic_salary());
++        payslip.setEmployee(payslip_user.get());
++        payslip.setTax(payslipRequest.getTax());
++        payslip.setPayPeriod(payslipRequest.getPeriod());
++        payslip.setLeaveType(payslip.getLeaveType());
++        payslip.setLeaveDays(payslip.getLeaveDays());
++        payslip.setLeaveDaysCharge(payslip.getLeaveDays()/12 * payslip.getBasic_salary());
++        payslip.setOther_deductions(payslipRequest.getOtherDeductions());
++        long tax_calc = payslipRequest.getTax()/100 * payslipRequest.getBasic_salary();
++        payslip.setNetPay(payslipRequest.getBasic_salary() - (payslipRequest.getOtherDeductions() + tax_calc));
++        Payslip saved = paySlipRepo.save(payslip);
++        return ResponseEntity.ok().body(saved)  ;
++    }
++}
+Index: src/main/java/zw/co/afrosoft/configuration/SecurityConfiguration.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package zw.co.afrosoft.configuration;\r\n\r\nimport org.springframework.beans.factory.annotation.Autowired;\r\nimport org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;\r\nimport org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;\r\nimport zw.co.afrosoft.security.jwt.JwtAuthenticationEntryPoint;\r\nimport zw.co.afrosoft.security.jwt.JwtAuthenticationFilter;\r\nimport lombok.RequiredArgsConstructor;\r\nimport org.springframework.context.annotation.Bean;\r\nimport org.springframework.context.annotation.Configuration;\r\nimport org.springframework.security.authentication.AuthenticationManager;\r\nimport org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;\r\nimport org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;\r\nimport org.springframework.security.config.annotation.web.builders.HttpSecurity;\r\nimport org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;\r\nimport org.springframework.security.config.http.SessionCreationPolicy;\r\nimport org.springframework.security.web.SecurityFilterChain;\r\nimport org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;\r\n\r\n@Configuration\r\n@EnableWebSecurity\r\n@RequiredArgsConstructor\r\n@EnableGlobalMethodSecurity(prePostEnabled = true)\r\npublic class SecurityConfiguration  {\r\n\r\n\tprivate final JwtAuthenticationFilter jwtAuthenticationFilter;\r\n\r\n\tprivate final JwtAuthenticationEntryPoint unauthorizedHandler;\r\n\r\n\t@Bean\r\n\tpublic AuthenticationManager authenticationManager(final AuthenticationConfiguration authenticationConfiguration) throws Exception {\r\n\t\treturn authenticationConfiguration.getAuthenticationManager();\r\n\t}\r\n\r\n\r\n\t@Bean\r\n\tpublic SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {\r\n\t\treturn http.cors().and().csrf().disable()\r\n\t\t\t\t.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)\r\n\t\t\t\t.authorizeRequests()\r\n\r\n\t\t\t\t.antMatchers(\"/register\", \"/file/**\",\"/department/**\",\"/headOfDepartment/**\",\"/employee/**\",\"/reset/**\", \"/login\",\"/v3/api-docs/**\",\"/leave/**\",\"/Reports/**\", \"/swagger-ui/**\", \"/swagger-ui.html\", \"/actuator/**\").permitAll()\r\n\r\n\t\t\t\t.anyRequest().authenticated().and()\r\n\t\t\t\t.exceptionHandling().authenticationEntryPoint(unauthorizedHandler). and()\r\n\t\t\t\t.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)\r\n\t\t\t\t.and().build();\r\n\t}\r\n\r\n\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/zw/co/afrosoft/configuration/SecurityConfiguration.java b/src/main/java/zw/co/afrosoft/configuration/SecurityConfiguration.java
+--- a/src/main/java/zw/co/afrosoft/configuration/SecurityConfiguration.java	(revision ab60c0797c15c31918f73d278f0b556786b9ffc7)
++++ b/src/main/java/zw/co/afrosoft/configuration/SecurityConfiguration.java	(date 1706002353694)
+@@ -39,7 +39,7 @@
+ 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+ 				.authorizeRequests()
+ 
+-				.antMatchers("/register", "/file/**","/department/**","/headOfDepartment/**","/employee/**","/reset/**", "/login","/v3/api-docs/**","/leave/**","/Reports/**", "/swagger-ui/**", "/swagger-ui.html", "/actuator/**").permitAll()
++				.antMatchers("/register", "/file/**","/department/**","/headOfDepartment/**","/employee/**","/payslips/**","/reset/**", "/login","/v3/api-docs/**","/leave/**","/Reports/**", "/swagger-ui/**", "/swagger-ui.html", "/actuator/**").permitAll()
+ 
+ 				.anyRequest().authenticated().and()
+ 				.exceptionHandling().authenticationEntryPoint(unauthorizedHandler). and()
+Index: target/classes/application.yml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>server:\r\n  port: 8085\r\nspring:\r\n  datasource:\r\n    url: jdbc:mysql://localhost:3306/employee2\r\n    username: root\r\n    password: Perfect2001\r\n\r\n  jpa:\r\n#    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect\r\n    hibernate:\r\n      ddl-auto: update\r\n      show-sql: true\r\n      format-sql: true\r\n      type: info\r\n      use-sql-comments: true\r\n      properties:\r\n        hibernate.use_sql_comments: true\r\n        hibernate.format_sql: true\r\n\r\nspringdoc:\r\n  show-actuator: true\r\n  paths-to-match: /**\r\n  packages-to-scan: zw.co.afrosoft\r\n\r\nmanagement:\r\n  endpoint:\r\n    health:\r\n      show-details: ALWAYS\r\n    endpoints:\r\n      web:\r\n        exposure:\r\n          include: \"*\"\r\n\r\nlogging:\r\n  level:\r\n    org.springframework: INFO\r\n    design.boilerplate.springboot: INFO\r\n\r\n## FIXME : Customize JWT token and Swagger information for your application\r\n\r\njwt:\r\n  secretKey: secret\r\n  issuer: afrosoft.co.zw\r\n  expirationMinute: 10\r\n\r\nswagger:\r\n  contact-name: Perfect Makuwerere\r\n  contact-mail: perfect.makuwerere@afrosoft.co.zw\r\n  contact-url:\r\n  app-name: INNOVATION\r\n  app-description: \"LETS INNOVATE\"\r\n  app-version: 2.0.0\r\n  app-license-url: https://www.apache.org/licenses/LICENSE-2.0.html\r\n  app-license: Apache 2.0\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/target/classes/application.yml b/target/classes/application.yml
+--- a/target/classes/application.yml	(revision ab60c0797c15c31918f73d278f0b556786b9ffc7)
++++ b/target/classes/application.yml	(date 1705181501229)
+@@ -2,9 +2,9 @@
+   port: 8085
+ spring:
+   datasource:
+-    url: jdbc:mysql://localhost:3306/employee2
++    url: jdbc:mysql://localhost:3306/employee
+     username: root
+-    password: Perfect2001
++    password: perfect2001
+ 
+   jpa:
+ #    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+Index: src/main/java/zw/co/afrosoft/model/payslips/PayslipRequest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/zw/co/afrosoft/model/payslips/PayslipRequest.java b/src/main/java/zw/co/afrosoft/model/payslips/PayslipRequest.java
+new file mode 100644
+--- /dev/null	(date 1706175361984)
++++ b/src/main/java/zw/co/afrosoft/model/payslips/PayslipRequest.java	(date 1706175361984)
+@@ -0,0 +1,27 @@
++package zw.co.afrosoft.model.payslips;
++
++
++import lombok.AllArgsConstructor;
++import lombok.Builder;
++import lombok.Data;
++import lombok.NoArgsConstructor;
++
++import java.math.BigDecimal;
++import java.time.LocalDate;
++
++@Data
++@AllArgsConstructor
++@NoArgsConstructor
++@Builder
++public class PayslipRequest {
++
++    private Long employeeId;
++    private Long basic_salary;
++    private Long allowances;
++    private Long otherDeductions;
++    private Long tax;
++    private LocalDate period;
++    private  String Leavetype;
++    private Long leaveDays;
++
++}
+Index: src/main/java/zw/co/afrosoft/model/payslips/Payslip.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/zw/co/afrosoft/model/payslips/Payslip.java b/src/main/java/zw/co/afrosoft/model/payslips/Payslip.java
+new file mode 100644
+--- /dev/null	(date 1706175361968)
++++ b/src/main/java/zw/co/afrosoft/model/payslips/Payslip.java	(date 1706175361968)
+@@ -0,0 +1,46 @@
++package zw.co.afrosoft.model.payslips;
++
++import lombok.AllArgsConstructor;
++import lombok.Builder;
++import lombok.Data;
++import lombok.NoArgsConstructor;
++import zw.co.afrosoft.model.department.Department;
++import zw.co.afrosoft.model.employee.Employee;
++import zw.co.afrosoft.model.leave.LeaveType;
++
++import javax.persistence.*;
++import java.math.BigDecimal;
++import java.time.LocalDate;
++import java.util.Date;
++import java.util.Optional;
++
++
++@Data
++@Builder
++@AllArgsConstructor
++@NoArgsConstructor
++
++@Entity
++@Table(name = "payslip")
++public class Payslip {
++    @Id
++    @GeneratedValue(strategy = GenerationType.IDENTITY)
++    @Column(name = "id")
++    private Long id;
++    @ManyToOne
++    private Employee employee;
++//    private String department;
++    private LocalDate payPeriod;
++    private Long basic_salary;
++    private Long allowances;
++    private Long tax;
++    private Long netPay;
++    private Long other_deductions;
++    private Long leaveDays;
++    private String LeaveType;
++    private Long leaveDaysCharge;
++
++
++
++
++}
+Index: target/classes/templates/Leave.jrxml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<!-- Created with Jaspersoft Studio version 6.20.0.final using JasperReports Library version 6.20.0-2bc7ab61c56f459e8176eb05c7705e145cd400ad  -->\r\n<jasperReport xmlns=\"http://jasperreports.sourceforge.net/jasperreports\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd\" name=\"cooperativeFullKyc\" pageWidth=\"595\" pageHeight=\"842\" whenNoDataType=\"AllSectionsNoDetail\" columnWidth=\"555\" leftMargin=\"20\" rightMargin=\"20\" topMargin=\"20\" bottomMargin=\"20\" uuid=\"b82e3d3c-cc21-424b-bdce-bc4d65f2ea79\">\r\n    <property name=\"com.jaspersoft.studio.data.defaultdataadapter\" value=\"CBS\"/>\r\n    <property name=\"com.jaspersoft.studio.data.sql.tables\" value=\"\"/>\r\n    <parameter name=\"username\" class=\"java.lang.String\"/>\r\n    <parameter name=\"logo\" class=\"java.lang.Object\"/>\r\n    <queryString language=\"SQL\">\r\n        <![CDATA[SELECT * FROM events ;]]>\r\n    </queryString>\r\n    <field name=\"name\" class=\"java.lang.String\">\r\n        <property name=\"com.jaspersoft.studio.field.name\" value=\"name\"/>\r\n        <property name=\"com.jaspersoft.studio.field.label\" value=\"name\"/>\r\n    </field>\r\n    <field name=\"from\" class=\"java.time.LocalDate\">\r\n        <property name=\"com.jaspersoft.studio.field.name\" value=\"from\"/>\r\n        <property name=\"com.jaspersoft.studio.field.label\" value=\"from\"/>\r\n    </field>\r\n    <field name=\"to\" class=\"java.time.LocalDate\">\r\n        <property name=\"com.jaspersoft.studio.field.name\" value=\"to\"/>\r\n        <property name=\"com.jaspersoft.studio.field.label\" value=\"to\"/>\r\n    </field>\r\n    <field name=\"type\" class=\"zw.co.afrosoft.model.LeaveType\">\r\n        <property name=\"com.jaspersoft.studio.field.name\" value=\"type\"/>\r\n        <property name=\"com.jaspersoft.studio.field.label\" value=\"type\"/>\r\n    </field>\r\n    <field name=\"stat\" class=\"zw.co.afrosoft.model.Status\">\r\n        <property name=\"com.jaspersoft.studio.field.name\" value=\"stat\"/>\r\n        <property name=\"com.jaspersoft.studio.field.label\" value=\"stat\"/>\r\n    </field>\r\n    <field name=\"duration\" class=\"java.lang.Integer\">\r\n        <property name=\"com.jaspersoft.studio.field.name\" value=\"duration\"/>\r\n        <property name=\"com.jaspersoft.studio.field.label\" value=\"duration\"/>\r\n    </field>\r\n    <background>\r\n        <band height=\"84\" splitType=\"Stretch\"/>\r\n    </background>\r\n    <pageHeader>\r\n        <band height=\"115\" splitType=\"Stretch\">\r\n            <staticText>\r\n                <reportElement x=\"399\" y=\"58\" width=\"175\" height=\"20\" uuid=\"5afa1ac3-e0ae-4000-b169-712fbb4fe12b\"/>\r\n                <textElement textAlignment=\"Left\">\r\n                    <font fontName=\"SansSerif\" size=\"10\" isBold=\"true\"/>\r\n                </textElement>\r\n                <text><![CDATA[Employee Leave  Report]]></text>\r\n            </staticText>\r\n            <textField pattern=\" dd-MMM-yyyy h:mm:ss\">\r\n                <reportElement x=\"445\" y=\"97\" width=\"132\" height=\"18\" uuid=\"d2680c28-f155-42d1-a257-b1ead3f6c54f\"/>\r\n                <textElement>\r\n                    <font fontName=\"SansSerif\" size=\"10\"/>\r\n                </textElement>\r\n                <textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>\r\n            </textField>\r\n            <staticText>\r\n                <reportElement x=\"398\" y=\"97\" width=\"44\" height=\"18\" uuid=\"fa5bf524-f72f-433a-a7cd-fc14484bc0f0\"/>\r\n                <textElement>\r\n                    <font fontName=\"SansSerif\" size=\"10\" isBold=\"true\"/>\r\n                </textElement>\r\n                <text><![CDATA[Run On:]]></text>\r\n            </staticText>\r\n            <image>\r\n                <reportElement x=\"0\" y=\"10\" width=\"160\" height=\"100\" uuid=\"66517d16-65c9-4d9f-9848-5634c83b71ff\"/>\r\n                <imageExpression><![CDATA[\"C:/Users/princessm/Desktop/ATTACHMENT PROJECTS/spring-boot-boilerplate/src/main/resources/templates/logo.png\"]]></imageExpression>\r\n            </image>\r\n        </band>\r\n    </pageHeader>\r\n    <columnHeader>\r\n        <band height=\"88\" splitType=\"Stretch\">\r\n            <line>\r\n                <reportElement x=\"-21\" y=\"23\" width=\"596\" height=\"1\" uuid=\"5bcec5da-38f6-4c92-8143-d5968ce41918\">\r\n                    <property name=\"com.jaspersoft.studio.unit.height\" value=\"px\"/>\r\n                </reportElement>\r\n            </line>\r\n            <textField>\r\n                <reportElement mode=\"Opaque\" x=\"-20\" y=\"-1\" width=\"597\" height=\"24\" forecolor=\"#FFFFFF\" backcolor=\"#29235A\" uuid=\"ac682eff-2cc0-40fa-bc03-d3071872a911\">\r\n                    <property name=\"com.jaspersoft.studio.unit.height\" value=\"px\"/>\r\n                </reportElement>\r\n                <textElement textAlignment=\"Center\" verticalAlignment=\"Middle\" markup=\"html\"/>\r\n                <textFieldExpression><![CDATA[\"\"]]></textFieldExpression>\r\n            </textField>\r\n            <staticText>\r\n                <reportElement x=\"150\" y=\"6\" width=\"133\" height=\"18\" forecolor=\"#FFFFFF\" uuid=\"35ecf4bd-3c9e-4707-8c78-de5a09d42418\">\r\n                    <property name=\"com.jaspersoft.studio.spreadsheet.connectionID\" value=\"4697d721-b905-4105-ad0c-a8e92a922ddb\"/>\r\n                </reportElement>\r\n                <textElement>\r\n                    <font fontName=\"SansSerif\" size=\"8\" isBold=\"true\"/>\r\n                </textElement>\r\n                <text><![CDATA[           To]]></text>\r\n            </staticText>\r\n            <staticText>\r\n                <reportElement x=\"50\" y=\"6\" width=\"91\" height=\"18\" forecolor=\"#FFFFFF\" uuid=\"62c2d44a-be74-41b3-b55b-1fec46648031\">\r\n                    <property name=\"com.jaspersoft.studio.spreadsheet.connectionID\" value=\"e29f1483-5e0c-4660-a250-6dbc347161a8\"/>\r\n                </reportElement>\r\n                <textElement>\r\n                    <font fontName=\"SansSerif\" size=\"8\" isBold=\"true\"/>\r\n                </textElement>\r\n                <text><![CDATA[              From]]></text>\r\n            </staticText>\r\n            <staticText>\r\n                <reportElement x=\"250\" y=\"2\" width=\"50\" height=\"18\" forecolor=\"#FFFFFF\" uuid=\"06c68a6b-586c-47a5-8771-305a730d9563\">\r\n                    <property name=\"com.jaspersoft.studio.spreadsheet.connectionID\" value=\"df3910e2-aaf8-407c-a264-e6a19df9094e\"/>\r\n                </reportElement>\r\n                <textElement>\r\n                    <font fontName=\"SansSerif\" size=\"8\" isBold=\"true\"/>\r\n                </textElement>\r\n                <text><![CDATA[Duration]]></text>\r\n            </staticText>\r\n            <staticText>\r\n                <reportElement x=\"-20\" y=\"6\" width=\"151\" height=\"18\" forecolor=\"#FFFFFF\" uuid=\"a2ae2ca9-b133-47ba-8b06-f5654a90be7b\">\r\n                    <property name=\"com.jaspersoft.studio.spreadsheet.connectionID\" value=\"cd6fea81-41d9-478c-9431-34310b4816b3\"/>\r\n                </reportElement>\r\n                <textElement textAlignment=\"Left\">\r\n                    <font fontName=\"SansSerif\" size=\"8\" isBold=\"true\"/>\r\n                </textElement>\r\n                <text><![CDATA[             Name]]></text>\r\n            </staticText>\r\n            <textField>\r\n                <reportElement x=\"-11\" y=\"48\" width=\"68\" height=\"18\" uuid=\"03b2cd02-df8f-4f8e-8bca-9e41cac5d1c2\">\r\n                    <property name=\"com.jaspersoft.studio.spreadsheet.connectionID\" value=\"e29f1483-5e0c-4660-a250-6dbc347161a8\"/>\r\n                </reportElement>\r\n                <textElement>\r\n                    <font fontName=\"SansSerif\" size=\"8\"/>\r\n                </textElement>\r\n                <textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>\r\n            </textField>\r\n            <textField>\r\n                <reportElement x=\"160\" y=\"46\" width=\"86\" height=\"18\" uuid=\"ff14796a-4351-44c0-a328-b1f3c96a1955\">\r\n                    <property name=\"com.jaspersoft.studio.spreadsheet.connectionID\" value=\"df3910e2-aaf8-407c-a264-e6a19df9094e\"/>\r\n                </reportElement>\r\n                <textElement>\r\n                    <font fontName=\"SansSerif\" size=\"8\"/>\r\n                </textElement>\r\n                <textFieldExpression><![CDATA[$F{to}]]></textFieldExpression>\r\n            </textField>\r\n            <textField>\r\n                <reportElement x=\"460\" y=\"48\" width=\"70\" height=\"18\" uuid=\"7e99ff59-2a32-460e-b2ad-b6a6f11e5859\">\r\n                    <property name=\"com.jaspersoft.studio.spreadsheet.connectionID\" value=\"4697d721-b905-4105-ad0c-a8e92a922ddb\"/>\r\n                </reportElement>\r\n                <textElement>\r\n                    <font fontName=\"SansSerif\" size=\"8\"/>\r\n                </textElement>\r\n                <textFieldExpression><![CDATA[$F{stat}]]></textFieldExpression>\r\n            </textField>\r\n            <textField>\r\n                <reportElement x=\"350\" y=\"46\" width=\"86\" height=\"18\" uuid=\"d79b4c9e-d4ff-44a8-8cd0-8623cd9583cf\">\r\n                    <property name=\"com.jaspersoft.studio.spreadsheet.connectionID\" value=\"294fc540-ef5e-4bf2-b44f-502001746d39\"/>\r\n                </reportElement>\r\n                <textElement>\r\n                    <font fontName=\"SansSerif\" size=\"8\"/>\r\n                </textElement>\r\n                <textFieldExpression><![CDATA[$F{type}]]></textFieldExpression>\r\n            </textField>\r\n            <staticText>\r\n                <reportElement x=\"355\" y=\"2\" width=\"110\" height=\"18\" forecolor=\"#FFFFFF\" uuid=\"932248e4-4671-4907-a1b7-1d397bf466f1\">\r\n                    <property name=\"com.jaspersoft.studio.spreadsheet.connectionID\" value=\"df3910e2-aaf8-407c-a264-e6a19df9094e\"/>\r\n                </reportElement>\r\n                <textElement>\r\n                    <font fontName=\"SansSerif\" size=\"8\" isBold=\"true\"/>\r\n                </textElement>\r\n                <text><![CDATA[Leave Type]]></text>\r\n            </staticText>\r\n            <staticText>\r\n                <reportElement x=\"465\" y=\"2\" width=\"110\" height=\"18\" forecolor=\"#FFFFFF\" uuid=\"18755820-33d6-46ed-85e3-144c84a44e56\">\r\n                    <property name=\"com.jaspersoft.studio.spreadsheet.connectionID\" value=\"df3910e2-aaf8-407c-a264-e6a19df9094e\"/>\r\n                </reportElement>\r\n                <textElement>\r\n                    <font fontName=\"SansSerif\" size=\"8\" isBold=\"true\"/>\r\n                </textElement>\r\n                <text><![CDATA[Status]]></text>\r\n            </staticText>\r\n            <textField>\r\n                <reportElement x=\"250\" y=\"46\" width=\"86\" height=\"18\" uuid=\"26d45aa2-cb4c-41e2-8eb9-2559c0cb6f74\">\r\n                    <property name=\"com.jaspersoft.studio.spreadsheet.connectionID\" value=\"294fc540-ef5e-4bf2-b44f-502001746d39\"/>\r\n                </reportElement>\r\n                <textElement>\r\n                    <font fontName=\"SansSerif\" size=\"8\"/>\r\n                </textElement>\r\n                <textFieldExpression><![CDATA[$F{duration}]]></textFieldExpression>\r\n            </textField>\r\n            <textField>\r\n                <reportElement x=\"74\" y=\"48\" width=\"86\" height=\"18\" uuid=\"3a0b0dc7-ac1a-45f0-831a-8a04a9ffbf2c\">\r\n                    <property name=\"com.jaspersoft.studio.spreadsheet.connectionID\" value=\"294fc540-ef5e-4bf2-b44f-502001746d39\"/>\r\n                </reportElement>\r\n                <textElement>\r\n                    <font fontName=\"SansSerif\" size=\"8\"/>\r\n                </textElement>\r\n                <textFieldExpression><![CDATA[$F{from}]]></textFieldExpression>\r\n            </textField>\r\n        </band>\r\n    </columnHeader>\r\n    <detail>\r\n        <band height=\"46\">\r\n            <property name=\"com.jaspersoft.studio.unit.height\" value=\"px\"/>\r\n        </band>\r\n    </detail>\r\n    <pageFooter>\r\n        <band height=\"33\" splitType=\"Stretch\">\r\n            <textField>\r\n                <reportElement x=\"183\" y=\"2\" width=\"100\" height=\"18\" uuid=\"15c4cf24-fef3-4f75-8085-f64fe73869cf\"/>\r\n                <textElement textAlignment=\"Right\">\r\n                    <font fontName=\"SansSerif\" size=\"8\"/>\r\n                </textElement>\r\n                <textFieldExpression><![CDATA[\"Page \" + $V{PAGE_NUMBER}]]></textFieldExpression>\r\n            </textField>\r\n            <textField evaluationTime=\"Report\">\r\n                <reportElement x=\"282\" y=\"2\" width=\"100\" height=\"18\" uuid=\"8c291e17-7c8b-4f78-a92c-bdf4c15f4885\"/>\r\n                <textElement textAlignment=\"Left\">\r\n                    <font fontName=\"SansSerif\" size=\"8\"/>\r\n                </textElement>\r\n                <textFieldExpression><![CDATA[\" of \" + $V{PAGE_NUMBER}]]></textFieldExpression>\r\n            </textField>\r\n            <line>\r\n                <reportElement x=\"-21\" y=\"1\" width=\"596\" height=\"1\" uuid=\"11047447-8ba6-4048-95ba-2a06ac9d7a72\">\r\n                    <property name=\"com.jaspersoft.studio.unit.height\" value=\"px\"/>\r\n                </reportElement>\r\n            </line>\r\n        </band>\r\n    </pageFooter>\r\n</jasperReport>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/target/classes/templates/Leave.jrxml b/target/classes/templates/Leave.jrxml
+--- a/target/classes/templates/Leave.jrxml	(revision ab60c0797c15c31918f73d278f0b556786b9ffc7)
++++ b/target/classes/templates/Leave.jrxml	(date 1705148395140)
+@@ -20,11 +20,11 @@
+         <property name="com.jaspersoft.studio.field.name" value="to"/>
+         <property name="com.jaspersoft.studio.field.label" value="to"/>
+     </field>
+-    <field name="type" class="zw.co.afrosoft.model.LeaveType">
++    <field name="type" class="zw.co.afrosoft.model.leave.LeaveType">
+         <property name="com.jaspersoft.studio.field.name" value="type"/>
+         <property name="com.jaspersoft.studio.field.label" value="type"/>
+     </field>
+-    <field name="stat" class="zw.co.afrosoft.model.Status">
++    <field name="stat" class="zw.co.afrosoft.model.leave.Status">
+         <property name="com.jaspersoft.studio.field.name" value="stat"/>
+         <property name="com.jaspersoft.studio.field.label" value="stat"/>
+     </field>
+Index: src/main/resources/local.yml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>server:\r\n  port: 8080\r\nspring:\r\n  datasource:\r\n    url: jdbc:mysql://localhost:3306/employee\r\n    username: root\r\n    password: Perfect2001\r\n\r\n  jpa:\r\n    #    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect\r\n    hibernate:\r\n      ddl-auto: create\r\n      show-sql: true\r\n      format-sql: true\r\n      type: info\r\n      use-sql-comments: true\r\n      properties:\r\n        hibernate.use_sql_comments: true\r\n        hibernate.format_sql: true\r\n\r\nspringdoc:\r\n  show-actuator: true\r\n  paths-to-match: /**\r\n  packages-to-scan: zw.co.afrosoft\r\n\r\nmanagement:\r\n  endpoint:\r\n    health:\r\n      show-details: ALWAYS\r\n    endpoints:\r\n      web:\r\n        exposure:\r\n          include: \"*\"\r\n\r\nlogging:\r\n  level:\r\n    org.springframework: INFO\r\n    design.boilerplate.springboot: INFO\r\n\r\n## FIXME : Customize JWT token and Swagger information for your application\r\n\r\njwt:\r\n  secretKey: secret\r\n  issuer: afrosoft.co.zw\r\n  expirationMinute: 10\r\n\r\nswagger:\r\n  contact-name: Perfect Makuwerere\r\n  contact-mail: perfect.makuwerere@afrosoft.co.zw\r\n  contact-url:\r\n  app-name: Hr Leave System\r\n  app-description: \"Spring Boot\"\r\n  app-version: 2.0.0\r\n  app-license-url: https://www.apache.org/licenses/LICENSE-2.0.html\r\n  app-license: Apache 2.0\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/resources/local.yml b/src/main/resources/local.yml
+--- a/src/main/resources/local.yml	(revision ab60c0797c15c31918f73d278f0b556786b9ffc7)
++++ b/src/main/resources/local.yml	(date 1705181458639)
+@@ -4,7 +4,7 @@
+   datasource:
+     url: jdbc:mysql://localhost:3306/employee
+     username: root
+-    password: Perfect2001
++    password: perfect2001
+ 
+   jpa:
+     #    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
