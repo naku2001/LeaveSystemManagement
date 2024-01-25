@@ -1,4 +1,4 @@
-package zw.co.afrosoft.service;
+package zw.co.afrosoft.service.email;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -8,7 +8,6 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
-import zw.co.afrosoft.model.Email;
 
 import javax.mail.internet.MimeMessage;
 import java.nio.charset.StandardCharsets;

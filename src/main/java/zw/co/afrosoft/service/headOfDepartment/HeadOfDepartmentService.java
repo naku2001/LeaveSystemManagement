@@ -1,4 +1,4 @@
-package zw.co.afrosoft.service;
+package zw.co.afrosoft.service.headOfDepartment;
 
 import org.springframework.http.ResponseEntity;
 
@@ -9,11 +9,11 @@ public interface HeadOfDepartmentService {
 
     ResponseEntity<HeadOfDepartment> create(Long departmentId ,Long employeeId);
 
-    ResponseEntity update(HeadOfDepartmentRequest request, Long id);
+    ResponseEntity<HeadOfDepartment> update(HeadOfDepartmentRequest request, Long id);
 
-    ResponseEntity getById(Long id);
+    ResponseEntity<HeadOfDepartment> getById(Long id);
 
-    ResponseEntity getAll();
+    ResponseEntity<HeadOfDepartment> getAll();
 
-    ResponseEntity delete(Long id);
+    ResponseEntity<HeadOfDepartment> delete(Long id);
 }

@@ -1,4 +1,4 @@
-package zw.co.afrosoft.service;
+package zw.co.afrosoft.service.report;
 
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;

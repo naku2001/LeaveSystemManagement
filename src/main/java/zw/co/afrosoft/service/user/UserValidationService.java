@@ -1,4 +1,4 @@
-package zw.co.afrosoft.service;
+package zw.co.afrosoft.service.user;
 
 import zw.co.afrosoft.exceptions.registration.RegistrationException;
 import zw.co.afrosoft.repository.user.UserRepository;

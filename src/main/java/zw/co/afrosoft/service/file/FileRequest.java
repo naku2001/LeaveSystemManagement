@@ -1,4 +1,4 @@
-package zw.co.afrosoft.service;
+package zw.co.afrosoft.service.file;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

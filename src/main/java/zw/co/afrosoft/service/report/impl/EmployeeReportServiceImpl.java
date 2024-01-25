@@ -1,8 +1,9 @@
-package zw.co.afrosoft.service;
+package zw.co.afrosoft.service.report.impl;
 
 import zw.co.afrosoft.repository.employee.EmployeeRepository;
+import zw.co.afrosoft.service.report.EmployeeReportService;
 
-public class EmployeeReportServiceImpl implements  EmployeeReportService{
+public class EmployeeReportServiceImpl implements EmployeeReportService {
 
     private final EmployeeRepository employeeRepository;
 

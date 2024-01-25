@@ -1,4 +1,4 @@
-package zw.co.afrosoft.service;
+package zw.co.afrosoft.service.passwordReset;
 
 
 import org.springframework.http.HttpStatus;
@@ -8,7 +8,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-import zw.co.afrosoft.model.EmailRequest;
+import zw.co.afrosoft.model.email.EmailRequest;
 import zw.co.afrosoft.model.passwordReset.PassWordResetCode;
 import zw.co.afrosoft.model.passwordReset.PasswordResetRequest;
 import zw.co.afrosoft.model.user.User;
