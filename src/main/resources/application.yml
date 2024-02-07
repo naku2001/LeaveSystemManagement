@@ -2,9 +2,9 @@ server:
   port: 8085
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/employee2
+    url: jdbc:mysql://localhost:3306/employee
     username: root
-    password: Perfect2001
+    password: perfect2001
 
   jpa:
 #    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect

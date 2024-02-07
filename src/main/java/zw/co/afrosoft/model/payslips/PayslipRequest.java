@@ -19,9 +19,10 @@ public class PayslipRequest {
     private Long basic_salary;
     private Long allowances;
     private Long otherDeductions;
-    private Long tax;
+//    private Long tax;
     private LocalDate period;
     private  String Leavetype;
     private Long leaveDays;
+    private String leavetype;
 
 }

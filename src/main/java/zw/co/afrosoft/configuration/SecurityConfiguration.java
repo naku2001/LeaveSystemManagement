@@ -39,7 +39,7 @@ public class SecurityConfiguration  {
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 				.authorizeRequests()
 
-				.antMatchers("/register", "/file/**","/department/**","/headOfDepartment/**","/employee/**","/reset/**", "/login","/v3/api-docs/**","/leave/**","/Reports/**", "/swagger-ui/**", "/swagger-ui.html", "/actuator/**").permitAll()
+				.antMatchers("/register", "/file/**","/department/**","/payslip/**","/headOfDepartment/**","/employee/**","/reset/**", "/login","/v3/api-docs/**","/leave/**","/Reports/**", "/swagger-ui/**", "/swagger-ui.html", "/actuator/**").permitAll()
 
 				.anyRequest().authenticated().and()
 				.exceptionHandling().authenticationEntryPoint(unauthorizedHandler). and()

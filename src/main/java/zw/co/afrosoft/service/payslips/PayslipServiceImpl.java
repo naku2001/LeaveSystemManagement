@@ -1,5 +1,6 @@
 package zw.co.afrosoft.service.payslips;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import zw.co.afrosoft.model.employee.Employee;
@@ -29,15 +30,54 @@ public class PayslipServiceImpl implements PayslipService{
         payslip.setAllowances(payslipRequest.getAllowances());
         payslip.setBasic_salary(payslipRequest.getBasic_salary());
         payslip.setEmployee(payslip_user.get());
-        payslip.setTax(payslipRequest.getTax());
+        payslip.setTax(10/100L);
         payslip.setPayPeriod(payslipRequest.getPeriod());
-        payslip.setLeaveType(payslip.getLeaveType());
-        payslip.setLeaveDays(payslip.getLeaveDays());
-        payslip.setLeaveDaysCharge(payslip.getLeaveDays()/12 * payslip.getBasic_salary());
+        payslip.setLeaveType(payslipRequest.getLeavetype());
+        payslip.setLeaveDays(payslipRequest.getLeaveDays());
+        payslip.setLeaveDaysCharge(payslipRequest.getLeaveDays()/12 * payslip.getBasic_salary());
         payslip.setOther_deductions(payslipRequest.getOtherDeductions());
-        long tax_calc = payslipRequest.getTax()/100 * payslipRequest.getBasic_salary();
+        long tax_calc = 10/100 * payslipRequest.getBasic_salary();
         payslip.setNetPay(payslipRequest.getBasic_salary() - (payslipRequest.getOtherDeductions() + tax_calc));
         Payslip saved = paySlipRepo.save(payslip);
         return ResponseEntity.ok().body(saved)  ;
+    }
+
+    @Override
+    public ResponseEntity<Payslip> delete(Long id) {
+        Optional<Payslip> payslip = paySlipRepo.findById(id);
+        return ResponseEntity.ok().body(payslip.get());
+    }
+
+    @Override
+    public List<Payslip> getAll() {
+        return paySlipRepo.findAll();
+    }
+
+    @Override
+    public ResponseEntity<Payslip> update(Long id,PayslipRequest payslipRequest) {
+        Optional<Payslip> payslip1 = paySlipRepo.findById(id);
+        if(payslip1.isPresent()){
+            Payslip payslip = payslip1.get();
+            payslip.setAllowances(payslipRequest.getAllowances());
+            payslip.setBasic_salary(payslipRequest.getBasic_salary());
+            payslip.setTax(10/100L);
+            payslip.setPayPeriod(payslipRequest.getPeriod());
+            payslip.setLeaveType(payslipRequest.getLeavetype());
+            payslip.setLeaveDays(payslipRequest.getLeaveDays());
+            payslip.setLeaveDaysCharge(payslipRequest.getLeaveDays()/12 * payslip.getBasic_salary());
+            payslip.setOther_deductions(payslipRequest.getOtherDeductions());
+            long tax_calc = 10/100 * payslipRequest.getBasic_salary();
+            payslip.setNetPay(payslipRequest.getBasic_salary() - (payslipRequest.getOtherDeductions() + tax_calc));
+            Payslip updated = paySlipRepo.save(payslip);
+            return ResponseEntity.ok().body(updated);
+
+        }
+        return null;
+    }
+
+    @Override
+    public ResponseEntity<Payslip> getById(Long id) {
+        Optional<Payslip> payslip = paySlipRepo.findById(id);
+        return ResponseEntity.ok().body(payslip.get());
     }
 }
