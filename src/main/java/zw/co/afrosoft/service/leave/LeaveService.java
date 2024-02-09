@@ -23,7 +23,7 @@ public interface LeaveService {
     ResponseEntity<Leave> leaveByStatus(Status status);
     ResponseEntity<Leave> totalLeaves();
     List<CalendarInfo> calenda();
-    ResponseEntity<Leave> myleaves(Long id);
+    ResponseEntity<List<Leave>> myleaves(Long id);
     Map getRemainingLeaveDays(Long id);
     ResponseEntity<Leave> cancelLeave(Long id, Long employeeId);
     ResponseEntity<Leave> updateLeave(Long leaveId, Long employeeId, LeaveUpdate update);

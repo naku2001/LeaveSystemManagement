@@ -18,15 +18,11 @@ import zw.co.afrosoft.repository.leave.LeaveRepository;
 import zw.co.afrosoft.service.email.EmailService;
 import zw.co.afrosoft.service.leave.LeaveRequest;
 import zw.co.afrosoft.service.leave.LeaveService;
-import zw.co.afrosoft.service.leave.ValidationType;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.Period;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static zw.co.afrosoft.service.leave.ValidationType.*;
 
 @Service
 @RequiredArgsConstructor
@@ -235,9 +231,9 @@ public class LeaveServiceImplementation implements LeaveService {
         return calendarInfos;
     }
     @Override
-    public ResponseEntity<Leave> myleaves(Long id) {
+    public ResponseEntity<List<Leave>> myleaves(Long id) {
         List<Leave> leaveList = leaveRepository.findAllByEmployeeId(id);
-        return (ResponseEntity<Leave>) leaveList;
+        return ResponseEntity.ok().body(leaveList);
     }
 
     @Override

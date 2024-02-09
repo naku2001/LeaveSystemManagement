@@ -22,7 +22,7 @@ public class PayslipRequest {
 //    private Long tax;
     private LocalDate period;
     private  String Leavetype;
-    private Long leaveDays;
-    private String leavetype;
+    private int leaveDays;
+
 
 }

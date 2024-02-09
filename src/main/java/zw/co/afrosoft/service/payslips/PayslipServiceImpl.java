@@ -30,15 +30,14 @@ public class PayslipServiceImpl implements PayslipService{
         payslip.setAllowances(payslipRequest.getAllowances());
         payslip.setBasic_salary(payslipRequest.getBasic_salary());
         payslip.setEmployee(payslip_user.get());
-        payslip.setTax(10/100L);
+        payslip.setTax(0.25);
         payslip.setPayPeriod(payslipRequest.getPeriod());
         payslip.setLeaveType(payslipRequest.getLeavetype());
         payslip.setLeaveDays(payslipRequest.getLeaveDays());
-        payslip.setLeaveDaysCharge(payslipRequest.getLeaveDays()/12 * payslip.getBasic_salary());
         payslip.setOther_deductions(payslipRequest.getOtherDeductions());
-        long tax_calc = 10/100 * payslipRequest.getBasic_salary();
-        payslip.setNetPay(payslipRequest.getBasic_salary() - (payslipRequest.getOtherDeductions() + tax_calc));
+        payslip.setNetPay(payslipRequest.getBasic_salary() + payslipRequest.getAllowances() - payslipRequest.getOtherDeductions());
         Payslip saved = paySlipRepo.save(payslip);
+        payslip.setLeaveDaysCharge(saved.getLeaveDays() * 2);
         return ResponseEntity.ok().body(saved)  ;
     }
 
@@ -60,14 +59,15 @@ public class PayslipServiceImpl implements PayslipService{
             Payslip payslip = payslip1.get();
             payslip.setAllowances(payslipRequest.getAllowances());
             payslip.setBasic_salary(payslipRequest.getBasic_salary());
-            payslip.setTax(10/100L);
+            payslip.setTax(0.15);
             payslip.setPayPeriod(payslipRequest.getPeriod());
             payslip.setLeaveType(payslipRequest.getLeavetype());
             payslip.setLeaveDays(payslipRequest.getLeaveDays());
-            payslip.setLeaveDaysCharge(payslipRequest.getLeaveDays()/12 * payslip.getBasic_salary());
+            int days = payslipRequest.getLeaveDays();
+            payslip.setLeaveDaysCharge( days + 5 );
             payslip.setOther_deductions(payslipRequest.getOtherDeductions());
             long tax_calc = 10/100 * payslipRequest.getBasic_salary();
-            payslip.setNetPay(payslipRequest.getBasic_salary() - (payslipRequest.getOtherDeductions() + tax_calc));
+            payslip.setNetPay(payslipRequest.getBasic_salary() + payslipRequest.getAllowances() - payslipRequest.getOtherDeductions());
             Payslip updated = paySlipRepo.save(payslip);
             return ResponseEntity.ok().body(updated);
 

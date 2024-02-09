@@ -83,7 +83,7 @@ public class LeaveRestController {
 
     @Operation(summary = "Get all my leaves")
     @GetMapping("/myleaves/{id}")
-    public  ResponseEntity<Leave> myleaves(@PathVariable  Long id){
+    public  ResponseEntity<List<Leave>> myleaves(@PathVariable  Long id){
         return leaveService.myleaves(id);
     }
 

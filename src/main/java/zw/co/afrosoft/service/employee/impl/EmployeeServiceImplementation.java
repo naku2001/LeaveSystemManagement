@@ -83,7 +83,7 @@ public class EmployeeServiceImplementation implements EmployeeService {
                     .append("Click the link below to access the login page:<br>")
                     .toString();
         emailService.sendEmail(emailContent,receiver, "LEAVE APPLICATION");
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(employeeSaved);
+        return ResponseEntity.status(HttpStatus.OK).body(employeeSaved);
     }
 
 
