@@ -42,7 +42,8 @@ public class LeaveServiceImplementation implements LeaveService {
             throw new LeaveException("Employee not found");
         Map<LeaveType, Integer> leaveTypes = new HashMap<>();
         leaveTypes.put(LeaveType.Annual, employee.get().getAvailableAnnualLeave());
-        leaveTypes.put(LeaveType.Maternity, employee.get().getAvailableMaternityLeave());
+        leaveTypes.put(LeaveType.Special, employee.get().getAvailableSpecialLeave());
+        leaveTypes.put(LeaveType.Unpaid,employee.get().getAvailableUnpaidLeave());
         Integer availableLeaveDays = leaveTypes.get(request.getLeaveType());
 
         int duration = 0;
@@ -99,21 +100,64 @@ public class LeaveServiceImplementation implements LeaveService {
     @Override
     public ResponseEntity<Leave> approveLeave(Long id) {
         Optional<Leave> leave = leaveRepository.findById(id);
-        Leave leaveApprove = leave.get();
-        Map<LeaveType, Integer> leaveTypes = new HashMap<>();
-        leaveTypes.put(LeaveType.Annual, leaveApprove.getEmployee().getAvailableAnnualLeave());
-        leaveTypes.put(LeaveType.Maternity, leaveApprove.getEmployee().getAvailableMaternityLeave());
-        Integer availableLeaveDays = leaveTypes.get(leaveApprove.getLeaveType());
-        int remaining = availableLeaveDays - leaveApprove.getDuration();
-        leaveApprove.setStatus(Status.APPROVED);
-        Employee employee = leaveApprove.getEmployee();
-        if(leaveApprove.getLeaveType().equals(LeaveType.Annual)){
-            employee.setAvailableAnnualLeave(remaining);
+        if (!leave.isPresent()) {
+            // Leave not found with the given id
+            return ResponseEntity.notFound().build();
         }
-        employee.setAvailableMaternityLeave(remaining);
-        employeeRepository.save(employee);
-        String reciever = leaveApprove.getEmployee().getEmail();
-        String emailContent = "Congratulations! Your leave request for "
+
+        Leave leaveApprove = leave.get();
+        Employee employee = leaveApprove.getEmployee();
+        LeaveType leaveType = leaveApprove.getLeaveType();
+        int requestedDuration = leaveApprove.getDuration();
+
+        // Get the employee's available leave days for the requested leave type
+        int availableLeaveDays = 0;
+        switch (leaveType) {
+            case Annual:
+                availableLeaveDays = employee.getAvailableAnnualLeave();
+                break;
+            case Maternity:
+//                availableLeaveDays = employee.getAvailableMaternityLeave();
+                break;
+            case Unpaid:
+                availableLeaveDays = employee.getAvailableUnpaidLeave();
+                break;
+            case Special:
+                availableLeaveDays = employee.getAvailableSpecialLeave();
+                break;
+            // Add more cases for other leave types if needed
+        }
+
+        // Check if the employee has enough available leave days
+        if (requestedDuration <= availableLeaveDays) {
+            // Sufficient available leave days, approve the leave
+            int remaining = availableLeaveDays - requestedDuration;
+            leaveApprove.setStatus(Status.APPROVED);
+
+            // Update the employee's available leave days based on the leave type
+            switch (leaveType) {
+                case Annual:
+                    employee.setAvailableAnnualLeave(remaining);
+                    break;
+                case Maternity:
+//                    employee.setAvailableMaternityLeave(remaining);
+                    break;
+                case Unpaid:
+                    employee.setAvailableUnpaidLeave(remaining);
+                    break;
+                case Special:
+                    employee.setAvailableSpecialLeave(remaining);
+                    break;
+                // Add more cases for other leave types if needed
+            }
+
+            // Save the updated employee and leave details
+            employeeRepository.save(employee);
+            leaveRepository.save(leaveApprove);
+
+            // Send approval email
+            String receiver = employee.getEmail();
+            String emailContent = "Congratulations! Your leave request for "
                     + leaveApprove.getLeaveType() + " from " + leaveApprove.getFromDate() + " to "
                     + leaveApprove.getToDate() + " has been approved.<br><br>"
                     + "Please make sure to plan your work accordingly and inform your " +
@@ -122,8 +166,17 @@ public class LeaveServiceImplementation implements LeaveService {
                     "reach out to your manager or the HR department.<br><br>"
                     + "Best regards,<br>"
                     + "Afrosoft Holdings";
-          emailService.sendEmail(emailContent,reciever,"Leave Approval");
-          return ResponseEntity.ok().body(leaveRepository.save(leaveApprove));
+            emailService.sendEmail(emailContent, receiver, "Leave Approval");
+
+            // Return the approved leave
+            return ResponseEntity.ok().body(leaveApprove);
+        } else {
+            // Insufficient available leave days, reject the leave
+            leaveApprove.setStatus(Status.REJECTED);
+            leaveRepository.save(leaveApprove);
+            // Return the rejected leave
+            return ResponseEntity.badRequest().body(leaveApprove);
+        }
     }
 
     @Override
@@ -243,7 +296,8 @@ public class LeaveServiceImplementation implements LeaveService {
             throw new LeaveException("Employee not found");
         Map<LeaveType, Integer> leaveTypes = new HashMap<>();
         leaveTypes.put(LeaveType.Annual, employee.get().getAvailableAnnualLeave());
-        leaveTypes.put(LeaveType.Maternity, employee.get().getAvailableMaternityLeave());
+        leaveTypes.put(LeaveType.Unpaid, employee.get().getAvailableUnpaidLeave());
+        leaveTypes.put(LeaveType.Special,employee.get().getAvailableSpecialLeave());
         return leaveTypes;
 
     }

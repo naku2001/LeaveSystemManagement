@@ -49,6 +49,7 @@ public class PayslipServiceImpl implements PayslipService{
 
     @Override
     public List<Payslip> getAll() {
+
         return paySlipRepo.findAll();
     }
 
