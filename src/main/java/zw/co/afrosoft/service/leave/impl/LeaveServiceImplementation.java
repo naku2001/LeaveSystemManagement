@@ -226,7 +226,7 @@ public class LeaveServiceImplementation implements LeaveService {
             model.put("link", "http://localhost:4200/");
             model.put("message",emailContent);
             model.put("year", "2023");
-            emailService.sendEmail(emailContent,"pee","leave");
+            emailService.sendEmail(emailContent,leaveReject.getEmployee().getEmail(),"Leave Rejection");
         return ResponseEntity.ok().body(leaveRepository.save(leaveReject));
     }
 
