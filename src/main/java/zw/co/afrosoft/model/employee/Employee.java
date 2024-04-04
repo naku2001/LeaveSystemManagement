@@ -20,8 +20,13 @@ public class Employee {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
+    private int count = 1;
     private String firstName;
     private String lastName;
+    private String date_of_join;
+    private String grade;
+    private String status;
+    private String emp_number;
     public Long getId() {
         return id;
     }
@@ -46,12 +51,23 @@ public class Employee {
 //
 //    }
 
+//    public Employee() {
+//        empNumber = "emp-" + String.format("%02d", count);
+//        count++;
+//    }
+//
+//    public String getEmpNumber() {
+//        return emp_number;
+//    }
+
 
 
     public Employee() {
         this.availableUnpaidLeave = 90;
         this.availableSpecialLeave = 30;
         this.availableAnnualLeave= 20;
+        emp_number = "emp-" + String.format("%02d", count);
+        count++;
 
     }
 //    private final EmployeeRepository employeeRepository;

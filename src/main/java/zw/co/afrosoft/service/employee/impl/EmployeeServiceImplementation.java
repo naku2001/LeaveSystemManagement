@@ -57,6 +57,10 @@ public class EmployeeServiceImplementation implements EmployeeService {
         Employee employees = new Employee();
         employees.setGender(request.getGender());
         employees.setEmail(request.getEmail());
+        employees.setGrade(request.getGrade());
+        employees.setDate_of_join(request.getDate_of_join());
+        employees.setEmp_number(employees.getEmp_number());
+        employees.setStatus(request.getStatus());
         employees.setDateOfBirth(request.getDateOfBirth());
         employees.setDepartment(department.get());
         employees.setLastName(request.getLastName());

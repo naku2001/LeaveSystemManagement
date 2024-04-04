@@ -24,6 +24,10 @@ public class EmployeeRequest {
 
     @NotEmpty(message = "{date_of_birth_not_empty}")
     private String dateOfBirth;
+
+    private String date_of_join;
+    private String grade;
+    private String status;
     @Email(message = "{registration_email_is_not_valid}")
     @NotEmpty(message = "{registration_email_not_empty}")
     private String email;

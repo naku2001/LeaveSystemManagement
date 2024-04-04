@@ -4,7 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6c46e9d2-4570-4e77-9cfe-aff4ff265af4" name="Changes" comment="" />
+    <list default="true" id="6c46e9d2-4570-4e77-9cfe-aff4ff265af4" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/employee/Employee.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/employee/Employee.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/dto/EmployeeRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/security/dto/EmployeeRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/employee/impl/EmployeeServiceImplementation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/employee/impl/EmployeeServiceImplementation.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/dto/EmployeeRequest$EmployeeRequestBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/dto/EmployeeRequest$EmployeeRequestBuilder.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/dto/EmployeeRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/security/dto/EmployeeRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/employee/impl/EmployeeServiceImplementation.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/employee/impl/EmployeeServiceImplementation.class" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -57,7 +65,7 @@
     </option>
     <option name="myId2Visible">
       <map>
-        <entry key="com.haulmont.jpb.jpaInspector" value="true" />
+        <entry key="com.haulmont.jpb.jpaInspector" value="false" />
         <entry key="com.haulmont.jpb.jpaPalette" value="false" />
         <entry key="com.haulmont.jpb.jpaStructure" value="false" />
       </map>
@@ -234,7 +242,9 @@
       <workItem from="1710867669976" duration="433000" />
       <workItem from="1711365475554" duration="7561000" />
       <workItem from="1711386605192" duration="610000" />
-      <workItem from="1711543143598" duration="1443000" />
+      <workItem from="1711543143598" duration="2527000" />
+      <workItem from="1711563330971" duration="735000" />
+      <workItem from="1712233976926" duration="2335000" />
     </task>
     <task id="LOCAL-00001" summary="leave now working">
       <created>1676293375930</created>
@@ -453,7 +463,14 @@
       <option name="project" value="LOCAL" />
       <updated>1711544562999</updated>
     </task>
-    <option name="localTasksCounter" value="32" />
+    <task id="LOCAL-00032" summary="LEAVE REJECTION EMAIL">
+      <created>1711545085544</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1711545085544</updated>
+    </task>
+    <option name="localTasksCounter" value="33" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
