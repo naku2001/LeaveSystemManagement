@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import zw.co.afrosoft.exceptions.department.DepartmentNotFoundException;
 import zw.co.afrosoft.model.department.Department;
 import zw.co.afrosoft.model.department.DepartmentRequest;
+import zw.co.afrosoft.model.department.DepartmentStatus;
 import zw.co.afrosoft.model.employee.Employee;
 import zw.co.afrosoft.repository.department.DepartmentRepository;
 import zw.co.afrosoft.service.department.DepartmentService;
@@ -20,7 +21,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public ResponseEntity<Department> create(DepartmentRequest request) {
         Department department = Department.builder().
-                name(request.getName()).build();
+                name(request.getName()).departmentStatus(DepartmentStatus.Active).build();
        Department departmentCreated = departmentRepository.save(department);
        return ResponseEntity.ok().body(departmentCreated)  ;
     }
@@ -44,7 +45,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
     @Override
     public List<Department> getAll() {
-       List<Department> departmentList = departmentRepository.findAll();
+       List<Department> departmentList = departmentRepository.findAllByDepartmentStatusEquals(DepartmentStatus.Active);
         return departmentList ;
     }
     //to do
@@ -53,12 +54,10 @@ public class DepartmentServiceImpl implements DepartmentService {
         Optional<Department> departmentOptional = departmentRepository.findById(id);
         Department department = departmentOptional.orElseThrow(() ->
                 new DepartmentNotFoundException("Department not found"));
-        List<Employee> employees = department.getEmployees();
-        if (employees.isEmpty()) {
-            departmentRepository.delete(department);
-            return ResponseEntity.ok().body(department);
-        }
-        return ResponseEntity.ok().build();
+       Department department1 = departmentOptional.get();
+       department1.setDepartmentStatus(DepartmentStatus.Inactive);
+        departmentRepository.save(department1);
+        return ResponseEntity.ok(department1);
 
 
     }

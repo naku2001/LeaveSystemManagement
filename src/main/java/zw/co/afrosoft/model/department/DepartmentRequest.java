@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class DepartmentRequest {
 
     private String name;
+    private DepartmentStatus departmentStatus;
 }

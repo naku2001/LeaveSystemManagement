@@ -22,6 +22,7 @@ public class Department {
     @Column(name = "id")
     private Long id;
     private String name;
+    private DepartmentStatus departmentStatus;
     @OneToMany(mappedBy = "department", cascade = CascadeType.DETACH)
     @JsonManagedReference
     private List<Employee> employees;
