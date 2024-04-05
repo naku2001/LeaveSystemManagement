@@ -1,5 +1,6 @@
 package zw.co.afrosoft.service.user;
 
+import zw.co.afrosoft.exceptions.department.DepartmentNotFoundException;
 import zw.co.afrosoft.exceptions.registration.RegistrationException;
 import zw.co.afrosoft.repository.user.UserRepository;
 import zw.co.afrosoft.security.dto.EmployeeRequest;
@@ -40,7 +41,7 @@ public class UserValidationService {
 			log.warn("{} is already being used!", username);
 
 			final String existsUsername = USERNAME_ALREADY_EXISTS;
-			throw new RegistrationException(existsUsername);
+			throw new DepartmentNotFoundException(existsUsername);
 		}
 
 	}
@@ -53,15 +54,16 @@ public class UserValidationService {
 
 			log.warn("{} is already being used!", email);
 
+
 			final String existsEmail =  EMAIL_ALREADY_EXISTS;
-			throw new RegistrationException(existsEmail);
+			throw new DepartmentNotFoundException(existsEmail);
 		}
 	}
 
-	public void validateUser(EmployeeRequest request) {
+	public void validateEmployee(EmployeeRequest request) {
 		final String email = request.getEmail();
 		final String username = request.getUsername();
-
+		log.warn("{} is already being used checkssss!", email);
 		checkEmail(email);
 		checkUsername(username);
 	}

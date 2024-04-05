@@ -82,19 +82,23 @@ public class LeaveServiceImplementation implements LeaveService {
         Long departmentId= employee.get().getDepartment().getId();
         Optional<HeadOfDepartment> head = headOfDepartmentRepository.
                 findHeadOfDepartmentByDepartment_Id(departmentId);
-        String receiver = head.get().getEmployee().getEmail();
-        String emailContent =
-                "This is to inform you that  " + employee.get().getFirstName() +
-                        "  " + employee.get().getLastName() + " has applied for " +
-                        leave.getLeaveType() + " from "
-                        + leave.getFromDate() + " to " + leave.getToDate()+
-                        ". Please take the necessary actions and approve/reject" +
-                        " the leave request.<br><br>"
-                        + "Thank You.<br>"
-                        + "Best Regards, <br><br>"
-                        + employee.get().getLastName().toUpperCase();
-        emailService.sendEmail(emailContent,receiver, "LEAVE APPLICATION");
-        return ResponseEntity.ok().body(leaveRepository.save(leave));
+        if(head.isPresent()){
+            String receiver = head.get().getEmployee().getEmail();
+            String emailContent =
+                    "This is to inform you that  " + employee.get().getFirstName() +
+                            "  " + employee.get().getLastName() + " has applied for " +
+                            leave.getLeaveType() + " from "
+                            + leave.getFromDate() + " to " + leave.getToDate()+
+                            ". Please take the necessary actions and approve/reject" +
+                            " the leave request.<br><br>"
+                            + "Thank You.<br>"
+                            + "Best Regards, <br><br>"
+                            + employee.get().getLastName().toUpperCase();
+            emailService.sendEmail(emailContent,receiver, "LEAVE APPLICATION");
+            return ResponseEntity.ok().body(leaveRepository.save(leave));
+        }
+       return ResponseEntity.ok(leaveRepository.save(leave));
+
     }
 
     @Override

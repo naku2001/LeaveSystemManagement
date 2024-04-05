@@ -40,6 +40,8 @@ public interface EmployeeService {
    public Page getAll(int offset,int size);
 
 
+    List<Employee> getInActiveEmployees();
+
     ResponseEntity getEmployeeByName(String username);
 
     ResponseEntity totalEmployee();

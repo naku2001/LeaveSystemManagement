@@ -20,12 +20,13 @@ public class Employee {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
-    private int count = 1;
+    private static int count = 1;
     private String firstName;
     private String lastName;
     private String date_of_join;
     private String grade;
     private String status;
+    private EmployeeStatus employeeStatus;
     private String emp_number;
     public Long getId() {
         return id;

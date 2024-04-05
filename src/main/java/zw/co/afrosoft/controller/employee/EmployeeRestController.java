@@ -14,6 +14,7 @@ import zw.co.afrosoft.security.dto.EmployeeRequest;
 import zw.co.afrosoft.service.employee.EmployeeService;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 @CrossOrigin
 @RestController
@@ -44,6 +45,10 @@ public class EmployeeRestController {
   @GetMapping("/getById/{id}")
    public ResponseEntity getUser(@PathVariable Long id){
         return employeeService.getEmployee(id);
+   }
+   @GetMapping("inactiveEmployees")
+   public List<Employee> getInActiveEmployees(){
+       return employeeService.getInActiveEmployees();
    }
   @DeleteMapping("/delete/{id}")
    public ResponseEntity deleteUser(@PathVariable Long id){

@@ -1,5 +1,6 @@
 package zw.co.afrosoft.service.employee.impl;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.springframework.data.domain.Page;
@@ -11,8 +12,11 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
+import zw.co.afrosoft.exceptions.department.DepartmentNotFoundException;
+import zw.co.afrosoft.exceptions.registration.RegistrationException;
 import zw.co.afrosoft.model.department.Department;
 import zw.co.afrosoft.model.employee.Employee;
+import zw.co.afrosoft.model.employee.EmployeeStatus;
 import zw.co.afrosoft.model.headOfDepartment.HeadOfDepartment;
 import zw.co.afrosoft.model.headOfDepartment.HodRequest;
 import zw.co.afrosoft.model.leave.Leave;
@@ -34,6 +38,7 @@ import java.io.InputStream;
 import java.util.*;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class EmployeeServiceImplementation implements EmployeeService {
     private final EmployeeRepository employeeRepository;
@@ -50,13 +55,15 @@ public class EmployeeServiceImplementation implements EmployeeService {
     private final EmailService emailService;
     @Override
     public ResponseEntity createEmployee( EmployeeRequest request) {
-        userValidationService.validateUser(request);
+        userValidationService.validateEmployee(request);
         Optional<Department> department = departmentRepository.findById(request.getDepartmentId());
-        if(!department.isPresent())
-            ResponseEntity.status(HttpStatus.BAD_REQUEST).body("DEPARTMENT NOT FOUND");
+        Department departmentNotFound = department.orElseThrow(() ->
+                new DepartmentNotFoundException("Department not found"));
         Employee employees = new Employee();
         employees.setGender(request.getGender());
         employees.setEmail(request.getEmail());
+
+        employees.setEmployeeStatus(EmployeeStatus.Active);
         employees.setGrade(request.getGrade());
         employees.setDate_of_join(request.getDate_of_join());
         employees.setEmp_number(employees.getEmp_number());
@@ -69,7 +76,8 @@ public class EmployeeServiceImplementation implements EmployeeService {
         employees.setUsername(request.getUsername());
         Employee employeeSaved = employeeRepository.save(employees);
         final User user = UserMapper.INSTANCE.convertToUser(request);
-        user.setUserRole(UserRole.USER);
+
+       user.setUserRole(UserRole.USER);
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         user.setEmployee(employeeSaved);
         userRepository.save(user);
@@ -101,6 +109,11 @@ public class EmployeeServiceImplementation implements EmployeeService {
     }
 
     @Override
+    public List<Employee> getInActiveEmployees(){
+        return employeeRepository.findAllByEmployeeStatusEquals(EmployeeStatus.Inactive);
+    }
+
+    @Override
     public ResponseEntity getEmployeeByName(String username) {
         List<Employee> employee = employeeRepository.findByUsername(username);
         if(!employee.isEmpty())
@@ -110,7 +123,7 @@ public class EmployeeServiceImplementation implements EmployeeService {
 
     @Override
     public ResponseEntity totalEmployee() {
-        List<Employee> employees = employeeRepository.findAll();
+        List<Employee> employees = employeeRepository.findAllByEmployeeStatusEquals(EmployeeStatus.Active);
         Long count = employees.stream().count();
         return ResponseEntity.ok().body(count);
     }
@@ -170,7 +183,7 @@ public class EmployeeServiceImplementation implements EmployeeService {
     public Employee updateEmployee(Long id, @RequestBody EmployeeRequest employeeRequest) {
         Optional<Employee> user = employeeRepository.findById(id);
         String response = "Employee not found";
-        if(user.isPresent()){
+        if(user.isPresent() & user.get().getEmployeeStatus().equals(EmployeeStatus.Active)){
             Employee updatedEmployee = user.get();
 
             updatedEmployee.setGender(employeeRequest.getGender());
@@ -189,7 +202,7 @@ public class EmployeeServiceImplementation implements EmployeeService {
     @Override
     public ResponseEntity assignEmployeeAsHod(Long id, HodRequest request) {
         Optional<Employee> employee = employeeRepository.findById(id);
-        if(employee.isPresent()){
+        if(employee.isPresent() & employee.get().getEmployeeStatus().equals(EmployeeStatus.Active)){
             HeadOfDepartment headOfDepartment = new HeadOfDepartment();
 //            headOfDepartment.setEmployee(employee.get());
 //            headOfDepartment.setDepartments(request.getDepartments());
@@ -204,7 +217,7 @@ public class EmployeeServiceImplementation implements EmployeeService {
     public ResponseEntity getEmployee(Long id) {
 
         Optional<Employee> user = employeeRepository.findById(id);
-        if (user.isPresent())
+        if (user.isPresent()& user.get().getEmployeeStatus().equals(EmployeeStatus.Active))
         {
             return ResponseEntity.ok().body(user);
         }
@@ -213,13 +226,11 @@ public class EmployeeServiceImplementation implements EmployeeService {
     @Override
     public ResponseEntity deleteEmployee(Long id) {
         Optional<Employee> user = employeeRepository.findById(id);
-        List<User> users = userRepository.findAll();
-        Optional<User> user1 = userRepository.findUserByEmployeeId(id);
         if (user.isPresent() ){
-
-            employeeRepository.delete(user.get());
-            userRepository.delete(user1.get());
-            return ResponseEntity.ok().body(user);
+            Employee deleted = user.get();
+            deleted.setEmployeeStatus(EmployeeStatus.Inactive);
+            employeeRepository.save(deleted);
+            return ResponseEntity.ok().body(deleted);
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Employee Not Found");
     }
