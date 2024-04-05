@@ -67,7 +67,7 @@ public class Employee {
         this.availableUnpaidLeave = 90;
         this.availableSpecialLeave = 30;
         this.availableAnnualLeave= 20;
-        emp_number = "emp-" + String.format("%02d", count);
+        emp_number = "ZW-EMP2024-" + String.format("%02d", count);
         count++;
 
     }

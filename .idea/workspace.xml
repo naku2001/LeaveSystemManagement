@@ -5,19 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6c46e9d2-4570-4e77-9cfe-aff4ff265af4" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/department/DepartmentStatus.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/department/Department.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/department/Department.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/department/DepartmentRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/department/DepartmentRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/department/DepartmentRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/repository/department/DepartmentRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/department/impl/DepartmentServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/department/impl/DepartmentServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/department/Department$DepartmentBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/department/Department$DepartmentBuilder.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/department/Department.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/department/Department.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/department/DepartmentRequest$DepartmentRequestBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/department/DepartmentRequest$DepartmentRequestBuilder.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/department/DepartmentRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/department/DepartmentRequest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/repository/employee/EmployeeRepository.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/repository/employee/EmployeeRepository.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/department/impl/DepartmentServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/department/impl/DepartmentServiceImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/employee/EmployeeService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/employee/EmployeeService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/employee/Employee.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/employee/Employee.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/employee/Employee.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/employee/Employee.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/repository/department/DepartmentRepository.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/repository/department/DepartmentRepository.class" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -251,7 +242,7 @@
       <workItem from="1711386605192" duration="610000" />
       <workItem from="1711543143598" duration="2527000" />
       <workItem from="1711563330971" duration="735000" />
-      <workItem from="1712233976926" duration="11743000" />
+      <workItem from="1712233976926" duration="12950000" />
     </task>
     <task id="LOCAL-00001" summary="leave now working">
       <created>1676293375930</created>
@@ -491,7 +482,14 @@
       <option name="project" value="LOCAL" />
       <updated>1712323795383</updated>
     </task>
-    <option name="localTasksCounter" value="35" />
+    <task id="LOCAL-00035" summary="FRIDAY UPDATES">
+      <created>1712324515193</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1712324515193</updated>
+    </task>
+    <option name="localTasksCounter" value="36" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -577,7 +575,8 @@
     <MESSAGE value="LEAVES" />
     <MESSAGE value="LEAVE REJECTION EMAIL" />
     <MESSAGE value="updates" />
-    <option name="LAST_COMMIT_MESSAGE" value="updates" />
+    <MESSAGE value="FRIDAY UPDATES" />
+    <option name="LAST_COMMIT_MESSAGE" value="FRIDAY UPDATES" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
