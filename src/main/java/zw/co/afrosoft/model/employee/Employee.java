@@ -39,6 +39,12 @@ public class Employee {
     private int availableAnnualLeave;
     private int availableUnpaidLeave;
     private int availableSpecialLeave;
+
+    private  int availableSickLeave;
+
+    private int availableMaternityLeave;
+
+    private int availableStudyLeave;
     @ManyToOne
     @JoinColumn(name = "department_id")
     @JsonBackReference
@@ -64,9 +70,12 @@ public class Employee {
 
 
     public Employee() {
-        this.availableUnpaidLeave = 90;
+        this.availableUnpaidLeave = 365;
         this.availableSpecialLeave = 30;
         this.availableAnnualLeave= 20;
+        this.availableMaternityLeave=90;
+        this.availableSickLeave=12;
+        this.availableStudyLeave=10;
         emp_number = "ZW-EMP2024-" + String.format("%02d", count);
         count++;
 

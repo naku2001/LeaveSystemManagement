@@ -50,6 +50,11 @@ public class EmployeeRestController {
    public List<Employee> getInActiveEmployees(){
        return employeeService.getInActiveEmployees();
    }
+
+    @GetMapping("activeEmployees")
+    public List<Employee> getActiveEmployees(){
+        return employeeService.getActiveEmployees();
+    }
   @DeleteMapping("/delete/{id}")
    public ResponseEntity deleteUser(@PathVariable Long id){
        return employeeService.deleteEmployee(id);

@@ -42,6 +42,8 @@ public interface EmployeeService {
 
     List<Employee> getInActiveEmployees();
 
+    List<Employee> getActiveEmployees();
+
     ResponseEntity getEmployeeByName(String username);
 
     ResponseEntity totalEmployee();

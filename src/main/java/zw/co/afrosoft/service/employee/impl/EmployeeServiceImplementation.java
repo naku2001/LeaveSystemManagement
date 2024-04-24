@@ -13,7 +13,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import zw.co.afrosoft.exceptions.department.DepartmentNotFoundException;
-import zw.co.afrosoft.exceptions.registration.RegistrationException;
 import zw.co.afrosoft.model.department.Department;
 import zw.co.afrosoft.model.employee.Employee;
 import zw.co.afrosoft.model.employee.EmployeeStatus;
@@ -105,6 +104,7 @@ public class EmployeeServiceImplementation implements EmployeeService {
     }
     @Override
     public Page getAll(int offset, int size) {
+
         return employeeRepository.findAll(PageRequest.of(offset, size));
     }
 
@@ -112,6 +112,11 @@ public class EmployeeServiceImplementation implements EmployeeService {
     public List<Employee> getInActiveEmployees(){
         return employeeRepository.findAllByEmployeeStatusEquals(EmployeeStatus.Inactive);
     }
+    @Override
+    public List<Employee> getActiveEmployees(){
+        return employeeRepository.findAllByEmployeeStatusEquals(EmployeeStatus.Active);
+    }
+
 
     @Override
     public ResponseEntity getEmployeeByName(String username) {

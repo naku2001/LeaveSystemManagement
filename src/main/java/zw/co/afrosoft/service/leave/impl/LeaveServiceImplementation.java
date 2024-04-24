@@ -44,6 +44,9 @@ public class LeaveServiceImplementation implements LeaveService {
         leaveTypes.put(LeaveType.Annual, employee.get().getAvailableAnnualLeave());
         leaveTypes.put(LeaveType.Special, employee.get().getAvailableSpecialLeave());
         leaveTypes.put(LeaveType.Unpaid,employee.get().getAvailableUnpaidLeave());
+        leaveTypes.put(LeaveType.Maternity,employee.get().getAvailableMaternityLeave());
+        leaveTypes.put(LeaveType.Study,employee.get().getAvailableStudyLeave());
+        leaveTypes.put(LeaveType.Sick,employee.get().getAvailableSickLeave());
         Integer availableLeaveDays = leaveTypes.get(request.getLeaveType());
 
         int duration = 0;
@@ -121,7 +124,7 @@ public class LeaveServiceImplementation implements LeaveService {
                 availableLeaveDays = employee.getAvailableAnnualLeave();
                 break;
             case Maternity:
-//                availableLeaveDays = employee.getAvailableMaternityLeave();
+                availableLeaveDays = employee.getAvailableMaternityLeave();
                 break;
             case Unpaid:
                 availableLeaveDays = employee.getAvailableUnpaidLeave();
@@ -129,7 +132,10 @@ public class LeaveServiceImplementation implements LeaveService {
             case Special:
                 availableLeaveDays = employee.getAvailableSpecialLeave();
                 break;
-            // Add more cases for other leave types if needed
+            case Sick:
+                availableLeaveDays = employee.getAvailableSickLeave();
+            case Study:
+                availableLeaveDays = employee.getAvailableStudyLeave();
         }
 
         // Check if the employee has enough available leave days

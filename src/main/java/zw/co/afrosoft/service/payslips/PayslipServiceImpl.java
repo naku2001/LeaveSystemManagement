@@ -32,6 +32,7 @@ public class PayslipServiceImpl implements PayslipService{
         payslip.setEmployee(payslip_user.get());
         payslip.setTax(0.25);
         payslip.setPayPeriod(payslipRequest.getPeriod());
+        payslip.setCurrency(payslip.getCurrency());
         payslip.setLeaveType(payslipRequest.getLeavetype());
         payslip.setLeaveDays(payslipRequest.getLeaveDays());
         payslip.setOther_deductions(payslipRequest.getOtherDeductions());

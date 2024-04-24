@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import zw.co.afrosoft.model.department.Department;
 import zw.co.afrosoft.model.department.DepartmentRequest;
 import zw.co.afrosoft.service.department.DepartmentService;
-
 import java.util.List;
 
 @CrossOrigin

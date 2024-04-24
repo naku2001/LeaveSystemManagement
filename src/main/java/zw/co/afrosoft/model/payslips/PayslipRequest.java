@@ -15,6 +15,8 @@ import java.time.LocalDate;
 @Builder
 public class PayslipRequest {
 
+
+    private String currency;
     private Long employeeId;
     private Long basic_salary;
     private Long allowances;

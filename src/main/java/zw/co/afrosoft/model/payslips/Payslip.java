@@ -37,6 +37,7 @@ public class Payslip {
     private Long netPay;
     private Long other_deductions;
     private int leaveDays;
+    private String currency;
     private String LeaveType;
     private int leaveDaysCharge;
 
