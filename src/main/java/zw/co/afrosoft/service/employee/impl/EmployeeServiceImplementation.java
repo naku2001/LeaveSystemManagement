@@ -153,11 +153,19 @@ public class EmployeeServiceImplementation implements EmployeeService {
         for (Employee employee : employeeList) {
             Map<String, Object> item = new HashMap<String, Object>();
 
-            item.put("firstname", employee.getFirstName());
-            item.put("lastname",employee.getLastName() );
+            item.put("firstname", employee.getFirstName() + " " + employee.getLastName());
+            item.put("empNumber",employee.getEmp_number());
             item.put("dob",employee.getDateOfBirth() );
-            item.put("gender",employee.getGender());
-            item.put("email", employee.getEmail());
+            item.put("joinDate",employee.getDate_of_join());
+            item.put("annual",employee.getAvailableAnnualLeave());
+            item.put("special",employee.getAvailableSpecialLeave());
+            item.put("maternity",employee.getAvailableMaternityLeave());
+            item.put("study",employee.getAvailableStudyLeave());
+            item.put("sick",employee.getAvailableStudyLeave());
+            item.put("unpaid",employee.getAvailableUnpaidLeave());
+            item.put("status",employee.getStatus());
+
+
 
             results.add(item);
 
