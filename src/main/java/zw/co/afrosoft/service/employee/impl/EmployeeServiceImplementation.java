@@ -183,7 +183,7 @@ public class EmployeeServiceImplementation implements EmployeeService {
 
             Map<String, Object> item = new HashMap<String, Object>();
             item.put("stat",leave.getStatus());
-            item.put("name",leave.getEmployee().getFirstName() + leave.getEmployee().getLastName());
+            item.put("name",leave.getEmployee().getFirstName() + " " + leave.getEmployee().getLastName());
             item.put("duration",leave.getDuration() );
             item.put("to",leave.getToDate());
             item.put("from", leave.getFromDate());
