@@ -23,6 +23,7 @@ public interface EmployeeService {
                                    String report) throws IOException, JRException;
 
     List<Map<String, Object>> employees();
+
     List<Map<String, Object>> leave();
 
     Employee updateEmployee(Long id, EmployeeRequest request);
