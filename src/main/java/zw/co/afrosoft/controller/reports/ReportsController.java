@@ -18,15 +18,27 @@ import zw.co.afrosoft.service.report.EmployeeReportService;
 public class ReportsController {
     private final EmployeeService employeeService;
     String report;
-    public ReportsController( EmployeeService employeeService) {
+
+    public ReportsController(EmployeeService employeeService) {
         this.employeeService = employeeService;
 
     }
-    @RequestMapping(value = "employees", method = RequestMethod.GET)
+
+    @RequestMapping(value = "employees/report", method = RequestMethod.GET)
     public ResponseEntity<byte[]> employees(HttpServletResponse response) throws Exception {
         JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource
                 (employeeService.employees());
+        String report;
         report= "employee";
         return employeeService.generateReports(dataSource,report);
     }
+    @RequestMapping(value = "leave/report", method = RequestMethod.GET)
+    public ResponseEntity<byte[]> leave(HttpServletResponse response) throws Exception {
+        JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource
+                (employeeService.leave());
+        String report;
+        report= "Leave";
+        return employeeService.generateReport(dataSource,report);
+    }
+
 }
