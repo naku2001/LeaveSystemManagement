@@ -194,6 +194,30 @@ public class EmployeeServiceImplementation implements EmployeeService {
     }
 
     @Override
+    public List<Map<String, Object>> getEmployeeLeave(Long id) {
+        Map<String, Object> item = new HashMap<String, Object>();
+        List<Map<String, Object>> results = new ArrayList<Map<String, Object>>();
+        Optional<Leave> leave = leaveRepository.findById(id);
+        if(leave.isPresent())
+        {
+            item.put("stat",leave.get().getStatus());
+            item.put("name",leave.get().getEmployee().getFirstName() + " " + leave.get().getEmployee().getLastName());
+            item.put("duration",leave.get().getDuration() );
+            item.put("to",leave.get().getToDate());
+            item.put("from", leave.get().getFromDate());
+            item.put("type", leave.get().getLeaveType());
+            results.add(item);
+
+            return results;
+
+        }
+
+
+
+        return null;
+    }
+
+    @Override
     public Employee updateEmployee(Long id, @RequestBody EmployeeRequest employeeRequest) {
         Optional<Employee> user = employeeRepository.findById(id);
         String response = "Employee not found";

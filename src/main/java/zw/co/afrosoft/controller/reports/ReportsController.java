@@ -1,5 +1,7 @@
 package zw.co.afrosoft.controller.reports;
 
+import io.micrometer.core.lang.NonNullApi;
+import io.swagger.v3.oas.annotations.Parameter;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,13 +34,24 @@ public class ReportsController {
         report= "employee";
         return employeeService.generateReports(dataSource,report);
     }
-    @RequestMapping(value = "leave/report", method = RequestMethod.GET)
-    public ResponseEntity<byte[]> leave(HttpServletResponse response) throws Exception {
-        JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource
-                (employeeService.leave());
-        String report;
-        report= "Leave";
-        return employeeService.generateReport(dataSource,report);
+
+
+    @GetMapping("leave/report/")
+    public ResponseEntity<byte[]> leave(@RequestParam(required = false) Long id ) throws Exception {
+        if(id != null){
+            JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(employeeService.getEmployeeLeave(id));
+            String report;
+            report= "Leave";
+            return employeeService.generateReport(dataSource,report);
+        }
+        else{
+            JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(employeeService.leave());
+            String report;
+            report= "Leave";
+            return employeeService.generateReport(dataSource,report);
+        }
+
+
     }
 
 }
