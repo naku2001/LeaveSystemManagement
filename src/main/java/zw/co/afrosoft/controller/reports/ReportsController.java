@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.bind.annotation.*;
+import zw.co.afrosoft.model.leave.LeaveType;
 import zw.co.afrosoft.service.employee.EmployeeService;
 import zw.co.afrosoft.service.report.EmployeeReportService;
 
@@ -44,9 +45,9 @@ public class ReportsController {
 
 
     @GetMapping("leave/report/")
-    public ResponseEntity<byte[]> leave(@RequestParam(required = false) Long id ) throws Exception {
-        if(id != null){
-            JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(employeeService.getEmployeeLeave(id));
+    public ResponseEntity<byte[]> leave(@RequestParam(required = false) LeaveType leavetype ) throws Exception {
+        if(leavetype != null){
+            JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(employeeService.getEmployeeLeave(leavetype));
             String report;
             report= "Leave";
             return employeeService.generateReport(dataSource,report);

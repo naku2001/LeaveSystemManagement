@@ -19,6 +19,7 @@ import zw.co.afrosoft.model.employee.EmployeeStatus;
 import zw.co.afrosoft.model.headOfDepartment.HeadOfDepartment;
 import zw.co.afrosoft.model.headOfDepartment.HodRequest;
 import zw.co.afrosoft.model.leave.Leave;
+import zw.co.afrosoft.model.leave.LeaveType;
 import zw.co.afrosoft.model.user.User;
 import zw.co.afrosoft.model.user.UserRole;
 import zw.co.afrosoft.repository.department.DepartmentRepository;
@@ -198,23 +199,27 @@ public class EmployeeServiceImplementation implements EmployeeService {
     }
 
     @Override
-    public List<Map<String, Object>> getEmployeeLeave(Long id) {
+    public List<Map<String, Object>> getEmployeeLeave(LeaveType leaveType) {
         Map<String, Object> item = new HashMap<String, Object>();
         List<Map<String, Object>> results = new ArrayList<Map<String, Object>>();
-        Optional<Leave> leave = leaveRepository.findById(id);
-        if(leave.isPresent())
-        {
-            item.put("stat",leave.get().getStatus());
-            item.put("name",leave.get().getEmployee().getFirstName() + " " + leave.get().getEmployee().getLastName());
-            item.put("duration",leave.get().getDuration() );
-            item.put("to",leave.get().getToDate());
-            item.put("from", leave.get().getFromDate());
-            item.put("type", leave.get().getLeaveType());
-            results.add(item);
+        List<Leave> leave1 = leaveRepository.findAllByLeaveType(leaveType);
+        if(!leave1.isEmpty())
 
-            return results;
+        for (Leave leave : leave1){
+            {
+                item.put("stat",leave.getStatus());
+                item.put("name",leave.getEmployee().getFirstName() + " " + leave.getEmployee().getLastName());
+                item.put("duration",leave.getDuration() );
+                item.put("to",leave.getToDate());
+                item.put("from", leave.getFromDate());
+                item.put("type", leave.getLeaveType());
+                results.add(item);
 
+                return results;
+
+            }
         }
+
 
 
 

@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import zw.co.afrosoft.model.employee.Employee;
 import zw.co.afrosoft.model.headOfDepartment.HodRequest;
+import zw.co.afrosoft.model.leave.LeaveType;
 import zw.co.afrosoft.security.dto.EmployeeRequest;
 
 import java.io.IOException;
@@ -25,7 +26,7 @@ public interface EmployeeService {
     List<Map<String, Object>> employees();
 
     List<Map<String, Object>> leave();
-    List<Map<String, Object>> getEmployeeLeave(Long id);
+    List<Map<String, Object>> getEmployeeLeave(LeaveType leaveType);
 
     List<Map<String, Object>> getEmployeeById(Long id);
 
