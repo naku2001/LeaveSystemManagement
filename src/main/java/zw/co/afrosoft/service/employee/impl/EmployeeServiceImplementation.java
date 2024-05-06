@@ -223,6 +223,31 @@ public class EmployeeServiceImplementation implements EmployeeService {
 
     @Override
     public List<Map<String, Object>> getEmployeeById(Long id) {
+        Map<String, Object> item = new HashMap<String, Object>();
+        List<Map<String, Object>> results = new ArrayList<Map<String, Object>>();
+        Optional<Employee> employee = employeeRepository.findById(id);
+        if(employee.isPresent())
+        {
+            item.put("empNumber",employee.get().getEmp_number());
+            item.put("name",employee.get().getFirstName() + " " + employee.get().getLastName());
+            item.put("status",employee.get().getStatus());
+            item.put("joinDate",employee.get().getDate_of_join());
+            item.put("dob", employee.get().getDateOfBirth());
+            item.put("maternity", employee.get().getAvailableMaternityLeave());
+            item.put("special", employee.get().getAvailableSpecialLeave());
+            item.put("unpaid", employee.get().getAvailableUnpaidLeave());
+            item.put("annual", employee.get().getAvailableAnnualLeave());
+            item.put("sick", employee.get().getAvailableSickLeave());
+            item.put("study", employee.get().getAvailableStudyLeave());
+
+            results.add(item);
+
+            return results;
+
+        }
+
+
+
         return null;
     }
 

@@ -29,7 +29,7 @@ public class ReportsController {
     @RequestMapping(value = "employees/report/", method = RequestMethod.GET)
     public ResponseEntity<byte[]> employees(@RequestParam(required = false) Long id ) throws Exception {
         if(id != null){
-            JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(employeeService.getEmployeeLeave(id));
+            JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(employeeService.getEmployeeById(id));
             String report;
             report= "Employee Report";
             return employeeService.generateReport(dataSource,report);
