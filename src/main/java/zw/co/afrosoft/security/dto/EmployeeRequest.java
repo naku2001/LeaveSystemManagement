@@ -40,6 +40,11 @@ public class EmployeeRequest {
 
     private Long departmentId;
 
+    private String designation;
+    private String bank;
+    private String branch_name;
+    private String acc_name;
+
     public String getFirstName() {
         return firstName;
     }

@@ -26,13 +26,20 @@ public class ReportsController {
 
     }
 
-    @RequestMapping(value = "employees/report", method = RequestMethod.GET)
-    public ResponseEntity<byte[]> employees(HttpServletResponse response) throws Exception {
-        JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource
-                (employeeService.employees());
-        String report;
-        report= "employee";
-        return employeeService.generateReports(dataSource,report);
+    @RequestMapping(value = "employees/report/", method = RequestMethod.GET)
+    public ResponseEntity<byte[]> employees(@RequestParam(required = false) Long id ) throws Exception {
+        if(id != null){
+            JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(employeeService.getEmployeeLeave(id));
+            String report;
+            report= "Employee Report";
+            return employeeService.generateReport(dataSource,report);
+        }
+        else{
+            JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(employeeService.employees());
+            String report;
+            report= "Employee Report";
+            return employeeService.generateReport(dataSource,report);
+        }
     }
 
 

@@ -20,6 +20,10 @@ public class Employee {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
+    private String designation;
+    private String bank;
+    private String branch_name;
+    private String acc_number;
     private static int count = 1;
     private String firstName;
     private String lastName;

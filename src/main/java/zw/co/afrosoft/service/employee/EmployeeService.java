@@ -27,6 +27,8 @@ public interface EmployeeService {
     List<Map<String, Object>> leave();
     List<Map<String, Object>> getEmployeeLeave(Long id);
 
+    List<Map<String, Object>> getEmployeeById(Long id);
+
 
     Employee updateEmployee(Long id, EmployeeRequest request);
 

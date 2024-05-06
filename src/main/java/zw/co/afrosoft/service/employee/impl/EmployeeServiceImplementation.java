@@ -64,6 +64,10 @@ public class EmployeeServiceImplementation implements EmployeeService {
 
         employees.setEmployeeStatus(EmployeeStatus.Active);
         employees.setGrade(request.getGrade());
+        employees.setBank(request.getBank());
+        employees.setAcc_number(request.getAcc_name());
+        employees.setDesignation(request.getDesignation());
+        employees.setBranch_name(request.getBranch_name());
         employees.setDate_of_join(request.getDate_of_join());
         employees.setEmp_number(employees.getEmp_number());
         employees.setStatus(request.getStatus());
@@ -214,6 +218,11 @@ public class EmployeeServiceImplementation implements EmployeeService {
 
 
 
+        return null;
+    }
+
+    @Override
+    public List<Map<String, Object>> getEmployeeById(Long id) {
         return null;
     }
 
