@@ -29,7 +29,13 @@ public class Payslip {
     private Long id;
     @ManyToOne
     private Employee employee;
-//    private String department;
+    private Long housing_plan;
+    private Long attendance_bonus;
+    private Long transport_allowance;
+    private Long night_allowance;
+    private Long overtime;
+    private Long overtime_holiday;
+    private Long nssa ;
     private LocalDate payPeriod;
     private Long basic_salary;
     private Long allowances;

@@ -25,6 +25,13 @@ public class PayslipRequest {
     private LocalDate period;
     private  String Leavetype;
     private int leaveDays;
+    private Long housing_plan;
+    private Long attendance_bonus;
+    private Long transport_allowance;
+    private Long night_allowance;
+    private Long overtime;
+    private Long overtime_holiday;
+    private Long nssa ;
 
 
 }

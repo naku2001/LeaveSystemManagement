@@ -30,6 +30,13 @@ public class PayslipServiceImpl implements PayslipService{
         payslip.setAllowances(payslipRequest.getAllowances());
         payslip.setBasic_salary(payslipRequest.getBasic_salary());
         payslip.setEmployee(payslip_user.get());
+        payslip.setAttendance_bonus(payslipRequest.getAttendance_bonus());
+        payslip.setHousing_plan(payslipRequest.getHousing_plan());
+        payslip.setNight_allowance(payslipRequest.getNight_allowance());
+        payslip.setOvertime_holiday(payslipRequest.getOvertime_holiday());
+        payslip.setNssa(payslipRequest.getNssa());
+        payslip.setNight_allowance(payslipRequest.getNight_allowance());
+        payslip.setTransport_allowance(payslipRequest.getTransport_allowance());
         payslip.setTax(0.25);
         payslip.setPayPeriod(payslipRequest.getPeriod());
         payslip.setCurrency(payslipRequest.getCurrency());
