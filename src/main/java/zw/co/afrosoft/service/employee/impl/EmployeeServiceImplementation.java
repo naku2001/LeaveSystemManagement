@@ -20,12 +20,14 @@ import zw.co.afrosoft.model.headOfDepartment.HeadOfDepartment;
 import zw.co.afrosoft.model.headOfDepartment.HodRequest;
 import zw.co.afrosoft.model.leave.Leave;
 import zw.co.afrosoft.model.leave.LeaveType;
+import zw.co.afrosoft.model.payslips.Payslip;
 import zw.co.afrosoft.model.user.User;
 import zw.co.afrosoft.model.user.UserRole;
 import zw.co.afrosoft.repository.department.DepartmentRepository;
 import zw.co.afrosoft.repository.employee.EmployeeRepository;
 import zw.co.afrosoft.repository.headOfDepartment.HeadOfDepartmentRepository;
 import zw.co.afrosoft.repository.leave.LeaveRepository;
+import zw.co.afrosoft.repository.payslip.PaySlipRepo;
 import zw.co.afrosoft.repository.user.UserRepository;
 import zw.co.afrosoft.security.dto.EmployeeRequest;
 import zw.co.afrosoft.security.mapper.UserMapper;
@@ -53,6 +55,8 @@ public class EmployeeServiceImplementation implements EmployeeService {
     private final HeadOfDepartmentRepository headOfDepartmentRepository;
     private final DepartmentRepository departmentRepository;
     private final EmailService emailService;
+
+    private final PaySlipRepo paySlipRepo;
     @Override
     public ResponseEntity createEmployee( EmployeeRequest request) {
         userValidationService.validateEmployee(request);
@@ -177,6 +181,49 @@ public class EmployeeServiceImplementation implements EmployeeService {
 
         }
         return results;
+    }
+
+    @Override
+    public List<Map<String, Object>> getPayslipEmployeeById(Long id) {
+        Map<String, Object> item = new HashMap<String, Object>();
+        List<Map<String, Object>> results = new ArrayList<Map<String, Object>>();
+        Optional<Payslip> payslip = paySlipRepo.findById(id);
+        if(payslip.isPresent())
+        {
+            Payslip payslip1 = payslip.get();
+            Long sumPay = payslip1.getBasic_salary() + payslip1.getHousing_plan()+ payslip1.getTransport_allowance()+payslip1.getNight_allowance()+
+                payslip1.getOvertime_holiday();
+            Long subtractions = (payslip1.getTax() + payslip1.getNssa());
+            item.put("salary",payslip1.getBasic_salary());
+            item.put("house",payslip1.getHousing_plan());
+            item.put("transport",payslip1.getTransport_allowance());
+            item.put("department",payslip1.getEmployee().getDepartment().getName().toString());
+            item.put("empId",payslip1.getEmployee().getEmp_number());
+            item.put("join",payslip1.getEmployee().getDate_of_join());
+            item.put("name",payslip1.getEmployee().getFirstName() + " " + payslip1.getEmployee().getLastName());
+            item.put("account",payslip1.getEmployee().getAcc_number());
+            item.put("bank",payslip1.getEmployee().getBank() + "," + payslip1.getEmployee().getBranch_name());
+            item.put("designation",payslip1.getEmployee().getDesignation());
+            item.put("paye",payslip1.getTax());
+            item.put("nssa",payslip1.getNssa());
+            item.put("night",payslip1.getNight_allowance());
+            item.put("holiday",payslip1.getOvertime_holiday());
+            item.put("total",subtractions - sumPay);
+            item.put("deductions",subtractions);
+            item.put("earnings", sumPay);
+            item.put("overtime",payslip1.getOvertime()) ;
+
+
+
+
+
+            results.add(item);
+
+            return results;
+
+        }
+
+        return null;
     }
 
     @Override

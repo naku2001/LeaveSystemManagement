@@ -25,6 +25,8 @@ public interface EmployeeService {
 
     List<Map<String, Object>> employees();
 
+    List<Map<String, Object>> getPayslipEmployeeById(Long id);
+
     List<Map<String, Object>> leave();
     List<Map<String, Object>> getEmployeeLeave(LeaveType leaveType);
 

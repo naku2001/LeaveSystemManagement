@@ -40,6 +40,9 @@ public class Employee {
     private String email;
     private String password;
     private String username;
+//    @ManyToOne
+//    @JoinColumn(name = "department_id")
+//    private Department department;
     private int availableAnnualLeave;
     private int availableUnpaidLeave;
     private int availableSpecialLeave;
@@ -51,7 +54,6 @@ public class Employee {
     private int availableStudyLeave;
     @ManyToOne
     @JoinColumn(name = "department_id")
-    @JsonBackReference
     private Department department;
 //    private int availableMaternityLeave;
 //    public int getAvailableMaternityLeave() {

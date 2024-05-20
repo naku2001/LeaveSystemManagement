@@ -5,7 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6c46e9d2-4570-4e77-9cfe-aff4ff265af4" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/resources/templates/payslip.jrxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/reports/ReportsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/controller/reports/ReportsController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/department/Department.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/department/Department.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/employee/Employee.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/employee/Employee.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/payslips/Payslip.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/payslips/Payslip.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/system/SystemConstants.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/model/system/SystemConstants.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/employee/EmployeeService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/employee/EmployeeService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/employee/impl/EmployeeServiceImplementation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/employee/impl/EmployeeServiceImplementation.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/payslips/PayslipServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/zw/co/afrosoft/service/payslips/PayslipServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/controller/file/FileRestController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/controller/file/FileRestController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/system/SystemConstants.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/model/system/SystemConstants.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/employee/EmployeeService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/zw/co/afrosoft/service/employee/EmployeeService.class" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -255,7 +267,13 @@
       <workItem from="1714560797492" duration="8693000" />
       <workItem from="1714909523424" duration="6141000" />
       <workItem from="1714996584527" duration="781000" />
-      <workItem from="1715014424853" duration="6988000" />
+      <workItem from="1715014424853" duration="7826000" />
+      <workItem from="1715261459570" duration="690000" />
+      <workItem from="1715262165172" duration="1421000" />
+      <workItem from="1715608213886" duration="661000" />
+      <workItem from="1715937608282" duration="4807000" />
+      <workItem from="1716206115845" duration="5859000" />
+      <workItem from="1716228177064" duration="5160000" />
     </task>
     <task id="LOCAL-00001" summary="leave now working">
       <created>1676293375930</created>
@@ -593,7 +611,14 @@
       <option name="project" value="LOCAL" />
       <updated>1715024123896</updated>
     </task>
-    <option name="localTasksCounter" value="49" />
+    <task id="LOCAL-00049" summary="report">
+      <created>1715024623443</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1715024623443</updated>
+    </task>
+    <option name="localTasksCounter" value="50" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

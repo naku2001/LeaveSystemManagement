@@ -39,13 +39,14 @@ public class Payslip {
     private LocalDate payPeriod;
     private Long basic_salary;
     private Long allowances;
-    private Double tax;
+    private Long tax;
     private Long netPay;
     private Long other_deductions;
     private int leaveDays;
     private String currency;
     private String LeaveType;
     private int leaveDaysCharge;
+    private String account_number;
 
 
 

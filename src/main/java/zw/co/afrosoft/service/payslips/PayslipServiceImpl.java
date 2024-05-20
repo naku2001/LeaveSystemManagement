@@ -36,9 +36,10 @@ public class PayslipServiceImpl implements PayslipService{
         payslip.setOvertime_holiday(payslipRequest.getOvertime_holiday());
         payslip.setNssa(payslipRequest.getNssa());
         payslip.setNight_allowance(payslipRequest.getNight_allowance());
-        payslip.setTransport_allowance(payslipRequest.getTransport_allowance()); 
-        payslip.setTax(0.25);
+        payslip.setTransport_allowance(payslipRequest.getTransport_allowance());
+        payslip.setTax(12L);
         payslip.setPayPeriod(payslipRequest.getPeriod());
+        payslip.setOvertime(payslipRequest.getOvertime());
         payslip.setCurrency(payslipRequest.getCurrency());
         payslip.setLeaveType(payslipRequest.getLeavetype());
         payslip.setLeaveDays(payslipRequest.getLeaveDays());
@@ -68,7 +69,7 @@ public class PayslipServiceImpl implements PayslipService{
             Payslip payslip = payslip1.get();
             payslip.setAllowances(payslipRequest.getAllowances());
             payslip.setBasic_salary(payslipRequest.getBasic_salary());
-            payslip.setTax(0.15);
+            payslip.setTax((long) 0.15);
             payslip.setPayPeriod(payslipRequest.getPeriod());
             payslip.setLeaveType(payslipRequest.getLeavetype());
             payslip.setLeaveDays(payslipRequest.getLeaveDays());

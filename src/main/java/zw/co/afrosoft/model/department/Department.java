@@ -23,7 +23,6 @@ public class Department {
     private Long id;
     private String name;
     private DepartmentStatus departmentStatus;
-    @OneToMany(mappedBy = "department", cascade = CascadeType.DETACH)
-    @JsonManagedReference
+    @OneToMany
     private List<Employee> employees;
 }
